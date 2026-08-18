@@ -1,0 +1,17 @@
+# Project-owned ByteTrack configuration.
+#
+# track_buffer is measured in frames. Approximate lost-track grace period:
+#     seconds = track_buffer / input_fps
+#
+# Increase it for longer occlusions; decrease it to retire stale IDs sooner.
+
+tracker_type: bytetrack
+track_high_thresh: 0.25
+track_low_thresh: 0.1
+new_track_thresh: 0.25
+# Measured in processed frames, not seconds. At the 3 FPS checkpoint rate,
+# 9 frames is approximately a 3 second lost-track grace period. Re-test this
+# value with observed occlusion behavior before changing it.
+track_buffer: 9
+match_thresh: 0.8
+fuse_score: True
