@@ -1,6 +1,6 @@
 import unittest
 
-from src.stabilization import OccupancyStabilizer
+from model_server.stabilization import OccupancyStabilizer
 
 
 class OccupancyStabilizerTests(unittest.TestCase):
@@ -33,4 +33,3 @@ class OccupancyStabilizerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

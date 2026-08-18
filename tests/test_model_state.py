@@ -3,8 +3,8 @@ from datetime import datetime, timezone
 import time
 from unittest.mock import patch
 
-from src.model_state import LatestOccupancyStore
-from src.occupancy import OccupancyRecord
+from model_server.model_state import LatestOccupancyStore
+from model_server.occupancy import OccupancyRecord
 
 
 def record(camera_id: str, timestamp: str, raw: int = 4, stable: int = 5) -> OccupancyRecord:
@@ -21,7 +21,7 @@ class LatestOccupancyStoreTests(unittest.TestCase):
         now = time.time()
         timestamp = datetime.fromtimestamp(now, timezone.utc).isoformat()
         store.update(record("camera_01", timestamp, raw=4, stable=5))
-        with patch("src.model_state.time.time", return_value=now):
+        with patch("model_server.model_state.time.time", return_value=now):
             state = store.camera_snapshot("camera_01")
         self.assertEqual(state["raw_occupancy"], 4)
         self.assertEqual(state["occupancy"], 5)
@@ -32,7 +32,7 @@ class LatestOccupancyStoreTests(unittest.TestCase):
         now = time.time()
         timestamp = datetime.fromtimestamp(now, timezone.utc).isoformat()
         store.update(record("camera_01", timestamp))
-        with patch("src.model_state.time.time", return_value=now + 11.0):
+        with patch("model_server.model_state.time.time", return_value=now + 11.0):
             self.assertEqual(store.camera_snapshot("camera_01")["status"], "stale")
 
     def test_unknown_camera_is_not_in_store(self) -> None:
