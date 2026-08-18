@@ -1,0 +1,23 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+.uv-cache/
+logs/
+runs/
+outputs/
+
+# Large local media inputs are never committed.
+videos/
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.webm
+*.wmv
