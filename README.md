@@ -70,7 +70,7 @@ The API reads the latest in-memory state; requests never trigger inference:
 ```text
 GET /health
 GET /occupancy
-GET /occupancy/camera_01
+GET /occupancy/cam_001
 ```
 
 For example:

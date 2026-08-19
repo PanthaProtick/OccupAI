@@ -1,0 +1,46 @@
+{
+  "cameras": [
+    {
+      "camera_id": "cam_001",
+      "occupancy": 10,
+      "updated_at": "2026-08-19T13:00:00Z",
+      "status": "online"
+    },
+    {
+      "camera_id": "cam_002",
+      "occupancy": 14,
+      "updated_at": "2026-08-19T13:00:00Z",
+      "status": "online"
+    },
+    {
+      "camera_id": "cam_003",
+      "occupancy": 48,
+      "updated_at": "2026-08-19T12:49:00Z",
+      "status": "stale"
+    },
+    {
+      "camera_id": "cam_004",
+      "occupancy": 5,
+      "updated_at": "2026-08-19T13:00:00Z",
+      "status": "online"
+    },
+    {
+      "camera_id": "cam_005",
+      "occupancy": 117,
+      "updated_at": "2026-08-19T13:00:00Z",
+      "status": "online"
+    },
+    {
+      "camera_id": "cam_006",
+      "occupancy": 0,
+      "updated_at": "2026-08-19T13:00:00Z",
+      "status": "offline"
+    },
+    {
+      "camera_id": "cam_007",
+      "occupancy": 20,
+      "updated_at": "2026-08-19T13:00:00Z",
+      "status": "online"
+    }
+  ]
+}

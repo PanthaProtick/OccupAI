@@ -1,0 +1,103 @@
+{
+  "generated_at": "2026-08-19T13:00:00Z",
+  "rooms": [
+    {
+      "room_id": "room_cse_201",
+      "name": "CSE 201",
+      "capacity": 40,
+      "building": "CSE Building",
+      "floor": 2,
+      "camera_id": "cam_001",
+      "behavior_profile": "classroom",
+      "current_occupancy": 10,
+      "occupancy_percentage": 25.0,
+      "intensity": "Moderate",
+      "status": "online",
+      "updated_at": "2026-08-19T13:00:00Z"
+    },
+    {
+      "room_id": "room_cse_202",
+      "name": "CSE 202",
+      "capacity": 35,
+      "building": "CSE Building",
+      "floor": 2,
+      "camera_id": "cam_002",
+      "behavior_profile": "classroom",
+      "current_occupancy": 14,
+      "occupancy_percentage": 40.0,
+      "intensity": "Moderate",
+      "status": "online",
+      "updated_at": "2026-08-19T13:00:00Z"
+    },
+    {
+      "room_id": "room_library_01",
+      "name": "Library Reading Room",
+      "capacity": 80,
+      "building": "Central Library",
+      "floor": 1,
+      "camera_id": "cam_003",
+      "behavior_profile": "library",
+      "current_occupancy": 48,
+      "occupancy_percentage": 60.0,
+      "intensity": "Busy",
+      "status": "stale",
+      "updated_at": "2026-08-19T12:49:00Z"
+    },
+    {
+      "room_id": "room_library_02",
+      "name": "Library Study Room",
+      "capacity": 12,
+      "building": "Central Library",
+      "floor": 3,
+      "camera_id": "cam_004",
+      "behavior_profile": "study_room",
+      "current_occupancy": 5,
+      "occupancy_percentage": 41.67,
+      "intensity": "Moderate",
+      "status": "online",
+      "updated_at": "2026-08-19T13:00:00Z"
+    },
+    {
+      "room_id": "room_canteen",
+      "name": "Main Canteen",
+      "capacity": 120,
+      "building": "Student Center",
+      "floor": 1,
+      "camera_id": "cam_005",
+      "behavior_profile": "canteen",
+      "current_occupancy": 117,
+      "occupancy_percentage": 97.5,
+      "intensity": "Very Busy",
+      "status": "online",
+      "updated_at": "2026-08-19T13:00:00Z"
+    },
+    {
+      "room_id": "room_ece_105",
+      "name": "ECE 105 Lab",
+      "capacity": 50,
+      "building": "ECE Building",
+      "floor": 1,
+      "camera_id": "cam_006",
+      "behavior_profile": "classroom",
+      "current_occupancy": 0,
+      "occupancy_percentage": 0.0,
+      "intensity": "Low",
+      "status": "offline",
+      "updated_at": "2026-08-19T13:00:00Z"
+    },
+    {
+      "room_id": "room_common_01",
+      "name": "Student Common Room",
+      "capacity": 60,
+      "building": "Student Center",
+      "floor": 2,
+      "camera_id": "cam_007",
+      "behavior_profile": "study_room",
+      "current_occupancy": 20,
+      "occupancy_percentage": 33.33,
+      "intensity": "Moderate",
+      "status": "online",
+      "updated_at": "2026-08-19T13:00:00Z"
+    }
+  ]
+}

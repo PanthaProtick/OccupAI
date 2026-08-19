@@ -9,9 +9,9 @@ loop_videos: true
 stabilization_window_seconds: 2.0
 tracker_config: model_server/config/bytetrack_custom.yaml
 cameras:
-  - camera_id: camera_01
+  - camera_id: cam_001
     source: model_server/videos/test1.avi
-  - camera_id: camera_02
+  - camera_id: cam_002
     source: model_server/videos/test2.avi
-  - camera_id: camera_03
+  - camera_id: cam_003
     source: model_server/videos/test3.mp4
