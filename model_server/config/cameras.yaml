@@ -3,7 +3,7 @@ model: model_server/models/yolo11m.pt
 imgsz: 960
 classes: [0]
 device: 0
-confidence: 0.2
+confidence: 0.15
 sample_fps: 3.0
 loop_videos: true
 stabilization_window_seconds: 2.0
