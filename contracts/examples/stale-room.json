@@ -1,0 +1,17 @@
+{
+  "data": {
+    "room_id": "room_library_01",
+    "name": "Library Reading Room",
+    "capacity": 80,
+    "building": "Central Library",
+    "floor": 1,
+    "camera_id": "cam_003",
+    "behavior_profile": "library",
+    "occupancy": 48,
+    "raw_occupancy": 48,
+    "occupancy_percentage": 60.0,
+    "intensity": "Busy",
+    "status": "stale",
+    "updated_at": "2026-08-19T12:49:00Z"
+  }
+}

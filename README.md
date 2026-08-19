@@ -2,6 +2,8 @@
 
 This project runs a multi-camera people-occupancy pipeline. Each camera has a capture thread and an independent ByteTrack tracker; one shared YOLO11 detector performs inference, and a scheduler samples the latest frame from each camera at about 3 FPS. A two-second per-camera history produces the stabilized occupancy value.
 
+The repository also includes a mock-backed product API for parallel frontend/backend development. See [`docs/parallel-development.md`](docs/parallel-development.md), the generated contract in [`contracts/openapi.yaml`](contracts/openapi.yaml), and the work plans in [`frontend/task.md`](frontend/task.md) and [`backend/task.md`](backend/task.md).
+
 ## Requirements
 
 - Python 3.12 (the required version is recorded in `.python-version` and `pyproject.toml`).

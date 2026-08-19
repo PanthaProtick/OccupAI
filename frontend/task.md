@@ -1,143 +1,204 @@
-# Frontend Development Plan
+# Frontend Developer Tasks
 
-The frontend consumes the backend API through a typed client. It must not import or read files from `mock/generated` directly; the mock data is exposed through the backend during development.
+Complete these milestones in order. The frontend can start immediately using the mock-backed product API; it does not need to wait for model-server integration.
 
-## Contract and conventions
+## Already provided
 
-- [ ] Use `cam_001`–`cam_007` and the backend-provided room IDs.
-- [ ] Treat `online`, `stale`, and `offline` as distinct UI states.
-- [ ] Treat zero occupancy as a valid value, not as missing data.
-- [ ] Display unavailable occupancy as `—` or an explicit unavailable state.
-- [ ] Never display occupancy percentages above `100%`.
-- [ ] Format timestamps consistently and indicate the source timezone where needed.
+- API contract: `contracts/openapi.yaml`
+- Normal and edge-case payloads: `contracts/examples/`
+- API startup command: `scripts/start-backend.ps1`
+- Environment template: `frontend/.env.example`
+- Development guide: `docs/parallel-development.md`
 
-## Milestone 1: Frontend foundation
+Start the API from the repository root:
 
-### Modules
+```powershell
+.\scripts\start-backend.ps1
+```
 
-- [ ] Establish the application shell, routing, styling, and reusable component conventions.
-- [ ] Add environment-based API configuration, for example `VITE_API_BASE_URL`.
-- [ ] Add a shared loading, error, empty, and retry pattern.
-- [ ] Add a shared formatting layer for occupancy, percentage, timestamps, and statuses.
+Use this frontend configuration:
 
-### Done when
+```env
+VITE_API_BASE_URL=http://127.0.0.1:8000/api
+```
 
-- [ ] The application starts with one documented command.
-- [ ] The API base URL is configurable without code changes.
-- [ ] Common state and formatting behavior is not duplicated across pages.
+## Required conventions
+
+- [ ] Use `cam_001`–`cam_007` and room IDs returned by the API.
+- [ ] Treat `online`, `stale`, and `offline` as different UI states.
+- [ ] Treat `0` occupancy as a valid measurement and `null` as unavailable.
+- [ ] Never display an occupancy percentage above `100%`.
+- [ ] Display timestamps consistently in the user's timezone while retaining UTC API values.
+- [ ] Use one centralized API client; components must not call `fetch` directly.
+- [ ] Do not import files from `mock/generated` into frontend code.
+- [ ] Do not reinterpret API fields without coordinating a contract change.
+
+## Milestone 1: Application foundation
+
+### Tasks
+
+- [ ] Confirm the frontend stack with the lead. Recommended: React, TypeScript, and Vite.
+- [ ] Scaffold the application in `frontend/`.
+- [ ] Add routing, global layout, styling conventions, and test configuration.
+- [ ] Configure `VITE_API_BASE_URL` from the environment.
+- [ ] Add shared loading, empty, error, retry, and not-found components.
+- [ ] Add shared formatters for occupancy, percentage, status, and timestamps.
+
+### Acceptance gate
+
+- [ ] The frontend starts with one documented command.
+- [ ] The application shell works at narrow and wide viewport sizes.
+- [ ] No API URL or machine-specific path is hardcoded in components.
 
 ## Milestone 2: Typed API client
 
-### Modules
+### Tasks
 
-- [ ] Define types for rooms, occupancy, statuses, history points, and API errors.
-- [ ] Implement `getRooms()`.
-- [ ] Implement `getRoom(roomId)`.
-- [ ] Implement `getOccupancy()`.
-- [ ] Implement `getOccupancyByCamera(cameraId)`.
-- [ ] Implement `getHistory({ roomId, range, metric })`.
-- [ ] Centralize HTTP errors, parsing, request cancellation, and retry behavior.
+- [ ] Generate or define TypeScript types from `contracts/openapi.yaml`.
+- [ ] Define types for rooms, occupancy, status, history, metadata, and API errors.
+- [ ] Implement `getRooms()` using `GET /api/rooms`.
+- [ ] Implement `getRoom(roomId)` using `GET /api/rooms/{room_id}`.
+- [ ] Implement `getOccupancy()` using `GET /api/occupancy`.
+- [ ] Implement `getOccupancyByCamera(cameraId)` using `GET /api/occupancy/{camera_id}`.
+- [ ] Implement `getHistory({ roomId, range, metric })` using `GET /api/history`.
+- [ ] Centralize query serialization, JSON parsing, API errors, timeout, and cancellation.
+- [ ] Reject malformed responses through runtime validation or a controlled client error.
+- [ ] Add API-client tests using `contracts/examples/`.
 
-### Done when
+### Acceptance gate
 
-- [ ] UI components never construct API URLs or call `fetch` directly.
-- [ ] Client types match the backend contract rather than the raw fixture nesting.
-- [ ] Invalid or incomplete API responses produce a controlled error state.
+- [ ] UI components do not construct URLs or call `fetch` directly.
+- [ ] The client handles success, `400`, `404`, and network failures.
+- [ ] Switching API environments requires configuration only.
 
 ## Milestone 3: Room overview dashboard
 
-### Modules
+### Tasks
 
-- [ ] Load and display the room list.
-- [ ] Build reusable room/occupancy cards.
-- [ ] Display room name, building, floor, capacity, occupancy, percentage, intensity, and camera status.
-- [ ] Show last-updated time.
-- [ ] Add refresh behavior and refresh failure feedback.
-- [ ] Add loading skeletons and a meaningful empty state.
+- [ ] Fetch rooms and current occupancy.
+- [ ] Join room and occupancy records using `camera_id`.
+- [ ] Build a reusable room card.
+- [ ] Display room name, building, floor, capacity, occupancy, percentage, status, and update time.
+- [ ] Add loading, empty, error, retry, and manual-refresh states.
+- [ ] Preserve existing data while a refresh is running or fails.
+- [ ] Prevent overlapping refresh requests.
+- [ ] Link each room card to `/rooms/{room_id}`.
 
-### Done when
+### Acceptance gate
 
-- [ ] All seven mock rooms render correctly.
-- [ ] Cards remain readable across normal, busy, stale, and offline states.
-- [ ] Existing data is retained while a refresh is in progress or fails.
+- [ ] All seven mock rooms render from the running API.
+- [ ] `cam_001`–`cam_007` map to the correct rooms.
+- [ ] No dashboard data is hardcoded or imported from fixtures.
 
 ## Milestone 4: Status and edge-case UX
 
-### Modules
+Use the named files under `contracts/examples/` for component tests.
 
-- [ ] Design the `online` state.
-- [ ] Design the `stale` state with last update time and warning treatment.
-- [ ] Design the `offline` state without misleading users into thinking occupancy is zero.
-- [ ] Display valid zero occupancy clearly.
-- [ ] Display over-capacity data with a capped percentage and optional raw-value detail.
-- [ ] Display missing history and partial coverage without inventing data.
+### Tasks
 
-### Done when
+- [ ] Render normal online data using `occupancy.json`.
+- [ ] Render stale status with last-known occupancy using `stale-room.json`.
+- [ ] Render offline occupancy as unavailable using `offline-camera.json`.
+- [ ] Render a valid zero measurement using `zero-occupancy.json`.
+- [ ] Cap display percentage while retaining raw occupancy using `over-capacity.json`.
+- [ ] Render no-data history using `empty-history.json`.
+- [ ] Communicate incomplete data using `partial-coverage-history.json`.
+- [ ] Render the provided not-found and validation errors.
+- [ ] Communicate status through text or icons as well as color.
 
-- [ ] Every case in `mock/generated/edge_cases.json` has an intentional UI representation.
-- [ ] Status is communicated by text and not color alone.
+### Acceptance gate
 
-## Milestone 5: Room detail view
+- [ ] Offline is never presented as a measured occupancy of zero.
+- [ ] Missing history is never converted into artificial zero points.
+- [ ] Every provided edge-case payload has an automated UI test.
 
-### Modules
+## Milestone 5: Room detail page
 
-- [ ] Add room detail routing by `room_id`.
-- [ ] Display room metadata and current occupancy summary.
-- [ ] Display camera status and update timestamp.
-- [ ] Add navigation back to the room overview.
-- [ ] Handle unknown room IDs with a not-found state.
+### Tasks
 
-### Done when
+- [ ] Add a route using `room_id`.
+- [ ] Fetch and display the room-detail response.
+- [ ] Display room metadata, current occupancy, status, and update timestamp.
+- [ ] Add navigation back to the dashboard.
+- [ ] Add loading, retry, and not-found states.
+- [ ] Handle direct navigation to an unknown room gracefully.
 
-- [ ] Every room card links to a working detail view.
-- [ ] Direct navigation to an invalid room is handled gracefully.
+### Acceptance gate
+
+- [ ] Every dashboard card opens the correct room detail page.
+- [ ] Refreshing a detail URL works without dashboard state.
+- [ ] Invalid room IDs show a not-found view instead of crashing.
 
 ## Milestone 6: Historical analytics
 
-### Modules
+The current `range` parameter means aggregation granularity across the retained seven-day dataset:
 
-- [ ] Add range selector: hour, day, week.
-- [ ] Add metric selector: occupancy, percentage.
-- [ ] Build the historical chart using backend history responses.
-- [ ] Render tooltips with bucket timestamps and values.
-- [ ] Handle empty data, missing buckets, and partial coverage.
-- [ ] Prevent stale requests from overwriting newer selections.
-- [ ] Add chart loading and error states.
+- `hour`: 168 hourly points
+- `day`: 7 daily points
+- `week`: 1 weekly point
 
-### Done when
+It does not mean “look back one hour/day/week.”
 
-- [ ] Switching room, range, or metric requests the correct backend query.
-- [ ] Charts do not assume a fixed number of data points.
-- [ ] Missing intervals are visually distinguishable from zero values.
+### Tasks
 
-## Milestone 7: Frontend tests
+- [ ] Add `hour`, `day`, and `week` controls.
+- [ ] Add `occupancy` and `percentage` metric controls.
+- [ ] Request history for the selected room, range, and metric.
+- [ ] Build the chart without assuming a fixed point count.
+- [ ] Show timestamp, value, and coverage percentage in chart details.
+- [ ] Render missing intervals as gaps rather than zero values.
+- [ ] Add chart loading, empty, error, and retry states.
+- [ ] Cancel obsolete requests when room or filters change quickly.
+- [ ] Prevent a slow old response from replacing a newer selection.
 
-### Modules
+### Acceptance gate
 
-- [ ] Test API client success and failure responses.
-- [ ] Test dashboard rendering with normal room data.
-- [ ] Test zero occupancy, stale, offline, and over-capacity states.
-- [ ] Test unknown room and empty-history states.
-- [ ] Test range and metric query selection.
-- [ ] Test that rapid room/filter changes do not show stale request results.
-- [ ] Add accessibility checks for status, controls, keyboard navigation, and chart labels.
+- [ ] Every range and metric combination renders correctly.
+- [ ] Empty and partial-coverage history are visually distinct from complete history.
+- [ ] Rapid filter changes never show data for the wrong selection.
 
-### Done when
+## Milestone 7: Refresh and resilience
 
-- [ ] The core user flows work without a real model server.
-- [ ] Edge-case fixtures are covered by UI tests.
+### Tasks
 
-## Milestone 8: Integration and polish
+- [ ] Add a visible last-refresh timestamp.
+- [ ] Add auto-refresh only after manual refresh is stable.
+- [ ] Avoid overlapping occupancy requests.
+- [ ] Retain the last successful state during temporary network failure.
+- [ ] Show a non-blocking warning when cached data remains visible.
+- [ ] Pause or reduce refresh activity when the page is hidden if appropriate.
 
-- [ ] Connect the UI to the backend mock API.
-- [ ] Remove direct fixture imports and temporary hardcoded data.
-- [ ] Verify behavior at narrow and wide viewport sizes.
-- [ ] Add auto-refresh only after manual refresh and stale-state behavior are correct.
-- [ ] Avoid overlapping refresh requests and cancel obsolete history requests.
-- [ ] Add a user-visible last-refresh indicator.
-- [ ] Document local startup and API configuration.
-- [ ] Verify the UI against both mock-backed and model-server-backed API responses.
+### Acceptance gate
 
-## Frontend integration gate
+- [ ] Temporary backend failure does not blank a loaded dashboard.
+- [ ] Auto-refresh does not create duplicate or accumulating requests.
 
-The frontend is ready for model-server integration when it depends only on the documented backend API, handles all mock edge cases, and does not require code changes when the backend switches data sources.
+## Milestone 8: Quality and integration
+
+### Tasks
+
+- [ ] Add unit tests for formatters and API error handling.
+- [ ] Add component tests for dashboard cards and room detail.
+- [ ] Add interaction tests for history controls and refresh.
+- [ ] Verify keyboard navigation, visible focus, and screen-readable labels.
+- [ ] Verify narrow and wide layouts.
+- [ ] Run the UI against the local mock-backed API.
+- [ ] Document install, start, test, and build commands.
+
+### Final frontend gate
+
+- [ ] The frontend depends only on the documented product API.
+- [ ] It handles all normal and edge-case examples.
+- [ ] Changing from mock data to model-server data requires no frontend code change.
+
+## Contract change rule
+
+If a field is missing or unsuitable:
+
+1. Document the UI requirement.
+2. Discuss it with the backend developer and lead.
+3. Update backend models and routes.
+4. Regenerate `contracts/openapi.yaml` and examples.
+5. Update frontend types and tests in the same integration window.
+
+Do not create an undocumented frontend-only interpretation as a workaround.

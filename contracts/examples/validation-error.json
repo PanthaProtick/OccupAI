@@ -1,0 +1,22 @@
+{
+  "error": {
+    "code": "invalid_request",
+    "message": "Request validation failed",
+    "details": {
+      "errors": [
+        {
+          "type": "enum",
+          "loc": [
+            "query",
+            "range"
+          ],
+          "msg": "Input should be 'hour', 'day' or 'week'",
+          "input": "month",
+          "ctx": {
+            "expected": "'hour', 'day' or 'week'"
+          }
+        }
+      ]
+    }
+  }
+}

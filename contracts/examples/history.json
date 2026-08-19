@@ -1,0 +1,16 @@
+{
+  "data": [
+    {
+      "bucket_start": "2026-08-12T00:00:00Z",
+      "value": 17.3785,
+      "coverage_percentage": 100.0
+    }
+  ],
+  "meta": {
+    "room_id": "room_cse_201",
+    "range": "week",
+    "metric": "percentage",
+    "count": 1,
+    "generated_at": "2026-08-19T13:00:00Z"
+  }
+}

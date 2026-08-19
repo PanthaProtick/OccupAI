@@ -1,0 +1,71 @@
+{
+  "data": [
+    {
+      "room_id": "room_cse_201",
+      "name": "CSE 201",
+      "capacity": 40,
+      "building": "CSE Building",
+      "floor": 2,
+      "camera_id": "cam_001",
+      "behavior_profile": "classroom"
+    },
+    {
+      "room_id": "room_cse_202",
+      "name": "CSE 202",
+      "capacity": 35,
+      "building": "CSE Building",
+      "floor": 2,
+      "camera_id": "cam_002",
+      "behavior_profile": "classroom"
+    },
+    {
+      "room_id": "room_library_01",
+      "name": "Library Reading Room",
+      "capacity": 80,
+      "building": "Central Library",
+      "floor": 1,
+      "camera_id": "cam_003",
+      "behavior_profile": "library"
+    },
+    {
+      "room_id": "room_library_02",
+      "name": "Library Study Room",
+      "capacity": 12,
+      "building": "Central Library",
+      "floor": 3,
+      "camera_id": "cam_004",
+      "behavior_profile": "study_room"
+    },
+    {
+      "room_id": "room_canteen",
+      "name": "Main Canteen",
+      "capacity": 120,
+      "building": "Student Center",
+      "floor": 1,
+      "camera_id": "cam_005",
+      "behavior_profile": "canteen"
+    },
+    {
+      "room_id": "room_ece_105",
+      "name": "ECE 105 Lab",
+      "capacity": 50,
+      "building": "ECE Building",
+      "floor": 1,
+      "camera_id": "cam_006",
+      "behavior_profile": "classroom"
+    },
+    {
+      "room_id": "room_common_01",
+      "name": "Student Common Room",
+      "capacity": 60,
+      "building": "Student Center",
+      "floor": 2,
+      "camera_id": "cam_007",
+      "behavior_profile": "study_room"
+    }
+  ],
+  "meta": {
+    "count": 7,
+    "generated_at": "2026-08-19T13:00:00Z"
+  }
+}

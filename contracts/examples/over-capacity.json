@@ -1,0 +1,12 @@
+{
+  "data": {
+    "camera_id": "cam_005",
+    "room_id": "room_canteen",
+    "occupancy": 126,
+    "raw_occupancy": 126,
+    "capacity": 120,
+    "occupancy_percentage": 100.0,
+    "status": "online",
+    "updated_at": "2026-08-19T13:00:00Z"
+  }
+}

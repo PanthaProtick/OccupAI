@@ -1,0 +1,12 @@
+{
+  "data": {
+    "camera_id": "cam_006",
+    "room_id": "room_ece_105",
+    "occupancy": null,
+    "raw_occupancy": 0,
+    "capacity": 50,
+    "occupancy_percentage": null,
+    "status": "offline",
+    "updated_at": "2026-08-19T13:00:00Z"
+  }
+}

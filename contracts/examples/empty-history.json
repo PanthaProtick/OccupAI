@@ -1,0 +1,10 @@
+{
+  "data": [],
+  "meta": {
+    "room_id": "room_ece_105",
+    "range": "hour",
+    "metric": "occupancy",
+    "count": 0,
+    "generated_at": "2026-08-19T13:00:00Z"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "data": {
+    "camera_id": "cam_004",
+    "room_id": "room_library_02",
+    "occupancy": 0,
+    "raw_occupancy": 0,
+    "capacity": 12,
+    "occupancy_percentage": 0.0,
+    "status": "online",
+    "updated_at": "2026-08-19T13:00:00Z"
+  }
+}

@@ -1,130 +1,202 @@
-# Backend Development Plan
+# Backend Developer Tasks
 
-The backend owns the product API and hides the difference between mock fixtures and the real model server. The frontend must consume API responses, not read files from `mock/generated` directly.
+Complete these milestones in order. The product API, contract, mock repository, and core routes already exist. Extend and harden them; do not rebuild the foundation or expose a second API shape.
 
-## Contract and conventions
+## Already completed
 
-- [ ] Use `cam_001`–`cam_007` as canonical camera IDs.
-- [ ] Use the existing `room_*` IDs from `mock/generated/rooms.json`.
-- [ ] Use UTC ISO-8601 timestamps with a `Z` suffix.
-- [ ] Support camera statuses: `online`, `stale`, and `offline`.
-- [ ] Preserve raw occupancy values for diagnostics.
-- [ ] Cap display occupancy percentage at `100`; never expose a display percentage above `100`.
-- [ ] Define one consistent JSON error shape for `400`, `404`, and `500` responses.
+- [x] Canonical IDs, UTC timestamps, and camera statuses are defined.
+- [x] Raw occupancy is preserved and display percentage is capped at `100`.
+- [x] A consistent JSON error envelope exists.
+- [x] FastAPI application and environment configuration exist.
+- [x] Domain and response models exist.
+- [x] A repository protocol and fixture-backed implementation exist.
+- [x] `/health` and the core `/api/*` routes are implemented.
+- [x] CORS is configured for the local frontend.
+- [x] OpenAPI generation and contract-drift testing exist.
+- [x] Documented start and test commands exist.
 
-## Milestone 1: Backend foundation
+## Start here
 
-### Modules
+Read `docs/parallel-development.md`, `contracts/README.md`, `contracts/openapi.yaml`, and `contracts/examples/`.
 
-- [ ] Create the backend application entry point and local development command.
-- [ ] Add environment-based configuration for data source, fixture directory, host, and port.
-- [ ] Add structured logging and a request/error handling policy.
-- [ ] Add dependency and test configuration if not already present.
+Run:
 
-### Done when
+```powershell
+.\scripts\start-backend.ps1
+```
 
-- [ ] The service starts locally with one documented command.
-- [ ] `GET /health` returns a predictable success response.
-- [ ] Configuration does not contain hardcoded machine-specific paths.
+In a second terminal:
 
-## Milestone 2: Domain models and validation
+```powershell
+.\scripts\test.ps1
+```
 
-### Modules
+Confirm API documentation at `http://127.0.0.1:8000/docs`.
 
-- [ ] Define models for rooms, camera occupancy, room views, historical records, history points, and API errors.
-- [ ] Validate fixture data at load time.
-- [ ] Validate IDs, statuses, timestamps, capacity, occupancy ranges, and coverage percentages.
-- [ ] Define the distinction between zero occupancy and unavailable occupancy.
+## Required architectural rules
 
-### Done when
+- [ ] Routes depend on the repository protocol, not fixtures or model-server internals.
+- [ ] Route handlers do not contain `DATA_SOURCE` conditionals.
+- [ ] Mock and model-server repositories return the same domain models.
+- [ ] Responses do not change without an approved contract change.
+- [ ] Offline remains distinguishable from a valid zero measurement.
+- [ ] Stale data preserves the last trustworthy value and timestamp.
+- [ ] Raw values may exceed capacity; public percentage remains capped at `100`.
+- [ ] Missing history remains missing and is never synthesized as zero.
 
-- [ ] Invalid fixture data fails with an actionable error.
-- [ ] All model fields used by the frontend are explicit and documented.
+## Milestone 1: Complete validation tests
 
-## Milestone 3: Repository layer
+### Tasks
 
-### Modules
+- [ ] Test all seven room/camera mappings.
+- [ ] Test valid zero occupancy and over-capacity raw occupancy.
+- [ ] Test partial coverage and empty history.
+- [ ] Test duplicate room IDs and camera IDs.
+- [ ] Test negative occupancy and invalid occupancy ranges.
+- [ ] Test invalid coverage percentages.
+- [ ] Test missing or non-UTC timestamps.
+- [ ] Test missing files and malformed fixture JSON.
+- [ ] Test unknown room and camera responses.
+- [ ] Test invalid history range and metric responses.
+- [ ] Test history ordering and bucket counts.
+- [ ] Test CORS for the documented frontend origin.
 
-- [ ] Define interfaces for room, occupancy, and history access.
-- [ ] Implement a mock repository backed by `mock/generated/*.json`.
-- [ ] Load fixtures once and avoid rereading large history files on every request.
-- [ ] Build indexes by room ID and camera ID for lookup performance.
-- [ ] Implement filtering by room, camera, range, metric, and time window.
+### Acceptance gate
 
-### Done when
+- [ ] Every case in `mock/generated/edge_cases.json` has a backend test or documented example.
+- [ ] Invalid fixtures fail at startup with an actionable error.
+- [ ] All public errors use the standard envelope.
 
-- [ ] The HTTP layer does not access JSON files directly.
-- [ ] The repository can be replaced without changing route behavior.
-- [ ] Missing history is represented explicitly rather than silently fabricated as zeros.
+## Milestone 2: Operational hardening
 
-## Milestone 4: Core API
+### Tasks
 
-### Endpoints
+- [ ] Add structured request logging and request IDs.
+- [ ] Log the active data source and safe configuration at startup.
+- [ ] Keep stack traces and internal paths out of public `500` responses.
+- [ ] Add bounded history query behavior before arbitrary date filters are introduced.
+- [ ] Define cache headers for mock metadata and live occupancy.
+- [ ] Verify graceful shutdown and repository cleanup hooks.
+- [ ] Add a readiness check for external dependencies.
+- [ ] Document expected status codes and operational configuration.
 
-- [ ] `GET /health`
-- [ ] `GET /rooms`
-- [ ] `GET /rooms/{room_id}`
-- [ ] `GET /occupancy`
-- [ ] `GET /occupancy/{camera_id}`
-- [ ] `GET /history?room_id=...&range=hour|day|week&metric=occupancy|percentage`
+### Acceptance gate
 
-### Modules
+- [ ] Requests are traceable by request ID.
+- [ ] Failures are diagnosable without leaking internals.
+- [ ] Startup fails clearly when required configuration is unavailable.
 
-- [ ] Add query-parameter validation and useful error messages.
-- [ ] Return `404` for unknown rooms and cameras.
-- [ ] Return stable response envelopes for collections and history.
-- [ ] Return `updated_at`, status, capacity, raw occupancy, display occupancy, and percentage where applicable.
-- [ ] Preserve stale last-known values while clearly exposing stale status.
-- [ ] Keep offline and zero-occupancy responses distinguishable.
+## Milestone 3: Model-server repository adapter
 
-### Done when
+Create a new implementation of the existing repository protocol. Do not call model-server code from route handlers.
 
-- [ ] Every endpoint can be exercised using the generated mock data.
-- [ ] Response shapes are documented with examples.
-- [ ] The frontend can implement its first dashboard without reading fixture files.
+### Tasks
 
-## Milestone 5: Contract and edge-case tests
+- [ ] Define the model-server connection or in-process access strategy.
+- [ ] Implement `ModelServerOccupancyRepository`.
+- [ ] Normalize camera IDs to `cam_001` format.
+- [ ] Map model output into existing domain models.
+- [ ] Preserve raw and stabilized occupancy separately where available.
+- [ ] Calculate percentage from configured room capacity and cap it at `100`.
+- [ ] Map source failures to `offline`.
+- [ ] Calculate `stale` from the last successful update.
+- [ ] Preserve the last trustworthy stale occupancy.
+- [ ] Handle timeout, unavailable server, malformed response, and recovery.
+- [ ] Select the repository once at startup using `DATA_SOURCE`.
 
-### Modules
+### Acceptance gate
 
-- [ ] Test that all seven rooms and cameras load correctly.
-- [ ] Test room/camera relationship and ID uniqueness.
-- [ ] Test online, stale, and offline behavior.
-- [ ] Test zero occupancy, missing history, partial coverage, and over-capacity data.
-- [ ] Test invalid ranges, metrics, IDs, and malformed dates.
-- [ ] Test history ordering and bucket consistency.
-- [ ] Add endpoint-level contract tests for the frontend integration.
+- [ ] `DATA_SOURCE=mock` and `DATA_SOURCE=model_server` satisfy the same contract.
+- [ ] Switching source requires configuration only.
+- [ ] Existing frontend parsing does not change.
 
-### Done when
+## Milestone 4: Resolve seven-room live coverage
 
-- [ ] Edge cases from `mock/generated/edge_cases.json` are covered.
-- [ ] Contract tests fail if a response field or identifier changes unexpectedly.
+The model-server configuration has three cameras, while the product contract has seven.
 
-## Milestone 6: Model-server adapter
+### Tasks
 
-### Modules
+- [ ] Confirm whether four additional camera sources will be configured.
+- [ ] If sources are unavailable, retain all rooms and return unavailable/offline occupancy for those cameras.
+- [ ] Do not silently omit unconfigured rooms from `/api/rooms`.
+- [ ] Do not renumber or alias camera IDs differently between sources.
+- [ ] Add tests for configured and unconfigured cameras.
+- [ ] Document the selected live-coverage policy.
 
-- [ ] Define the adapter from model-server state to backend domain models.
-- [ ] Map model-server output to `cam_001`-style IDs.
-- [ ] Normalize timestamps and status values.
-- [ ] Preserve raw occupancy, inference diagnostics, and last-known values where useful.
-- [ ] Convert source failures into the documented offline/stale behavior.
-- [ ] Select mock or model-server repository using configuration, not route-level conditionals.
+### Acceptance gate
 
-### Done when
+- [ ] All seven rooms behave predictably in both data-source modes.
+- [ ] The frontend needs no separate mock-mode and live-mode room logic.
 
-- [ ] Switching from mock data to model-server data requires configuration only.
-- [ ] The frontend API contract remains unchanged.
+## Milestone 5: Historical persistence and aggregation
 
-## Milestone 7: Operational readiness
+The model server exposes latest state; the history API requires durable samples.
 
-- [ ] Add CORS configuration for the local frontend origin.
-- [ ] Add request logging without logging sensitive or excessive data.
-- [ ] Add bounded history query limits to prevent expensive requests.
-- [ ] Add graceful startup failure for missing or invalid fixtures.
-- [ ] Document startup, configuration, fixture regeneration, and test commands.
-- [ ] Add one end-to-end smoke test using the mock repository.
+### Tasks
 
-## Backend integration gate
+- [ ] Propose the storage technology and obtain lead approval.
+- [ ] Define records for room, camera, timestamp, raw occupancy, display occupancy, and status.
+- [ ] Persist normalized UTC samples and add room/timestamp indexes.
+- [ ] Define retention and cleanup policy.
+- [ ] Aggregate samples into hourly, daily, and weekly points.
+- [ ] Calculate coverage percentage for each bucket.
+- [ ] Preserve downtime gaps instead of writing artificial zeros.
+- [ ] Implement live `/api/history` through the repository boundary.
+- [ ] Test boundary timestamps, empty ranges, partial buckets, and performance.
 
-The backend is ready for frontend integration when `/rooms`, `/occupancy`, and `/history` are stable, documented, tested against the mocks, and independent of the underlying data source.
+### Acceptance gate
+
+- [ ] Live history satisfies `contracts/openapi.yaml`.
+- [ ] Aggregation matches the documented semantics.
+- [ ] Partial and missing data are represented accurately.
+
+## Milestone 6: Repository parity and recovery tests
+
+### Tasks
+
+- [ ] Run shared contract tests against both repository implementations.
+- [ ] Test offline-to-online, online-to-stale, and stale-to-online transitions.
+- [ ] Test concurrent reads during occupancy updates.
+- [ ] Test model-server timeout and malformed output.
+- [ ] Ensure one failed camera does not fail the complete response.
+- [ ] Test percentage capping and raw-value retention in both repositories.
+
+### Acceptance gate
+
+- [ ] Both repositories produce contract-equivalent responses.
+- [ ] Camera-level failures remain isolated.
+- [ ] Concurrent reads do not observe partially updated state.
+
+## Milestone 7: Documentation and integration
+
+### Tasks
+
+- [ ] Document install, start, test, and configuration commands.
+- [ ] Document model-server connectivity and failure behavior.
+- [ ] Document history storage and retention.
+- [ ] Update `backend/.env.example` for every supported source.
+- [ ] Regenerate the contract after approved API changes:
+
+```powershell
+$env:UV_CACHE_DIR = ".uv-cache"
+uv run python -m scripts.export_api_contract
+```
+
+- [ ] Run the complete test suite after contract generation.
+- [ ] Perform a frontend/backend smoke test using rooms, occupancy, and history.
+
+### Final backend gate
+
+- [ ] The mock API remains available for frontend development.
+- [ ] Model-server mode can be enabled through configuration.
+- [ ] The contract remains stable across data sources.
+- [ ] Operational and recovery behavior is documented and tested.
+
+## Contract change rule
+
+1. Describe the problem and affected frontend behavior.
+2. Agree on the change with the frontend developer and lead.
+3. Update backend models and routes.
+4. Regenerate `contracts/openapi.yaml` and examples.
+5. Update contract and frontend tests together.
+6. Do not merge while the checked-in contract differs from `app.openapi()`.

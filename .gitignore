@@ -12,6 +12,9 @@ wheels/
 logs/
 runs/
 outputs/
+.env
+.env.local
+.env.*.local
 
 # Large local media inputs are never committed.
 videos/

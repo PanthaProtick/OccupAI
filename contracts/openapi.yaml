@@ -1,0 +1,539 @@
+openapi: 3.1.0
+info:
+  title: OccupAI Product API
+  description: Stable frontend-facing occupancy API with a replaceable data repository.
+  version: 0.1.0
+paths:
+  /health:
+    get:
+      tags:
+      - system
+      summary: Health
+      operationId: health_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /api/rooms:
+    get:
+      tags:
+      - rooms
+      summary: List Rooms
+      operationId: list_rooms_api_rooms_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomsResponse'
+  /api/rooms/{room_id}:
+    get:
+      tags:
+      - rooms
+      summary: Get Room
+      operationId: get_room_api_rooms__room_id__get
+      parameters:
+      - name: room_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Room Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomResponse'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '400': &id001
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/occupancy:
+    get:
+      tags:
+      - occupancy
+      summary: List Occupancy
+      operationId: list_occupancy_api_occupancy_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OccupancyListResponse'
+  /api/occupancy/{camera_id}:
+    get:
+      tags:
+      - occupancy
+      summary: Get Occupancy
+      operationId: get_occupancy_api_occupancy__camera_id__get
+      parameters:
+      - name: camera_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Camera Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OccupancyResponse'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '400': *id001
+  /api/history:
+    get:
+      tags:
+      - history
+      summary: Get History
+      operationId: get_history_api_history_get
+      parameters:
+      - name: room_id
+        in: query
+        required: true
+        schema:
+          type: string
+          pattern: ^room_[a-z0-9_]+$
+          description: Canonical room identifier
+          title: Room Id
+        description: Canonical room identifier
+      - name: range
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/HistoryRange'
+          description: 'Aggregation bucket across retained history: hourly, daily,
+            or one weekly bucket'
+        description: 'Aggregation bucket across retained history: hourly, daily, or
+          one weekly bucket'
+      - name: metric
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/HistoryMetric'
+          description: Value represented by each history point
+        description: Value represented by each history point
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryResponse'
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Not Found
+        '400': *id001
+components:
+  schemas:
+    CameraStatus:
+      type: string
+      enum:
+      - online
+      - stale
+      - offline
+      title: CameraStatus
+    CollectionMeta:
+      properties:
+        count:
+          type: integer
+          minimum: 0.0
+          title: Count
+        generated_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Generated At
+      additionalProperties: false
+      type: object
+      required:
+      - count
+      title: CollectionMeta
+    ErrorBody:
+      properties:
+        code:
+          type: string
+          title: Code
+        message:
+          type: string
+          title: Message
+        details:
+          additionalProperties: true
+          type: object
+          title: Details
+      additionalProperties: false
+      type: object
+      required:
+      - code
+      - message
+      title: ErrorBody
+    ErrorResponse:
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorBody'
+      additionalProperties: false
+      type: object
+      required:
+      - error
+      title: ErrorResponse
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    HealthResponse:
+      properties:
+        status:
+          type: string
+          title: Status
+          default: ok
+        data_source:
+          type: string
+          title: Data Source
+      additionalProperties: false
+      type: object
+      required:
+      - data_source
+      title: HealthResponse
+    HistoryMeta:
+      properties:
+        room_id:
+          type: string
+          title: Room Id
+        range:
+          $ref: '#/components/schemas/HistoryRange'
+        metric:
+          $ref: '#/components/schemas/HistoryMetric'
+        count:
+          type: integer
+          minimum: 0.0
+          title: Count
+        generated_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Generated At
+      additionalProperties: false
+      type: object
+      required:
+      - room_id
+      - range
+      - metric
+      - count
+      title: HistoryMeta
+    HistoryMetric:
+      type: string
+      enum:
+      - occupancy
+      - percentage
+      title: HistoryMetric
+    HistoryPoint:
+      properties:
+        bucket_start:
+          type: string
+          format: date-time
+          title: Bucket Start
+        value:
+          type: number
+          minimum: 0.0
+          title: Value
+        coverage_percentage:
+          type: number
+          maximum: 100.0
+          minimum: 0.0
+          title: Coverage Percentage
+          default: 100.0
+      additionalProperties: false
+      type: object
+      required:
+      - bucket_start
+      - value
+      title: HistoryPoint
+    HistoryRange:
+      type: string
+      enum:
+      - hour
+      - day
+      - week
+      title: HistoryRange
+    HistoryResponse:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/HistoryPoint'
+          type: array
+          title: Data
+        meta:
+          $ref: '#/components/schemas/HistoryMeta'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - meta
+      title: HistoryResponse
+    Occupancy:
+      properties:
+        camera_id:
+          type: string
+          pattern: ^cam_\d{3}$
+          title: Camera Id
+        room_id:
+          type: string
+          pattern: ^room_[a-z0-9_]+$
+          title: Room Id
+        occupancy:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Occupancy
+        raw_occupancy:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Raw Occupancy
+        capacity:
+          type: integer
+          exclusiveMinimum: 0.0
+          title: Capacity
+        occupancy_percentage:
+          anyOf:
+          - type: number
+            maximum: 100.0
+            minimum: 0.0
+          - type: 'null'
+          title: Occupancy Percentage
+        status:
+          $ref: '#/components/schemas/CameraStatus'
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      additionalProperties: false
+      type: object
+      required:
+      - camera_id
+      - room_id
+      - capacity
+      - status
+      - updated_at
+      title: Occupancy
+    OccupancyListResponse:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Occupancy'
+          type: array
+          title: Data
+        meta:
+          $ref: '#/components/schemas/CollectionMeta'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - meta
+      title: OccupancyListResponse
+    OccupancyResponse:
+      properties:
+        data:
+          $ref: '#/components/schemas/Occupancy'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: OccupancyResponse
+    Room:
+      properties:
+        room_id:
+          type: string
+          pattern: ^room_[a-z0-9_]+$
+          title: Room Id
+        name:
+          type: string
+          minLength: 1
+          title: Name
+        capacity:
+          type: integer
+          exclusiveMinimum: 0.0
+          title: Capacity
+        building:
+          type: string
+          minLength: 1
+          title: Building
+        floor:
+          type: integer
+          minimum: 0.0
+          title: Floor
+        camera_id:
+          type: string
+          pattern: ^cam_\d{3}$
+          title: Camera Id
+        behavior_profile:
+          type: string
+          minLength: 1
+          title: Behavior Profile
+      additionalProperties: false
+      type: object
+      required:
+      - room_id
+      - name
+      - capacity
+      - building
+      - floor
+      - camera_id
+      - behavior_profile
+      title: Room
+    RoomResponse:
+      properties:
+        data:
+          $ref: '#/components/schemas/RoomView'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: RoomResponse
+    RoomView:
+      properties:
+        room_id:
+          type: string
+          pattern: ^room_[a-z0-9_]+$
+          title: Room Id
+        name:
+          type: string
+          minLength: 1
+          title: Name
+        capacity:
+          type: integer
+          exclusiveMinimum: 0.0
+          title: Capacity
+        building:
+          type: string
+          minLength: 1
+          title: Building
+        floor:
+          type: integer
+          minimum: 0.0
+          title: Floor
+        camera_id:
+          type: string
+          pattern: ^cam_\d{3}$
+          title: Camera Id
+        behavior_profile:
+          type: string
+          minLength: 1
+          title: Behavior Profile
+        occupancy:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Occupancy
+        raw_occupancy:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Raw Occupancy
+        occupancy_percentage:
+          anyOf:
+          - type: number
+            maximum: 100.0
+            minimum: 0.0
+          - type: 'null'
+          title: Occupancy Percentage
+        intensity:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Intensity
+        status:
+          $ref: '#/components/schemas/CameraStatus'
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      additionalProperties: false
+      type: object
+      required:
+      - room_id
+      - name
+      - capacity
+      - building
+      - floor
+      - camera_id
+      - behavior_profile
+      - status
+      - updated_at
+      title: RoomView
+    RoomsResponse:
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/Room'
+          type: array
+          title: Data
+        meta:
+          $ref: '#/components/schemas/CollectionMeta'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      - meta
+      title: RoomsResponse
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError

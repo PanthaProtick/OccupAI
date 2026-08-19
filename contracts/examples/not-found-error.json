@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "camera_not_found",
+    "message": "Unknown camera: cam_999",
+    "details": {}
+  }
+}
