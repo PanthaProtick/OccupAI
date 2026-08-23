@@ -215,6 +215,20 @@ bucket_start minute % 5 == 0
 bucket_start seconds and microseconds == 0
 ```
 
+## Table: `ingestion_receipts`
+
+Added by migration `0002` after explicit task-owner approval on 2026-08-23. This narrow backend-owned ledger closes the idempotency gap created by controlled sample throttling: every accepted polling event records only its identity and timestamps, while `occupancy_samples` remains limited to the 5–10 second/change/heartbeat policy.
+
+| Column | SQLite type | Null | Rules |
+|---|---|---:|---|
+| `id` | `INTEGER` | No | Primary key |
+| `camera_id` | `TEXT` | No | Foreign key to `cameras`, cascade delete |
+| `observed_at` | `TEXT` | No | UTC source observation time |
+| `source_event_id` | `TEXT` | Yes | Optional stable source identity |
+| `accepted_at` | `TEXT` | No | UTC backend acceptance time |
+
+Both `(camera_id, observed_at)` and `(camera_id, source_event_id)` are unique. Receipts use the raw-sample retention window and are removed in the same bounded maintenance batches. They contain no occupancy payload and are not an inference-frame log.
+
 ## API mapping
 
 | API data | Database source |
