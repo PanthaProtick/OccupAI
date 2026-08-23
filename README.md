@@ -2,7 +2,7 @@
 
 This project runs a multi-camera people-occupancy pipeline. Each camera has a capture thread and an independent ByteTrack tracker; one shared YOLO11 detector performs inference, and a scheduler samples the latest frame from each camera at about 3 FPS. A two-second per-camera history produces the stabilized occupancy value.
 
-The repository also includes a mock-backed product API for parallel frontend/backend development. See [`docs/parallel-development.md`](docs/parallel-development.md), the generated contract in [`contracts/openapi.yaml`](contracts/openapi.yaml), and the work plans in [`frontend/task.md`](frontend/task.md) and [`backend/task.md`](backend/task.md).
+The repository also includes mock- and SQLite-backed product API modes for parallel frontend/backend development. See [`backend/README.md`](backend/README.md) for migration, ingestion, retention, recovery, and configuration operations; see [`docs/parallel-development.md`](docs/parallel-development.md) and [`contracts/openapi.yaml`](contracts/openapi.yaml) for the shared API boundary.
 
 ## Requirements
 

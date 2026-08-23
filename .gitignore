@@ -15,6 +15,10 @@ outputs/
 .env
 .env.local
 .env.*.local
+data/*.db
+data/*.db-journal
+data/*.db-shm
+data/*.db-wal
 
 # Large local media inputs are never committed.
 videos/

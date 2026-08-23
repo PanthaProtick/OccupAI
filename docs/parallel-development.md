@@ -39,9 +39,10 @@ The frontend can develop normal screens against the running API and use the comp
 
 ## Backend setup
 
-The current product API runs with `DATA_SOURCE=mock`. Its routes depend on a repository protocol, and the mock implementation loads and indexes fixture data once at startup. A future model-server repository must satisfy the same protocol and response contract.
+The product API supports `DATA_SOURCE=mock` and `DATA_SOURCE=database`. Routes depend on one repository protocol; neither mode changes the HTTP shape. In database mode, an optional backend-owned ingestion worker polls the model server and serializes SQLite writes. API routes never invoke inference or model-server code.
 
 Configuration is documented in `backend/.env.example`.
+Migration, seed, sampling, aggregation, retention, backup, failure, and seven-room coverage behavior are documented in `backend/README.md`.
 
 ## Regenerate the contract
 
