@@ -34,6 +34,7 @@ from backend.database import create_database_engine, make_session_factory
 from backend.ingestion import ModelServerIngestionAdapter, ModelServerIngestionService, SerializedDatabaseWriter
 from backend.maintenance import DatabaseMaintenanceService
 from backend.repositories import DatabaseOccupancyRepository, MockOccupancyRepository, OccupancyRepository
+from backend.simulation import SimulatedCamera, SimulatedIngestionService
 
 
 logger = logging.getLogger(__name__)
@@ -83,6 +84,7 @@ def create_app(
     active_repository = repository or _build_repository(active_settings)
     ingestion_service: ModelServerIngestionService | None = None
     maintenance_service: DatabaseMaintenanceService | None = None
+    simulation_service: SimulatedIngestionService | None = None
     if active_settings.ingestion_enabled:
         session_factory = getattr(active_repository, "session_factory", None)
         if session_factory is None:
@@ -108,17 +110,43 @@ def create_app(
             expected_samples,
             active_settings.maintenance_interval_seconds,
         )
+    if active_settings.simulation_enabled:
+        session_factory = getattr(active_repository, "session_factory", None)
+        if session_factory is None:
+            raise RuntimeError("Simulation requires DatabaseOccupancyRepository")
+        # Reuse the existing writer if ingestion created one, otherwise make a new one
+        sim_writer = writer if active_settings.ingestion_enabled else SerializedDatabaseWriter(
+            session_factory, active_settings.raw_sample_interval_seconds,
+        )
+        # Load room configs from mock fixtures to discover simulated cameras
+        import json
+        rooms_path = active_settings.mock_data_dir / "rooms.json"
+        rooms_payload = json.loads(rooms_path.read_text(encoding="utf-8"))
+        live_ids = set(active_settings.live_camera_ids)
+        sim_cameras = [
+            SimulatedCamera(room["camera_id"], room["capacity"], room["behavior_profile"])
+            for room in rooms_payload["rooms"]
+            if room["camera_id"] not in live_ids
+        ]
+        if sim_cameras:
+            simulation_service = SimulatedIngestionService(
+                sim_cameras, sim_writer, active_settings.simulation_tick_interval_seconds,
+            )
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
         _log("backend_startup", **active_settings.safe_summary())
         if ingestion_service:
             ingestion_service.start()
+        if simulation_service:
+            simulation_service.start()
         if maintenance_service:
             maintenance_service.start()
         yield
         if maintenance_service:
             maintenance_service.stop()
+        if simulation_service:
+            simulation_service.stop()
         if ingestion_service:
             ingestion_service.stop()
         close = getattr(active_repository, "close", None)
@@ -137,6 +165,7 @@ def create_app(
     app.state.settings = active_settings
     app.state.repository = active_repository
     app.state.ingestion_service = ingestion_service
+    app.state.simulation_service = simulation_service
     app.state.maintenance_service = maintenance_service
     app.add_middleware(
         CORSMiddleware,

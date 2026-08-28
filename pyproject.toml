@@ -16,6 +16,7 @@ dependencies = [
     "uvicorn>=0.30.0",
     "sqlalchemy>=2.0.0",
     "alembic>=1.13.0",
+    "dotenv>=0.9.9",
 ]
 
 [[tool.uv.index]]

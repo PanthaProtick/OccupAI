@@ -3,6 +3,19 @@ $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $projectRoot
 
+$environmentFile = Join-Path $projectRoot "backend\.env"
+if (Test-Path -LiteralPath $environmentFile) {
+    foreach ($line in Get-Content -LiteralPath $environmentFile) {
+        if ($line -match '^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$') {
+            $name = $Matches[1]
+            $value = $Matches[2].Trim('"', "'")
+            if (-not [Environment]::GetEnvironmentVariable($name, "Process")) {
+                [Environment]::SetEnvironmentVariable($name, $value, "Process")
+            }
+        }
+    }
+}
+
 if (-not $env:UV_CACHE_DIR) {
     $env:UV_CACHE_DIR = Join-Path $projectRoot ".uv-cache"
 }
@@ -17,4 +30,3 @@ $apiHost = if ($env:API_HOST) { $env:API_HOST } else { "127.0.0.1" }
 $apiPort = if ($env:API_PORT) { $env:API_PORT } else { "8000" }
 
 uv run uvicorn backend.app:app --host $apiHost --port $apiPort --reload
-

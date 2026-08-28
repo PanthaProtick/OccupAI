@@ -29,6 +29,19 @@ ROOMS: list[dict[str, Any]] = [
     {"room_id": "room_canteen", "name": "Main Canteen", "capacity": 120, "building": "Student Center", "floor": 1, "camera_id": "cam_005", "behavior_profile": "canteen"},
     {"room_id": "room_ece_105", "name": "ECE 105 Lab", "capacity": 50, "building": "ECE Building", "floor": 1, "camera_id": "cam_006", "behavior_profile": "classroom"},
     {"room_id": "room_common_01", "name": "Student Common Room", "capacity": 60, "building": "Student Center", "floor": 2, "camera_id": "cam_007", "behavior_profile": "study_room"},
+    {"room_id": "room_cse_301", "name": "CSE 301", "capacity": 45, "building": "CSE Building", "floor": 3, "camera_id": "cam_008", "behavior_profile": "classroom"},
+    {"room_id": "room_cse_302", "name": "CSE 302", "capacity": 30, "building": "CSE Building", "floor": 3, "camera_id": "cam_009", "behavior_profile": "classroom"},
+    {"room_id": "room_eee_101", "name": "EEE 101 Lab", "capacity": 55, "building": "EEE Building", "floor": 1, "camera_id": "cam_010", "behavior_profile": "classroom"},
+    {"room_id": "room_eee_201", "name": "EEE 201", "capacity": 40, "building": "EEE Building", "floor": 2, "camera_id": "cam_011", "behavior_profile": "classroom"},
+    {"room_id": "room_library_03", "name": "Library Computer Lab", "capacity": 30, "building": "Central Library", "floor": 2, "camera_id": "cam_012", "behavior_profile": "library"},
+    {"room_id": "room_auditorium", "name": "Main Auditorium", "capacity": 200, "building": "Admin Building", "floor": 1, "camera_id": "cam_013", "behavior_profile": "classroom"},
+    {"room_id": "room_seminar_01", "name": "Seminar Room A", "capacity": 25, "building": "Admin Building", "floor": 2, "camera_id": "cam_014", "behavior_profile": "classroom"},
+    {"room_id": "room_seminar_02", "name": "Seminar Room B", "capacity": 25, "building": "Admin Building", "floor": 2, "camera_id": "cam_015", "behavior_profile": "classroom"},
+    {"room_id": "room_canteen_02", "name": "Faculty Cafeteria", "capacity": 60, "building": "Faculty Building", "floor": 1, "camera_id": "cam_016", "behavior_profile": "canteen"},
+    {"room_id": "room_gym", "name": "Gymnasium", "capacity": 100, "building": "Sports Complex", "floor": 1, "camera_id": "cam_017", "behavior_profile": "study_room"},
+    {"room_id": "room_workshop", "name": "Workshop Hall", "capacity": 70, "building": "ECE Building", "floor": 0, "camera_id": "cam_018", "behavior_profile": "classroom"},
+    {"room_id": "room_common_02", "name": "Graduate Lounge", "capacity": 20, "building": "Faculty Building", "floor": 3, "camera_id": "cam_019", "behavior_profile": "study_room"},
+    {"room_id": "room_prayer", "name": "Prayer Room", "capacity": 50, "building": "Student Center", "floor": 1, "camera_id": "cam_020", "behavior_profile": "study_room"},
 ]
 
 
@@ -103,7 +116,15 @@ def generate_history(rng: random.Random, start: datetime) -> list[dict[str, Any]
 
 
 def make_live(rng: random.Random, now: datetime) -> dict[str, Any]:
-    statuses = {"cam_001": "online", "cam_002": "online", "cam_003": "stale", "cam_004": "online", "cam_005": "online", "cam_006": "offline", "cam_007": "online"}
+    statuses = {
+        "cam_001": "online", "cam_002": "online", "cam_003": "stale",
+        "cam_004": "online", "cam_005": "online", "cam_006": "offline",
+        "cam_007": "online", "cam_008": "online", "cam_009": "online",
+        "cam_010": "online", "cam_011": "online", "cam_012": "online",
+        "cam_013": "online", "cam_014": "online", "cam_015": "online",
+        "cam_016": "online", "cam_017": "online", "cam_018": "online",
+        "cam_019": "online", "cam_020": "online",
+    }
     results = []
     for room in ROOMS:
         status = statuses[room["camera_id"]]

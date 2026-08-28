@@ -3,7 +3,7 @@ import { api } from "../api/client";
 import type { Occupancy, Room } from "../api/types";
 
 export interface RoomSnapshot { room: Room; occupancy: Occupancy }
-export function useDashboard(refreshIntervalMs = 30_000) {
+export function useDashboard(refreshIntervalMs = 5_000) {
   const [data, setData] = useState<RoomSnapshot[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isRefreshing, setRefreshing] = useState(false);

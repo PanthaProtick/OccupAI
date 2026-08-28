@@ -57,14 +57,14 @@ The configured videos loop at EOF. At each loop boundary, that camera's tracker 
 Start the background CV worker and API:
 
 ```powershell
-uv run uvicorn model_server.model_server:app --host 127.0.0.1 --port 8000
+uv run uvicorn model_server.model_server:app --host 127.0.0.1 --port 8001
 ```
 
 For annotated windows in PowerShell, set the display flag before starting the server:
 
 ```powershell
 $env:OCCUPANCY_DISPLAY = "1"
-uv run uvicorn model_server.model_server:app --host 127.0.0.1 --port 8000
+uv run uvicorn model_server.model_server:app --host 127.0.0.1 --port 8001
 ```
 
 The API reads the latest in-memory state; requests never trigger inference:

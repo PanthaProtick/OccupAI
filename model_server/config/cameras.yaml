@@ -1,17 +1,17 @@
 # Three local files simulate independent CCTV cameras for the checkpoint.
 model: model_server/models/yolo11m.pt
-imgsz: 960
+imgsz: 1280
 classes: [0]
 device: 0
 confidence: 0.15
-sample_fps: 3.0
+sample_fps: 2.0
 loop_videos: true
 stabilization_window_seconds: 2.0
 tracker_config: model_server/config/bytetrack_custom.yaml
 cameras:
   - camera_id: cam_001
-    source: model_server/videos/test1.avi
-  - camera_id: cam_002
-    source: model_server/videos/test2.avi
-  - camera_id: cam_003
     source: model_server/videos/test3.mp4
+  - camera_id: cam_002
+    source: model_server/videos/test4.mp4
+  - camera_id: cam_003
+    source: model_server/videos/test5.mp4

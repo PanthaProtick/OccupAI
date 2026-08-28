@@ -17,9 +17,11 @@ uv run python -m scripts.database import-history # optional development history
 .\scripts\start-backend.ps1
 ```
 
-`migrate` is the only operation that creates or changes schema. Seed is idempotent and refuses to silently remap a room to a different camera. A newly seeded database retains all seven canonical rooms; cameras with no live source report `offline`, not zero, and are never omitted.
+`migrate` is the only operation that creates or changes schema. Seed is idempotent and refuses to silently remap a room to a different camera. A newly seeded database retains all 20 canonical rooms; cameras with no live source report `offline`, not zero, and are never omitted.
 
 Run all tests with `.\scripts\test.ps1`. API documentation is at `/docs`. `/health` reports process health and `/ready` checks the active repository. Public errors use `{ "error": { "code", "message", "details" } }` and never include stack traces or local paths.
+
+`scripts/start-backend.ps1` reads `backend/.env` before applying its development defaults; explicitly exported environment variables still take precedence. Restart the backend after changing that file.
 
 ## Configuration
 
@@ -36,11 +38,13 @@ Run all tests with `.\scripts\test.ps1`. API documentation is at `/docs`. `/heal
 - `LIVE_CAMERA_IDS`: canonical cameras expected from the model server. The current configuration is `cam_001,cam_002,cam_003`.
 - `MAINTENANCE_ENABLED`: starts recurring incremental aggregation and bounded retention in database mode.
 - `MAINTENANCE_INTERVAL_SECONDS`: maintenance cadence, default 60 seconds.
+- `SIMULATION_ENABLED`: starts synthetic ingestion for every canonical camera not listed in `LIVE_CAMERA_IDS`; requires database mode.
+- `SIMULATION_TICK_INTERVAL_SECONDS`: synthetic-reading cadence, default 10 seconds.
 - `FRONTEND_ORIGINS`: comma-separated CORS allowlist.
 
 Every SQLite connection enables foreign keys, WAL, and the busy timeout. Writes use short transactions and the ingestion writer is serialized. API reads continue serving the last durable state during model-server downtime. A successful stale result preserves its last occupancy and observation time; offline remains unavailable and distinct from a measured zero. One malformed camera result is isolated from other cameras.
 
-The checked-in `model_server/config/cameras.yaml` has exactly three sources. No sources are currently configured for `cam_004`–`cam_007`. The selected policy until those four sources are provisioned is to retain all seven canonical mappings and expose unconfigured cameras as offline. IDs are always normalized to `cam_NNN`; aliases never cross the product API boundary.
+The checked-in `model_server/config/cameras.yaml` has exactly three sources. With `SIMULATION_ENABLED=true`, `cam_004`–`cam_020` receive synthetic readings through the same database writer, so they remain visibly fresh in the frontend. IDs are always normalized to `cam_NNN`; aliases never cross the product API boundary.
 
 To run ingestion, start the model server on port 8001, then the product API on port 8000:
 
@@ -48,6 +52,7 @@ To run ingestion, start the model server on port 8001, then the product API on p
 uv run uvicorn model_server.model_server:app --host 127.0.0.1 --port 8001
 $env:DATA_SOURCE = "database"
 $env:INGESTION_ENABLED = "true"
+$env:SIMULATION_ENABLED = "true"
 $env:MODEL_SERVER_URL = "http://127.0.0.1:8001"
 .\scripts\start-backend.ps1
 ```

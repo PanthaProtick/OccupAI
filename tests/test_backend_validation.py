@@ -35,13 +35,20 @@ class FixtureValidationTests(unittest.TestCase):
         with temporary, self.assertRaisesRegex(FixtureError, phrase):
             MockOccupancyRepository(path)
 
-    def test_all_seven_mappings(self):
+    def test_all_twenty_mappings(self):
         repository = MockOccupancyRepository(FIXTURES)
         self.assertEqual([(r.room_id, r.camera_id) for r in repository.list_rooms()], [
             ("room_cse_201", "cam_001"), ("room_cse_202", "cam_002"),
             ("room_library_01", "cam_003"), ("room_library_02", "cam_004"),
             ("room_canteen", "cam_005"), ("room_ece_105", "cam_006"),
-            ("room_common_01", "cam_007")])
+            ("room_common_01", "cam_007"), ("room_cse_301", "cam_008"),
+            ("room_cse_302", "cam_009"), ("room_eee_101", "cam_010"),
+            ("room_eee_201", "cam_011"), ("room_library_03", "cam_012"),
+            ("room_auditorium", "cam_013"), ("room_seminar_01", "cam_014"),
+            ("room_seminar_02", "cam_015"), ("room_canteen_02", "cam_016"),
+            ("room_gym", "cam_017"), ("room_workshop", "cam_018"),
+            ("room_common_02", "cam_019"), ("room_prayer", "cam_020")
+        ])
 
     def test_duplicate_room_and_camera_ids(self):
         self.assert_invalid("rooms.json", lambda p: p["rooms"].__setitem__(1, deepcopy(p["rooms"][0])), "unique")

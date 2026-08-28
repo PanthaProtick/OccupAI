@@ -30,17 +30,17 @@ class BackendApiTests(unittest.TestCase):
         response = self.client.get("/api/rooms")
         self.assertEqual(response.status_code, 200)
         payload = response.json()
-        self.assertEqual(payload["meta"]["count"], 7)
+        self.assertEqual(payload["meta"]["count"], 20)
         self.assertEqual(payload["data"][0]["camera_id"], "cam_001")
-        self.assertEqual(len({room["room_id"] for room in payload["data"]}), 7)
-        self.assertEqual(len({room["camera_id"] for room in payload["data"]}), 7)
+        self.assertEqual(len({room["room_id"] for room in payload["data"]}), 20)
+        self.assertEqual(len({room["camera_id"] for room in payload["data"]}), 20)
 
     def test_stale_camera_preserves_last_known_occupancy(self) -> None:
         response = self.client.get("/api/occupancy/cam_003")
         self.assertEqual(response.status_code, 200)
         data = response.json()["data"]
         self.assertEqual(data["status"], "stale")
-        self.assertEqual(data["occupancy"], 48)
+        self.assertEqual(data["occupancy"], 51)
 
     def test_offline_camera_is_not_reported_as_zero_occupancy(self) -> None:
         response = self.client.get("/api/occupancy/cam_006")
@@ -85,3 +85,4 @@ class BackendApiTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
