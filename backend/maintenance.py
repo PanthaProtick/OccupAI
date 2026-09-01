@@ -37,6 +37,25 @@ def seed_canonical(session_factory, fixture_dir: Path) -> None:
     payload = json.loads((fixture_dir / "rooms.json").read_text(encoding="utf-8"))
     now = iso(datetime.now(timezone.utc))
     with session_factory.begin() as session:
+        desired_rooms = {item["room_id"] for item in payload["rooms"]}
+        desired_mapping = {item["camera_id"]: item["room_id"] for item in payload["rooms"]}
+        existing_cameras = session.scalars(select(CameraRow)).all()
+        retired_camera_ids = {
+            row.camera_id for row in existing_cameras
+            if row.camera_id not in desired_mapping or desired_mapping[row.camera_id] != row.room_id
+        }
+        retired_room_ids = {
+            row.room_id for row in session.scalars(select(RoomRow)).all()
+            if row.room_id not in desired_rooms
+        }
+        if retired_camera_ids:
+            session.execute(delete(OccupancyBucketRow).where(OccupancyBucketRow.camera_id.in_(retired_camera_ids)))
+            session.execute(delete(OccupancySampleRow).where(OccupancySampleRow.camera_id.in_(retired_camera_ids)))
+            session.execute(delete(IngestionReceiptRow).where(IngestionReceiptRow.camera_id.in_(retired_camera_ids)))
+            session.execute(delete(CameraStateRow).where(CameraStateRow.camera_id.in_(retired_camera_ids)))
+            session.execute(delete(CameraRow).where(CameraRow.camera_id.in_(retired_camera_ids)))
+        if retired_room_ids:
+            session.execute(delete(RoomRow).where(RoomRow.room_id.in_(retired_room_ids)))
         for item in payload["rooms"]:
             existing_for_room = session.scalar(select(CameraRow).where(CameraRow.room_id == item["room_id"]))
             if existing_for_room and existing_for_room.camera_id != item["camera_id"]:

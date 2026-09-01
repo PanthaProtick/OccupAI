@@ -1,9 +1,9 @@
 {
   "data": {
-    "room_id": "room_library_01",
-    "name": "Library Reading Room",
+    "room_id": "room_canteen",
+    "name": "Canteen",
     "capacity": 80,
-    "building": "Central Library",
+    "building": "University Building",
     "floor": 1,
     "camera_id": "cam_003",
     "behavior_profile": "library",

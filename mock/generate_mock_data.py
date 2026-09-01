@@ -22,26 +22,10 @@ DEFAULT_START = datetime(2026, 8, 12, 0, 0, tzinfo=timezone.utc)
 
 
 ROOMS: list[dict[str, Any]] = [
-    {"room_id": "room_cse_201", "name": "CSE 201", "capacity": 40, "building": "CSE Building", "floor": 2, "camera_id": "cam_001", "behavior_profile": "classroom"},
-    {"room_id": "room_cse_202", "name": "CSE 202", "capacity": 35, "building": "CSE Building", "floor": 2, "camera_id": "cam_002", "behavior_profile": "classroom"},
-    {"room_id": "room_library_01", "name": "Library Reading Room", "capacity": 80, "building": "Central Library", "floor": 1, "camera_id": "cam_003", "behavior_profile": "library"},
-    {"room_id": "room_library_02", "name": "Library Study Room", "capacity": 12, "building": "Central Library", "floor": 3, "camera_id": "cam_004", "behavior_profile": "study_room"},
-    {"room_id": "room_canteen", "name": "Main Canteen", "capacity": 120, "building": "Student Center", "floor": 1, "camera_id": "cam_005", "behavior_profile": "canteen"},
-    {"room_id": "room_ece_105", "name": "ECE 105 Lab", "capacity": 50, "building": "ECE Building", "floor": 1, "camera_id": "cam_006", "behavior_profile": "classroom"},
-    {"room_id": "room_common_01", "name": "Student Common Room", "capacity": 60, "building": "Student Center", "floor": 2, "camera_id": "cam_007", "behavior_profile": "study_room"},
-    {"room_id": "room_cse_301", "name": "CSE 301", "capacity": 45, "building": "CSE Building", "floor": 3, "camera_id": "cam_008", "behavior_profile": "classroom"},
-    {"room_id": "room_cse_302", "name": "CSE 302", "capacity": 30, "building": "CSE Building", "floor": 3, "camera_id": "cam_009", "behavior_profile": "classroom"},
-    {"room_id": "room_eee_101", "name": "EEE 101 Lab", "capacity": 55, "building": "EEE Building", "floor": 1, "camera_id": "cam_010", "behavior_profile": "classroom"},
-    {"room_id": "room_eee_201", "name": "EEE 201", "capacity": 40, "building": "EEE Building", "floor": 2, "camera_id": "cam_011", "behavior_profile": "classroom"},
-    {"room_id": "room_library_03", "name": "Library Computer Lab", "capacity": 30, "building": "Central Library", "floor": 2, "camera_id": "cam_012", "behavior_profile": "library"},
-    {"room_id": "room_auditorium", "name": "Main Auditorium", "capacity": 200, "building": "Admin Building", "floor": 1, "camera_id": "cam_013", "behavior_profile": "classroom"},
-    {"room_id": "room_seminar_01", "name": "Seminar Room A", "capacity": 25, "building": "Admin Building", "floor": 2, "camera_id": "cam_014", "behavior_profile": "classroom"},
-    {"room_id": "room_seminar_02", "name": "Seminar Room B", "capacity": 25, "building": "Admin Building", "floor": 2, "camera_id": "cam_015", "behavior_profile": "classroom"},
-    {"room_id": "room_canteen_02", "name": "Faculty Cafeteria", "capacity": 60, "building": "Faculty Building", "floor": 1, "camera_id": "cam_016", "behavior_profile": "canteen"},
-    {"room_id": "room_gym", "name": "Gymnasium", "capacity": 100, "building": "Sports Complex", "floor": 1, "camera_id": "cam_017", "behavior_profile": "study_room"},
-    {"room_id": "room_workshop", "name": "Workshop Hall", "capacity": 70, "building": "ECE Building", "floor": 0, "camera_id": "cam_018", "behavior_profile": "classroom"},
-    {"room_id": "room_common_02", "name": "Graduate Lounge", "capacity": 20, "building": "Faculty Building", "floor": 3, "camera_id": "cam_019", "behavior_profile": "study_room"},
-    {"room_id": "room_prayer", "name": "Prayer Room", "capacity": 50, "building": "Student Center", "floor": 1, "camera_id": "cam_020", "behavior_profile": "study_room"},
+    {"room_id": "room_tt_ground", "name": "T.T. Ground", "capacity": 150, "building": "University Building", "floor": 0, "camera_id": "cam_001", "behavior_profile": "study_room"},
+    {"room_id": "room_teachers_canteen", "name": "Teacher's Canteen", "capacity": 40, "building": "University Building", "floor": 0, "camera_id": "cam_002", "behavior_profile": "canteen"},
+    {"room_id": "room_canteen", "name": "Canteen", "capacity": 120, "building": "University Building", "floor": 0, "camera_id": "cam_003", "behavior_profile": "canteen"},
+    {"room_id": "room_girls_common", "name": "Girls' Common Room", "capacity": 60, "building": "University Building", "floor": 0, "camera_id": "cam_004", "behavior_profile": "study_room"},
 ]
 
 
@@ -117,13 +101,7 @@ def generate_history(rng: random.Random, start: datetime) -> list[dict[str, Any]
 
 def make_live(rng: random.Random, now: datetime) -> dict[str, Any]:
     statuses = {
-        "cam_001": "online", "cam_002": "online", "cam_003": "stale",
-        "cam_004": "online", "cam_005": "online", "cam_006": "offline",
-        "cam_007": "online", "cam_008": "online", "cam_009": "online",
-        "cam_010": "online", "cam_011": "online", "cam_012": "online",
-        "cam_013": "online", "cam_014": "online", "cam_015": "online",
-        "cam_016": "online", "cam_017": "online", "cam_018": "online",
-        "cam_019": "online", "cam_020": "online",
+        "cam_001": "online", "cam_002": "online", "cam_003": "stale", "cam_004": "offline",
     }
     results = []
     for room in ROOMS:
@@ -186,12 +164,12 @@ def generate(output_dir: Path, start: datetime = DEFAULT_START, seed: int = SEED
     # Explicit fixtures make failure handling testable without corrupting normal history invariants.
     edge_cases = {
         "stale_camera": {"camera_id": "cam_003", "status": "stale", "updated_at": iso(now - timedelta(minutes=11)), "stale_after_minutes": 10},
-        "offline_camera": {"camera_id": "cam_006", "status": "offline", "occupancy": 0},
-        "zero_occupancy": {"room_id": "room_library_02", "bucket_start": iso(start + timedelta(days=5, hours=2)), "avg_occupancy": 0, "min_occupancy": 0, "max_occupancy": 0, "capacity_snapshot": 12, "coverage_percentage": 100.0},
+        "offline_camera": {"camera_id": "cam_004", "status": "offline", "occupancy": 0},
+        "zero_occupancy": {"room_id": "room_girls_common", "bucket_start": iso(start + timedelta(days=5, hours=2)), "avg_occupancy": 0, "min_occupancy": 0, "max_occupancy": 0, "capacity_snapshot": 60, "coverage_percentage": 100.0},
         "very_high_occupancy": {"room_id": "room_canteen", "bucket_start": iso(start + timedelta(days=2, hours=13)), "avg_occupancy": 119, "min_occupancy": 112, "max_occupancy": 120, "capacity_snapshot": 120, "coverage_percentage": 100.0},
-        "missing_history": {"room_id": "room_ece_105", "from": iso(start + timedelta(days=4, hours=3)), "to": iso(start + timedelta(days=4, hours=4)), "reason": "camera_upload_gap"},
-        "partial_coverage_bucket": {"room_id": "room_cse_202", "bucket_start": iso(start + timedelta(days=3, hours=9, minutes=15)), "avg_occupancy": 18, "min_occupancy": 16, "max_occupancy": 20, "capacity_snapshot": 35, "coverage_percentage": 62.5},
-        "over_capacity_model_server": {"camera_id": "cam_005", "occupancy": 126, "updated_at": iso(now), "status": "online", "configured_capacity": 120, "expected_backend_behavior": "cap display percentage at 100 while retaining raw model value for diagnostics"},
+        "missing_history": {"room_id": "room_girls_common", "from": iso(start + timedelta(days=4, hours=3)), "to": iso(start + timedelta(days=4, hours=4)), "reason": "camera_upload_gap"},
+        "partial_coverage_bucket": {"room_id": "room_teachers_canteen", "bucket_start": iso(start + timedelta(days=3, hours=9, minutes=15)), "avg_occupancy": 18, "min_occupancy": 16, "max_occupancy": 20, "capacity_snapshot": 40, "coverage_percentage": 62.5},
+        "over_capacity_model_server": {"camera_id": "cam_003", "occupancy": 126, "updated_at": iso(now), "status": "online", "configured_capacity": 120, "expected_backend_behavior": "cap display percentage at 100 while retaining raw model value for diagnostics"},
     }
     views = {"range": {"hour": {}, "day": {}, "week": {}}, "metric": {"occupancy": {}, "percentage": {}}}
     for room in ROOMS:

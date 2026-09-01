@@ -18,7 +18,7 @@ import { RoomCard } from "./rooms/RoomCard";
 import type { Occupancy, Room, RoomView } from "../api/types";
 
 describe("provided UI edge cases", () => {
-  it("renders normal online data", () => { render(<MemoryRouter><RoomCard room={rooms.data[0] as Room} occupancy={occupancyResponse.data[0] as Occupancy} /></MemoryRouter>); expect(screen.getByText("Online")).toBeInTheDocument(); expect(screen.getByText("25% · capacity 40")).toBeInTheDocument(); });
+  it("renders normal online data", () => { render(<MemoryRouter><RoomCard room={rooms.data[0] as Room} occupancy={occupancyResponse.data[0] as Occupancy} /></MemoryRouter>); expect(screen.getByText("Online")).toBeInTheDocument(); expect(screen.getByText("32% · capacity 150")).toBeInTheDocument(); });
   it("renders stale last-known occupancy", () => { render(<MemoryRouter><RoomCard room={stale.data as RoomView} occupancy={stale.data as RoomView} /></MemoryRouter>); expect(screen.getByText("Stale")).toBeInTheDocument(); expect(screen.getByText("48")).toBeInTheDocument(); });
   it("renders offline as unavailable, not zero", () => { render(<OccupancyReading data={offline.data as Occupancy} />); expect(screen.getByText("Unavailable")).toBeInTheDocument(); expect(screen.queryByText("0")).not.toBeInTheDocument(); });
   it("renders a measured zero", () => { render(<OccupancyReading data={zero.data as Occupancy} />); expect(screen.getByText("0")).toBeInTheDocument(); expect(screen.getByText("0% · capacity 12")).toBeInTheDocument(); });

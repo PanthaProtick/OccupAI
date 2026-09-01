@@ -35,19 +35,11 @@ class FixtureValidationTests(unittest.TestCase):
         with temporary, self.assertRaisesRegex(FixtureError, phrase):
             MockOccupancyRepository(path)
 
-    def test_all_twenty_mappings(self):
+    def test_ground_floor_mappings(self):
         repository = MockOccupancyRepository(FIXTURES)
         self.assertEqual([(r.room_id, r.camera_id) for r in repository.list_rooms()], [
-            ("room_cse_201", "cam_001"), ("room_cse_202", "cam_002"),
-            ("room_library_01", "cam_003"), ("room_library_02", "cam_004"),
-            ("room_canteen", "cam_005"), ("room_ece_105", "cam_006"),
-            ("room_common_01", "cam_007"), ("room_cse_301", "cam_008"),
-            ("room_cse_302", "cam_009"), ("room_eee_101", "cam_010"),
-            ("room_eee_201", "cam_011"), ("room_library_03", "cam_012"),
-            ("room_auditorium", "cam_013"), ("room_seminar_01", "cam_014"),
-            ("room_seminar_02", "cam_015"), ("room_canteen_02", "cam_016"),
-            ("room_gym", "cam_017"), ("room_workshop", "cam_018"),
-            ("room_common_02", "cam_019"), ("room_prayer", "cam_020")
+            ("room_tt_ground", "cam_001"), ("room_teachers_canteen", "cam_002"),
+            ("room_canteen", "cam_003"), ("room_girls_common", "cam_004"),
         ])
 
     def test_duplicate_room_and_camera_ids(self):
@@ -71,14 +63,14 @@ class FixtureValidationTests(unittest.TestCase):
 
     def test_invalid_history_values_coverage_timestamp_and_order(self):
         def point(payload):
-            return payload["views"]["range"]["hour"]["room_cse_201"]["metric"]["occupancy"][0]
+            return payload["views"]["range"]["hour"]["room_tt_ground"]["metric"]["occupancy"][0]
         self.assert_invalid("historical_api_views.json", lambda p: point(p).__setitem__("value", -1))
         self.assert_invalid("historical_api_views.json", lambda p: point(p).__setitem__("coverage_percentage", 101))
         self.assert_invalid("historical_api_views.json", lambda p: point(p).__setitem__("coverage_percentage", -0.1))
         self.assert_invalid("historical_api_views.json", lambda p: point(p).__setitem__("bucket_start", "2026-08-12T00:00:00"))
         self.assert_invalid(
             "historical_api_views.json",
-            lambda p: p["views"]["range"]["hour"]["room_cse_201"]["metric"]["occupancy"].reverse(),
+            lambda p: p["views"]["range"]["hour"]["room_tt_ground"]["metric"]["occupancy"].reverse(),
             "ordered",
         )
 
@@ -86,7 +78,7 @@ class FixtureValidationTests(unittest.TestCase):
         self.assert_invalid("live_occupancy.json", lambda p: p["cameras"].append(deepcopy(p["cameras"][0])), "Duplicate")
         self.assert_invalid(
             "historical_api_views.json",
-            lambda p: p["views"]["range"]["day"].pop("room_cse_201"),
+            lambda p: p["views"]["range"]["day"].pop("room_tt_ground"),
             "incomplete",
         )
 
@@ -122,8 +114,8 @@ class ApiEdgeTests(unittest.TestCase):
             self.assertEqual(response.json()["error"]["code"], code)
 
     def test_invalid_history_range_metric_and_room_id(self):
-        for params in ({"room_id":"room_cse_201","range":"month","metric":"percentage"},
-                       {"room_id":"room_cse_201","range":"day","metric":"average"},
+        for params in ({"room_id":"room_tt_ground","range":"month","metric":"percentage"},
+                       {"room_id":"room_tt_ground","range":"day","metric":"average"},
                        {"room_id":"bad","range":"day","metric":"percentage"}):
             response = self.client.get("/api/history", params=params)
             self.assertEqual(response.status_code, 400)
@@ -132,7 +124,7 @@ class ApiEdgeTests(unittest.TestCase):
     def test_history_order_counts_zero_partial_and_gaps(self):
         expected = {"hour":168, "day":7, "week":1}
         for granularity, count in expected.items():
-            data = self.client.get("/api/history", params={"room_id":"room_cse_201","range":granularity,"metric":"occupancy"}).json()["data"]
+            data = self.client.get("/api/history", params={"room_id":"room_tt_ground","range":granularity,"metric":"occupancy"}).json()["data"]
             self.assertEqual(len(data), count)
             self.assertEqual([x["bucket_start"] for x in data], sorted(x["bucket_start"] for x in data))
         partial_example = json.loads((ROOT / "contracts" / "examples" / "partial-coverage-history.json").read_text())

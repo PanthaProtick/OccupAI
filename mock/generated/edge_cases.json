@@ -8,17 +8,17 @@
       "stale_after_minutes": 10
     },
     "offline_camera": {
-      "camera_id": "cam_006",
+      "camera_id": "cam_004",
       "status": "offline",
       "occupancy": 0
     },
     "zero_occupancy": {
-      "room_id": "room_library_02",
+      "room_id": "room_girls_common",
       "bucket_start": "2026-08-17T02:00:00Z",
       "avg_occupancy": 0,
       "min_occupancy": 0,
       "max_occupancy": 0,
-      "capacity_snapshot": 12,
+      "capacity_snapshot": 60,
       "coverage_percentage": 100.0
     },
     "very_high_occupancy": {
@@ -31,22 +31,22 @@
       "coverage_percentage": 100.0
     },
     "missing_history": {
-      "room_id": "room_ece_105",
+      "room_id": "room_girls_common",
       "from": "2026-08-16T03:00:00Z",
       "to": "2026-08-16T04:00:00Z",
       "reason": "camera_upload_gap"
     },
     "partial_coverage_bucket": {
-      "room_id": "room_cse_202",
+      "room_id": "room_teachers_canteen",
       "bucket_start": "2026-08-15T09:15:00Z",
       "avg_occupancy": 18,
       "min_occupancy": 16,
       "max_occupancy": 20,
-      "capacity_snapshot": 35,
+      "capacity_snapshot": 40,
       "coverage_percentage": 62.5
     },
     "over_capacity_model_server": {
-      "camera_id": "cam_005",
+      "camera_id": "cam_003",
       "occupancy": 126,
       "updated_at": "2026-08-19T13:00:00Z",
       "status": "online",

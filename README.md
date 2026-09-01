@@ -84,6 +84,40 @@ Invoke-RestMethod http://127.0.0.1:8000/occupancy
 
 Camera results become `stale` after 10 seconds without an update. Failed sources are marked `offline`, while the last known occupancy values are preserved when available. Override the timeout with `OCCUPANCY_STALE_AFTER_SECONDS`; override the config and log paths with `OCCUPANCY_CONFIG` and `OCCUPANCY_LOG`.
 
+## Run the full application stack
+
+To run the complete system with the model server, product API backend, and the React frontend, you will need three separate terminal windows.
+
+**1. Model Server:**
+From the repository root, start the computer vision worker on port 8001:
+
+```powershell
+uv run uvicorn model_server.model_server:app --host 127.0.0.1 --port 8001
+```
+
+**2. Backend (Product API):**
+From a new terminal at the repository root, start the backend. Enable ingestion and simulation to connect to the model server:
+
+```powershell
+$env:DATA_SOURCE = "database"
+$env:INGESTION_ENABLED = "true"
+$env:SIMULATION_ENABLED = "true"
+$env:MODEL_SERVER_URL = "http://127.0.0.1:8001"
+.\scripts\start-backend.ps1
+```
+
+**3. Frontend:**
+From a third terminal, navigate to the `frontend` directory, set up the environment, and start the development server:
+
+```powershell
+cd frontend
+Copy-Item .env.example .env.local
+npm install
+npm run dev
+```
+
+The frontend will start and provide a local URL (typically `http://localhost:5173/`) that you can open in your browser to view the dashboard.
+
 ## Configuration notes
 
 Edit `model_server/config/cameras.yaml` to change sources, model path, confidence, input size, device, sample rate, looping, or stabilization window. The default `track_buffer: 9` in `model_server/config/bytetrack_custom.yaml` is approximately three seconds at the configured 3 FPS sampling rate; it is measured in processed tracker frames, not wall-clock seconds.

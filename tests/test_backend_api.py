@@ -30,20 +30,20 @@ class BackendApiTests(unittest.TestCase):
         response = self.client.get("/api/rooms")
         self.assertEqual(response.status_code, 200)
         payload = response.json()
-        self.assertEqual(payload["meta"]["count"], 20)
+        self.assertEqual(payload["meta"]["count"], 4)
         self.assertEqual(payload["data"][0]["camera_id"], "cam_001")
-        self.assertEqual(len({room["room_id"] for room in payload["data"]}), 20)
-        self.assertEqual(len({room["camera_id"] for room in payload["data"]}), 20)
+        self.assertEqual(len({room["room_id"] for room in payload["data"]}), 4)
+        self.assertEqual(len({room["camera_id"] for room in payload["data"]}), 4)
 
     def test_stale_camera_preserves_last_known_occupancy(self) -> None:
         response = self.client.get("/api/occupancy/cam_003")
         self.assertEqual(response.status_code, 200)
         data = response.json()["data"]
         self.assertEqual(data["status"], "stale")
-        self.assertEqual(data["occupancy"], 51)
+        self.assertEqual(data["occupancy"], 113)
 
     def test_offline_camera_is_not_reported_as_zero_occupancy(self) -> None:
-        response = self.client.get("/api/occupancy/cam_006")
+        response = self.client.get("/api/occupancy/cam_004")
         self.assertEqual(response.status_code, 200)
         data = response.json()["data"]
         self.assertEqual(data["status"], "offline")
@@ -57,7 +57,7 @@ class BackendApiTests(unittest.TestCase):
             with self.subTest(history_range=history_range):
                 response = self.client.get(
                     "/api/history",
-                    params={"room_id": "room_cse_201", "range": history_range, "metric": "percentage"},
+                    params={"room_id": "room_tt_ground", "range": history_range, "metric": "percentage"},
                 )
                 self.assertEqual(response.status_code, 200)
                 payload = response.json()
@@ -72,7 +72,7 @@ class BackendApiTests(unittest.TestCase):
     def test_invalid_history_query_returns_400(self) -> None:
         response = self.client.get(
             "/api/history",
-            params={"room_id": "room_cse_201", "range": "month", "metric": "percentage"},
+            params={"room_id": "room_tt_ground", "range": "month", "metric": "percentage"},
         )
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()["error"]["code"], "invalid_request")
