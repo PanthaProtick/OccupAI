@@ -1,1 +1,1558 @@
-{"data":[{"camera_id":"cam_001","room_id":"room_tt_ground","occupancy":48,"raw_occupancy":48,"capacity":150,"occupancy_percentage":32.0,"status":"online","updated_at":"2026-09-01T13:00:00Z"},{"camera_id":"cam_002","room_id":"room_teachers_canteen","occupancy":28,"raw_occupancy":28,"capacity":40,"occupancy_percentage":70.0,"status":"online","updated_at":"2026-09-01T13:00:00Z"},{"camera_id":"cam_003","room_id":"room_canteen","occupancy":96,"raw_occupancy":96,"capacity":120,"occupancy_percentage":80.0,"status":"stale","updated_at":"2026-09-01T12:49:00Z"},{"camera_id":"cam_004","room_id":"room_girls_common","occupancy":12,"raw_occupancy":12,"capacity":60,"occupancy_percentage":20.0,"status":"online","updated_at":"2026-09-01T13:00:00Z"}],"meta":{"count":4,"generated_at":"2026-09-01T13:00:00Z"}}
+{
+  "data": [
+    {
+      "camera_id": "cam_001",
+      "room_id": "room_tt_ground",
+      "occupancy": 48,
+      "raw_occupancy": 48,
+      "capacity": 150,
+      "occupancy_percentage": 32.0,
+      "status": "online",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_002",
+      "room_id": "room_teachers_canteen",
+      "occupancy": 28,
+      "raw_occupancy": 28,
+      "capacity": 40,
+      "occupancy_percentage": 70.0,
+      "status": "online",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_003",
+      "room_id": "room_canteen",
+      "occupancy": 96,
+      "raw_occupancy": 96,
+      "capacity": 120,
+      "occupancy_percentage": 80.0,
+      "status": "stale",
+      "updated_at": "2026-09-01T12:49:00Z"
+    },
+    {
+      "camera_id": "cam_004",
+      "room_id": "room_girls_common",
+      "occupancy": 12,
+      "raw_occupancy": 12,
+      "capacity": 60,
+      "occupancy_percentage": 20.0,
+      "status": "online",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_005",
+      "room_id": "room_study_room",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 80,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_006",
+      "room_id": "room_library",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 200,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_007",
+      "room_id": "room_1a03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_008",
+      "room_id": "room_1a04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_009",
+      "room_id": "room_1a05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_010",
+      "room_id": "room_1a06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_011",
+      "room_id": "room_1a07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_012",
+      "room_id": "room_2c03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_013",
+      "room_id": "room_2c04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_014",
+      "room_id": "room_2c05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_015",
+      "room_id": "room_2c06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_016",
+      "room_id": "room_2c07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_017",
+      "room_id": "room_2a03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_018",
+      "room_id": "room_2a04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_019",
+      "room_id": "room_2a05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_020",
+      "room_id": "room_2a06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_021",
+      "room_id": "room_2a07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_022",
+      "room_id": "room_2b08",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_023",
+      "room_id": "room_2b06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_024",
+      "room_id": "room_2b04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_025",
+      "room_id": "room_2b02",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_026",
+      "room_id": "room_2b07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_027",
+      "room_id": "room_2b05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_028",
+      "room_id": "room_2b03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_029",
+      "room_id": "room_2b01",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_030",
+      "room_id": "room_3c03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_031",
+      "room_id": "room_3c04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_032",
+      "room_id": "room_3c05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_033",
+      "room_id": "room_3c06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_034",
+      "room_id": "room_3c07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_035",
+      "room_id": "room_3a03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_036",
+      "room_id": "room_3a04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_037",
+      "room_id": "room_3a05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_038",
+      "room_id": "room_3a06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_039",
+      "room_id": "room_3a07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_040",
+      "room_id": "room_3b08",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_041",
+      "room_id": "room_3b06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_042",
+      "room_id": "room_3b04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_043",
+      "room_id": "room_3b02",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_044",
+      "room_id": "room_3b07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_045",
+      "room_id": "room_3b05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_046",
+      "room_id": "room_3b03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_047",
+      "room_id": "room_3b01",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_048",
+      "room_id": "room_4c03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_049",
+      "room_id": "room_4c04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_050",
+      "room_id": "room_4c05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_051",
+      "room_id": "room_4c06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_052",
+      "room_id": "room_4c07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_053",
+      "room_id": "room_4a03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_054",
+      "room_id": "room_4a04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_055",
+      "room_id": "room_4a05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_056",
+      "room_id": "room_4a06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_057",
+      "room_id": "room_4a07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_058",
+      "room_id": "room_4b08",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_059",
+      "room_id": "room_4b06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_060",
+      "room_id": "room_4b04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_061",
+      "room_id": "room_4b02",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_062",
+      "room_id": "room_4b07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_063",
+      "room_id": "room_4b05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_064",
+      "room_id": "room_4b03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_065",
+      "room_id": "room_4b01",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_066",
+      "room_id": "room_5c03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_067",
+      "room_id": "room_5c04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_068",
+      "room_id": "room_5c05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_069",
+      "room_id": "room_5c06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_070",
+      "room_id": "room_5c07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_071",
+      "room_id": "room_5a03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_072",
+      "room_id": "room_5a04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_073",
+      "room_id": "room_5a05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_074",
+      "room_id": "room_5a06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_075",
+      "room_id": "room_5a07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_076",
+      "room_id": "room_5b08",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_077",
+      "room_id": "room_5b06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_078",
+      "room_id": "room_5b04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_079",
+      "room_id": "room_5b02",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_080",
+      "room_id": "room_5b07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_081",
+      "room_id": "room_5b05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_082",
+      "room_id": "room_5b03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_083",
+      "room_id": "room_5b01",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_084",
+      "room_id": "room_6c03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_085",
+      "room_id": "room_6c04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_086",
+      "room_id": "room_6c05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_087",
+      "room_id": "room_6c06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_088",
+      "room_id": "room_6c07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_089",
+      "room_id": "room_6a03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_090",
+      "room_id": "room_6a04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_091",
+      "room_id": "room_6a05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_092",
+      "room_id": "room_6a06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_093",
+      "room_id": "room_6a07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_094",
+      "room_id": "room_6b08",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_095",
+      "room_id": "room_6b06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_096",
+      "room_id": "room_6b04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_097",
+      "room_id": "room_6b02",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_098",
+      "room_id": "room_6b07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_099",
+      "room_id": "room_6b05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_100",
+      "room_id": "room_6b03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_101",
+      "room_id": "room_6b01",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_102",
+      "room_id": "room_7c03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_103",
+      "room_id": "room_7c04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_104",
+      "room_id": "room_7c05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_105",
+      "room_id": "room_7c06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_106",
+      "room_id": "room_7c07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_107",
+      "room_id": "room_7a03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_108",
+      "room_id": "room_7a04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_109",
+      "room_id": "room_7a05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_110",
+      "room_id": "room_7a06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_111",
+      "room_id": "room_7a07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_112",
+      "room_id": "room_7b08",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_113",
+      "room_id": "room_7b06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_114",
+      "room_id": "room_7b04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_115",
+      "room_id": "room_7b02",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_116",
+      "room_id": "room_7b07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_117",
+      "room_id": "room_7b05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_118",
+      "room_id": "room_7b03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_119",
+      "room_id": "room_7b01",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_120",
+      "room_id": "room_8c03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_121",
+      "room_id": "room_8c04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_122",
+      "room_id": "room_8c05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_123",
+      "room_id": "room_8c06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_124",
+      "room_id": "room_8c07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_125",
+      "room_id": "room_8a03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_126",
+      "room_id": "room_8a04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_127",
+      "room_id": "room_8a05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_128",
+      "room_id": "room_8a06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_129",
+      "room_id": "room_8a07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_130",
+      "room_id": "room_8b08",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_131",
+      "room_id": "room_8b06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_132",
+      "room_id": "room_8b04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_133",
+      "room_id": "room_8b02",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_134",
+      "room_id": "room_8b07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_135",
+      "room_id": "room_8b05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_136",
+      "room_id": "room_8b03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_137",
+      "room_id": "room_8b01",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_138",
+      "room_id": "room_9c03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_139",
+      "room_id": "room_9c04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_140",
+      "room_id": "room_9c05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_141",
+      "room_id": "room_9c06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_142",
+      "room_id": "room_9c07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_143",
+      "room_id": "room_9a03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_144",
+      "room_id": "room_9a04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_145",
+      "room_id": "room_9a05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_146",
+      "room_id": "room_9a06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_147",
+      "room_id": "room_9a07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_148",
+      "room_id": "room_9b08",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_149",
+      "room_id": "room_9b06",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_150",
+      "room_id": "room_9b04",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_151",
+      "room_id": "room_9b02",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_152",
+      "room_id": "room_9b07",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_153",
+      "room_id": "room_9b05",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_154",
+      "room_id": "room_9b03",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    },
+    {
+      "camera_id": "cam_155",
+      "room_id": "room_9b01",
+      "occupancy": null,
+      "raw_occupancy": 0,
+      "capacity": 40,
+      "occupancy_percentage": null,
+      "status": "offline",
+      "updated_at": "2026-09-01T13:00:00Z"
+    }
+  ],
+  "meta": {
+    "count": 155,
+    "generated_at": "2026-09-01T13:00:00Z"
+  }
+}

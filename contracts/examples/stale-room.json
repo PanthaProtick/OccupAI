@@ -2,16 +2,16 @@
   "data": {
     "room_id": "room_canteen",
     "name": "Canteen",
-    "capacity": 80,
+    "capacity": 120,
     "building": "University Building",
-    "floor": 1,
+    "floor": 0,
     "camera_id": "cam_003",
-    "behavior_profile": "library",
-    "occupancy": 48,
-    "raw_occupancy": 48,
-    "occupancy_percentage": 60.0,
-    "intensity": "Busy",
+    "behavior_profile": "canteen",
+    "occupancy": 96,
+    "raw_occupancy": 96,
+    "occupancy_percentage": 80.0,
+    "intensity": "Very Busy",
     "status": "stale",
-    "updated_at": "2026-08-19T12:49:00Z"
+    "updated_at": "2026-09-01T12:49:00Z"
   }
 }

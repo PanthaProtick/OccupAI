@@ -8,20 +8,27 @@ function occupancyLabel(snapshot: RoomSnapshot) {
   return `${occupancy.occupancy_percentage}% occupied`;
 }
 
+function compactMapLabel(snapshot: RoomSnapshot) {
+  return snapshot.occupancy.occupancy_percentage === null
+    ? "Unavailable"
+    : `${snapshot.occupancy.occupancy_percentage}% occupied`;
+}
+
 export function FloorMap({ snapshots }: { snapshots: RoomSnapshot[] }) {
   const mapRooms = getMapRooms(snapshots);
-  const height = 540;
+  const floor = snapshots[0]?.room.floor;
+  const height = 600;
 
   return (
     <div className="floor-map">
       <div className="floor-map__notice" role="note">
-        <strong>Schematic view</strong>
-        <span>Room positions are placeholders until they are verified against the architectural plan.</span>
+        <strong>{floor === 0 ? "Ground floor" : `Floor ${floor}`} plan</strong>
+        <span>Room arrangement follows the supplied university building floor diagrams.</span>
       </div>
       <div className="floor-map__canvas">
         <svg className="floor-map__svg" viewBox={`0 0 980 ${height}`} role="img" aria-labelledby="floor-map-title floor-map-description">
           <title id="floor-map-title">Interactive room occupancy map</title>
-          <desc id="floor-map-description">Select a room to view its live occupancy details. The current room positions are schematic.</desc>
+          <desc id="floor-map-description">Select a room to view its live occupancy details. Room positions follow the supplied floor plan.</desc>
           <rect className="floor-map__circulation" x="20" y="20" width="940" height={height - 40} rx="24" />
           <text className="floor-map__circulation-label" x="490" y="65" textAnchor="middle">Central circulation / connecting block</text>
           {mapRooms.map((mapRoom) => {
@@ -35,7 +42,7 @@ export function FloorMap({ snapshots }: { snapshots: RoomSnapshot[] }) {
               >
                 <rect x={mapRoom.x} y={mapRoom.y} width={mapRoom.width} height={mapRoom.height} rx="12" />
                 <text className="floor-map__room-name" x={mapRoom.x + mapRoom.width / 2} y={mapRoom.y + 34} textAnchor="middle">{mapRoom.room.name}</text>
-                <text className="floor-map__room-value" x={mapRoom.x + mapRoom.width / 2} y={mapRoom.y + 59} textAnchor="middle">{occupancyLabel(mapRoom)}</text>
+                <text className="floor-map__room-value" x={mapRoom.x + mapRoom.width / 2} y={mapRoom.y + 59} textAnchor="middle">{compactMapLabel(mapRoom)}</text>
               </Link>
             );
           })}

@@ -31,5 +31,20 @@ describe("DashboardPage", () => {
     expect(screen.getByLabelText("Building")).toHaveValue("University Building");
     expect(screen.getByLabelText("Floor")).toHaveValue("0");
     expect(screen.getByRole("link", { name: "Girls' Common Room, 20% occupied" })).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Floor"), { target: { value: "1" } });
+    expect(screen.getByRole("link", { name: /Study Room, Occupancy unavailable/ })).toBeInTheDocument();
+    expect(screen.getAllByRole("article")).toHaveLength(7);
+    fireEvent.change(screen.getByLabelText("Floor"), { target: { value: "2" } });
+    expect(screen.getByRole("link", { name: /2A03, Occupancy unavailable/ })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /2B01, Occupancy unavailable/ })).toBeInTheDocument();
+    expect(screen.getAllByRole("article")).toHaveLength(18);
+  });
+  it("restores the selected floor from the dashboard URL", async () => {
+    vi.spyOn(api, "getRooms").mockResolvedValue(rooms as never); vi.spyOn(api, "getOccupancy").mockResolvedValue(occupancy as never);
+    render(<MemoryRouter initialEntries={["/?building=University+Building&floor=6"]}><DashboardPage /></MemoryRouter>);
+    await screen.findByRole("heading", { name: "Floor map" });
+    expect(screen.getByLabelText("Floor")).toHaveValue("6");
+    expect(screen.getByRole("link", { name: /6A03, Occupancy unavailable/ })).toBeInTheDocument();
+    expect(screen.getAllByRole("article")).toHaveLength(18);
   });
 });

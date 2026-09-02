@@ -7,7 +7,7 @@
     }
   ],
   "meta": {
-    "room_id": "room_teachers_canteen",
+    "room_id": "room_1a04",
     "range": "hour",
     "metric": "occupancy",
     "count": 1,

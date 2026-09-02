@@ -14,16 +14,16 @@ async function get(path) {
 const [rooms, occupancy, history] = await Promise.all([
   get("/api/rooms"),
   get("/api/occupancy"),
-  get("/api/history?room_id=room_cse_201&range=day&metric=percentage"),
+  get("/api/history?room_id=room_tt_ground&range=day&metric=percentage"),
 ]);
 
 const roomIds = new Set(rooms.data.map((room) => room.room_id));
 const cameraIds = new Set(rooms.data.map((room) => room.camera_id));
-if (rooms.meta.count !== 7 || roomIds.size !== 7 || cameraIds.size !== 7) {
-  throw new Error("rooms response does not contain seven canonical mappings");
+if (rooms.meta.count !== 155 || roomIds.size !== 155 || cameraIds.size !== 155) {
+  throw new Error("rooms response does not contain all 155 building mappings");
 }
-if (occupancy.meta.count !== 7 || occupancy.data.length !== 7) {
-  throw new Error("occupancy response does not contain seven camera states");
+if (occupancy.meta.count !== 155 || occupancy.data.length !== 155) {
+  throw new Error("occupancy response does not contain all 155 camera states");
 }
 for (const item of occupancy.data) {
   if (!cameraIds.has(item.camera_id) || !roomIds.has(item.room_id)) {
@@ -36,7 +36,7 @@ for (const item of occupancy.data) {
     throw new Error("occupancy percentage is not capped");
   }
 }
-if (history.meta.room_id !== "room_cse_201" || history.meta.metric !== "percentage") {
+if (history.meta.room_id !== "room_tt_ground" || history.meta.metric !== "percentage") {
   throw new Error("history metadata does not match the query");
 }
 if (!history.data.every((point, index, values) =>

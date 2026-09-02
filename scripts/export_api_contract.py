@@ -36,16 +36,16 @@ def main() -> None:
             "health.json": ("/health", {}),
             "rooms.json": ("/api/rooms", {}),
             "occupancy.json": ("/api/occupancy", {}),
-            "stale-room.json": ("/api/rooms/room_library_01", {}),
-            "offline-camera.json": ("/api/occupancy/cam_006", {}),
+            "stale-room.json": ("/api/rooms/room_canteen", {}),
+            "offline-camera.json": ("/api/occupancy/cam_005", {}),
             "history.json": (
                 "/api/history",
-                {"params": {"room_id": "room_cse_201", "range": "week", "metric": "percentage"}},
+                {"params": {"room_id": "room_tt_ground", "range": "week", "metric": "percentage"}},
             ),
             "not-found-error.json": ("/api/occupancy/cam_999", {}),
             "validation-error.json": (
                 "/api/history",
-                {"params": {"room_id": "room_cse_201", "range": "month", "metric": "percentage"}},
+                {"params": {"room_id": "room_tt_ground", "range": "month", "metric": "percentage"}},
             ),
         }
         for filename, (path, kwargs) in requests.items():
@@ -56,11 +56,11 @@ def main() -> None:
         "zero-occupancy.json",
         {
             "data": {
-                "camera_id": "cam_004",
-                "room_id": "room_library_02",
+                "camera_id": "cam_005",
+                "room_id": "room_study_room",
                 "occupancy": 0,
                 "raw_occupancy": 0,
-                "capacity": 12,
+                "capacity": 80,
                 "occupancy_percentage": 0.0,
                 "status": "online",
                 "updated_at": "2026-08-19T13:00:00Z",
@@ -71,7 +71,7 @@ def main() -> None:
         "over-capacity.json",
         {
             "data": {
-                "camera_id": "cam_005",
+                "camera_id": "cam_003",
                 "room_id": "room_canteen",
                 "occupancy": 126,
                 "raw_occupancy": 126,
@@ -87,7 +87,7 @@ def main() -> None:
         {
             "data": [],
             "meta": {
-                "room_id": "room_ece_105",
+                "room_id": "room_1a03",
                 "range": "hour",
                 "metric": "occupancy",
                 "count": 0,
@@ -106,7 +106,7 @@ def main() -> None:
                 }
             ],
             "meta": {
-                "room_id": "room_cse_202",
+                "room_id": "room_1a04",
                 "range": "hour",
                 "metric": "occupancy",
                 "count": 1,
