@@ -11,12 +11,15 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@designcodeio/threeui": "^1.2.0",
     "@vitejs/plugin-react": "latest",
-    "vite": "latest",
-    "typescript": "latest",
+    "framer-motion": "^13.2.0",
+    "lucide-react": "^1.39.0",
     "react": "latest",
     "react-dom": "latest",
-    "react-router-dom": "latest"
+    "react-router-dom": "latest",
+    "typescript": "latest",
+    "vite": "latest"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "latest",
