@@ -37,10 +37,14 @@ class FixtureValidationTests(unittest.TestCase):
 
     def test_ground_floor_mappings(self):
         repository = MockOccupancyRepository(FIXTURES)
-        self.assertEqual([(r.room_id, r.camera_id) for r in repository.list_rooms()], [
+        rooms = repository.list_rooms()
+        self.assertEqual([(r.room_id, r.camera_id) for r in rooms[:4]], [
             ("room_tt_ground", "cam_001"), ("room_teachers_canteen", "cam_002"),
             ("room_canteen", "cam_003"), ("room_girls_common", "cam_004"),
         ])
+        self.assertEqual(len(rooms), 155)
+        self.assertEqual({floor: sum(room.floor == floor for room in rooms) for floor in range(10)},
+                         {0: 4, 1: 7, 2: 18, 3: 18, 4: 18, 5: 18, 6: 18, 7: 18, 8: 18, 9: 18})
 
     def test_duplicate_room_and_camera_ids(self):
         self.assert_invalid("rooms.json", lambda p: p["rooms"].__setitem__(1, deepcopy(p["rooms"][0])), "unique")

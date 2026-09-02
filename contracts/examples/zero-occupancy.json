@@ -1,10 +1,10 @@
 {
   "data": {
-    "camera_id": "cam_004",
-    "room_id": "room_girls_common",
+    "camera_id": "cam_005",
+    "room_id": "room_study_room",
     "occupancy": 0,
     "raw_occupancy": 0,
-    "capacity": 12,
+    "capacity": 80,
     "occupancy_percentage": 0.0,
     "status": "online",
     "updated_at": "2026-08-19T13:00:00Z"

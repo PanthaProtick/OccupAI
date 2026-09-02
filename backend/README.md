@@ -17,7 +17,7 @@ uv run python -m scripts.database import-history # optional development history
 .\scripts\start-backend.ps1
 ```
 
-`migrate` is the only operation that creates or changes schema. Seed is idempotent and refuses to silently remap a room to a different camera. A newly seeded database retains all 20 canonical rooms; cameras with no live source report `offline`, not zero, and are never omitted.
+`migrate` is the only operation that creates or changes schema. Seed is idempotent and refuses to silently remap a room to a different camera. A newly seeded database retains all 155 canonical spaces across floors 0-9; cameras with no live source report `offline`, not zero, and are never omitted.
 
 Run all tests with `.\scripts\test.ps1`. API documentation is at `/docs`. `/health` reports process health and `/ready` checks the active repository. Public errors use `{ "error": { "code", "message", "details" } }` and never include stack traces or local paths.
 
@@ -44,7 +44,7 @@ Run all tests with `.\scripts\test.ps1`. API documentation is at `/docs`. `/heal
 
 Every SQLite connection enables foreign keys, WAL, and the busy timeout. Writes use short transactions and the ingestion writer is serialized. API reads continue serving the last durable state during model-server downtime. A successful stale result preserves its last occupancy and observation time; offline remains unavailable and distinct from a measured zero. One malformed camera result is isolated from other cameras.
 
-The checked-in `model_server/config/cameras.yaml` has exactly three sources. With `SIMULATION_ENABLED=true`, `cam_004`–`cam_020` receive synthetic readings through the same database writer, so they remain visibly fresh in the frontend. IDs are always normalized to `cam_NNN`; aliases never cross the product API boundary.
+The checked-in `model_server/config/cameras.yaml` has exactly three sources. With `SIMULATION_ENABLED=true`, `cam_004`–`cam_155` receive synthetic readings through the same database writer, so they remain visibly fresh in the frontend. IDs are always normalized to `cam_NNN`; aliases never cross the product API boundary.
 
 To run ingestion, start the model server on port 8001, then the product API on port 8000:
 

@@ -10,7 +10,7 @@ This repository provides a stable HTTP boundary so frontend and backend work can
 - Frontend work plan: `frontend/task.md`
 - Backend work plan: `backend/task.md`
 
-Camera IDs use `cam_001`–`cam_007`. Timestamps are UTC ISO-8601 values. Camera status is one of `online`, `stale`, or `offline`.
+Camera IDs use canonical `cam_NNN` values (`cam_001`–`cam_155`). Timestamps are UTC ISO-8601 values. Camera status is one of `online`, `stale`, or `offline`.
 
 ## Start the mock-backed API
 
@@ -28,7 +28,7 @@ Useful requests:
 GET http://127.0.0.1:8000/health
 GET http://127.0.0.1:8000/api/rooms
 GET http://127.0.0.1:8000/api/occupancy
-GET http://127.0.0.1:8000/api/history?room_id=room_cse_201&range=day&metric=percentage
+GET http://127.0.0.1:8000/api/history?room_id=room_tt_ground&range=day&metric=percentage
 ```
 
 ## Frontend setup
@@ -42,7 +42,7 @@ The frontend can develop normal screens against the running API and use the comp
 The product API supports `DATA_SOURCE=mock` and `DATA_SOURCE=database`. Routes depend on one repository protocol; neither mode changes the HTTP shape. In database mode, an optional backend-owned ingestion worker polls the model server and serializes SQLite writes. API routes never invoke inference or model-server code.
 
 Configuration is documented in `backend/.env.example`.
-Migration, seed, sampling, aggregation, retention, backup, failure, and seven-room coverage behavior are documented in `backend/README.md`.
+Migration, seed, sampling, aggregation, retention, backup, failure, and full-building coverage behavior are documented in `backend/README.md`.
 
 ## Regenerate the contract
 
@@ -61,7 +61,7 @@ Commit the backend change, `contracts/openapi.yaml`, and affected examples toget
 The initial dashboard slice is ready when:
 
 - `/api/rooms` and `/api/occupancy` pass contract tests.
-- The frontend renders all seven rooms.
+- The frontend renders all 155 usable spaces and filters them across floors 0-9.
 - Online, stale, and offline states are distinct.
 - Switching the frontend from component mocks to the running API only changes configuration.
 

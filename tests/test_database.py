@@ -73,8 +73,8 @@ class DatabaseTests(unittest.TestCase):
         seed_canonical(self.sessions, fixtures)
         seed_canonical(self.sessions, fixtures)
         repository = DatabaseOccupancyRepository(self.sessions)
-        self.assertEqual(len(repository.list_rooms()), 4)
-        self.assertEqual(len(repository.list_occupancy()), 4)
+        self.assertEqual(len(repository.list_rooms()), 155)
+        self.assertEqual(len(repository.list_occupancy()), 155)
         self.assertTrue(all(value.status.value == "offline" for value in repository.list_occupancy()))
 
     def test_seed_refuses_canonical_camera_remapping(self):
@@ -83,7 +83,7 @@ class DatabaseTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             altered = Path(directory)
             payload = json.loads((fixtures / "rooms.json").read_text(encoding="utf-8"))
-            payload["rooms"][0]["camera_id"] = "cam_007"
+            payload["rooms"][0]["camera_id"] = "cam_155"
             (altered / "rooms.json").write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "Refusing"):
                 seed_canonical(self.sessions, altered)
@@ -93,12 +93,12 @@ class DatabaseTests(unittest.TestCase):
     def test_ingestion_is_idempotent_preserves_raw_and_survives_repository_restart(self):
         seed_canonical(self.sessions, PROJECT_ROOT / "mock" / "generated")
         writer = SerializedDatabaseWriter(self.sessions, sample_interval_seconds=0)
-        record = IngestionRecord(camera_id="1", observed_at=datetime.now(timezone.utc), raw_occupancy=126,
-                                 occupancy=126, source_event_id="event-1")
+        record = IngestionRecord(camera_id="1", observed_at=datetime.now(timezone.utc), raw_occupancy=176,
+                                 occupancy=176, source_event_id="event-1")
         self.assertTrue(writer.ingest(record))
         self.assertFalse(writer.ingest(record))
         value = DatabaseOccupancyRepository(self.sessions).get_occupancy("cam_001")
-        self.assertEqual(value.raw_occupancy, 126)
+        self.assertEqual(value.raw_occupancy, 176)
         self.assertEqual(value.occupancy_percentage, 100)
         self.assertEqual(value.status.value, "online")
 
@@ -136,14 +136,14 @@ class DatabaseTests(unittest.TestCase):
         TypeAdapter(RoomsResponse).validate_python(rooms.json())
         TypeAdapter(OccupancyListResponse).validate_python(occupancy.json())
         TypeAdapter(HistoryResponse).validate_python(history.json())
-        self.assertEqual(rooms.json()["meta"]["count"], 4)
+        self.assertEqual(rooms.json()["meta"]["count"], 155)
         self.assertEqual(history.json()["meta"]["count"], 7)
 
         self.engine.dispose()
         restarted_engine = create_database_engine(self.url)
         restarted_sessions = make_session_factory(restarted_engine)
         restarted = DatabaseOccupancyRepository(restarted_sessions)
-        self.assertEqual(len(restarted.list_rooms()), 4)
+        self.assertEqual(len(restarted.list_rooms()), 155)
         self.assertEqual(restarted.get_occupancy("cam_001").raw_occupancy, 45)
         self.assertEqual(len(restarted.get_history("room_tt_ground", HistoryRange.DAY, HistoryMetric.OCCUPANCY)), 7)
         restarted_engine.dispose()
@@ -176,7 +176,7 @@ class DatabaseTests(unittest.TestCase):
         self.assertTrue(result["cam_001"])
         self.assertFalse(result["cam_002"])
         repository = DatabaseOccupancyRepository(self.sessions)
-        self.assertEqual(len(repository.list_occupancy()), 4)
+        self.assertEqual(len(repository.list_occupancy()), 155)
         self.assertEqual(repository.get_occupancy("cam_001").raw_occupancy, 3)
         self.assertEqual(repository.get_occupancy("cam_002").status.value, "offline")
 
@@ -233,10 +233,10 @@ class DatabaseTests(unittest.TestCase):
             IngestionRecord(camera_id="1", observed_at=datetime.now(), raw_occupancy=1, occupancy=1)
         writer = SerializedDatabaseWriter(self.sessions)
         writer.ingest(IngestionRecord(
-            camera_id="cam_001", observed_at=datetime.now(timezone.utc), raw_occupancy=50, occupancy=42,
+            camera_id="cam_001", observed_at=datetime.now(timezone.utc), raw_occupancy=180, occupancy=160,
         ))
         value = DatabaseOccupancyRepository(self.sessions).get_occupancy("cam_001")
-        self.assertEqual((value.raw_occupancy, value.occupancy), (50, 42))
+        self.assertEqual((value.raw_occupancy, value.occupancy), (180, 160))
         self.assertEqual(value.occupancy_percentage, 100)
 
     def test_sampling_is_throttled_but_changes_and_heartbeat_are_persisted(self):
@@ -327,7 +327,7 @@ class DatabaseTests(unittest.TestCase):
         service.stop()
         self.assertFalse(service.is_alive)
 
-    def test_three_configured_and_seventeen_unconfigured_cameras_keep_twenty_room_contract(self):
+    def test_three_configured_and_remaining_unconfigured_cameras_keep_full_building_contract(self):
         seed_canonical(self.sessions, PROJECT_ROOT / "mock" / "generated")
         writer = SerializedDatabaseWriter(self.sessions)
         now = datetime.now(timezone.utc)
@@ -339,8 +339,8 @@ class DatabaseTests(unittest.TestCase):
         repository = DatabaseOccupancyRepository(self.sessions)
         rooms = repository.list_rooms()
         occupancy = repository.list_occupancy()
-        self.assertEqual([room.camera_id for room in rooms], [f"cam_{number:03d}" for number in range(1, 21)])
-        self.assertEqual(len(occupancy), 4)
+        self.assertEqual([room.camera_id for room in rooms], [f"cam_{number:03d}" for number in range(1, 156)])
+        self.assertEqual(len(occupancy), 155)
         self.assertTrue(all(item.status.value == "online" for item in occupancy[:3]))
         self.assertTrue(all(item.status.value == "offline" and item.occupancy is None for item in occupancy[3:]))
 
@@ -441,7 +441,7 @@ class DatabaseTests(unittest.TestCase):
         try:
             cursor = connection.execute("SELECT count(*) FROM rooms")
             try:
-                self.assertEqual(cursor.fetchone()[0], 20)
+                self.assertEqual(cursor.fetchone()[0], 155)
             finally:
                 cursor.close()
         finally:
@@ -506,10 +506,10 @@ class DatabaseTests(unittest.TestCase):
 
         thread = threading.Thread(target=maintain)
         thread.start()
-        self.assertEqual(len(repository.list_rooms()), 4)
+        self.assertEqual(len(repository.list_rooms()), 155)
         while thread.is_alive():
             try:
-                self.assertEqual(len(repository.list_rooms()), 4)
+                self.assertEqual(len(repository.list_rooms()), 155)
                 repository.list_occupancy()
             except Exception as exc:
                 errors.append(exc)
@@ -634,7 +634,7 @@ class DatabaseTests(unittest.TestCase):
             for filename in MockOccupancyRepository.REQUIRED_FILES:
                 (copied / filename).write_bytes((fixtures / filename).read_bytes())
             live = json.loads((copied / "live_occupancy.json").read_text(encoding="utf-8"))
-            live["cameras"][3]["occupancy"] = 126
+            live["cameras"][2]["occupancy"] = 126
             (copied / "live_occupancy.json").write_text(json.dumps(live), encoding="utf-8")
             mock_value = MockOccupancyRepository(copied).get_occupancy("cam_003")
         seed_canonical(self.sessions, fixtures)

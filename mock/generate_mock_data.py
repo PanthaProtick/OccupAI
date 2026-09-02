@@ -21,12 +21,19 @@ HISTORY_DAYS = 7
 DEFAULT_START = datetime(2026, 8, 12, 0, 0, tzinfo=timezone.utc)
 
 
-ROOMS: list[dict[str, Any]] = [
-    {"room_id": "room_tt_ground", "name": "T.T. Ground", "capacity": 150, "building": "University Building", "floor": 0, "camera_id": "cam_001", "behavior_profile": "study_room"},
-    {"room_id": "room_teachers_canteen", "name": "Teacher's Canteen", "capacity": 40, "building": "University Building", "floor": 0, "camera_id": "cam_002", "behavior_profile": "canteen"},
-    {"room_id": "room_canteen", "name": "Canteen", "capacity": 120, "building": "University Building", "floor": 0, "camera_id": "cam_003", "behavior_profile": "canteen"},
-    {"room_id": "room_girls_common", "name": "Girls' Common Room", "capacity": 60, "building": "University Building", "floor": 0, "camera_id": "cam_004", "behavior_profile": "study_room"},
-]
+MODEL_CAMERA_IDS = ("cam_001", "cam_002", "cam_003")
+
+
+def load_rooms() -> list[dict[str, Any]]:
+    payload = json.loads((Path(__file__).with_name("canonical_rooms.json")).read_text(encoding="utf-8"))
+    rooms = [dict(room) for room in payload["rooms"]]
+    random.Random(SEED).shuffle(rooms)
+    for index, room in enumerate(rooms):
+        room["camera_id"] = MODEL_CAMERA_IDS[index] if index < len(MODEL_CAMERA_IDS) else f"cam_{index + 1:03d}"
+    return rooms
+
+
+ROOMS: list[dict[str, Any]] = load_rooms()
 
 
 def iso(value: datetime) -> str:
@@ -100,9 +107,9 @@ def generate_history(rng: random.Random, start: datetime) -> list[dict[str, Any]
 
 
 def make_live(rng: random.Random, now: datetime) -> dict[str, Any]:
-    statuses = {
-        "cam_001": "online", "cam_002": "online", "cam_003": "stale", "cam_004": "offline",
-    }
+    statuses = {room["camera_id"]: "online" for room in ROOMS}
+    statuses["cam_003"] = "stale"
+    statuses["cam_004"] = "offline"
     results = []
     for room in ROOMS:
         status = statuses[room["camera_id"]]

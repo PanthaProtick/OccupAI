@@ -7,7 +7,7 @@ import { api, ApiError } from "./client";
 afterEach(() => vi.unstubAllGlobals());
 const response = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 describe("API client", () => {
-  it("parses a successful response", async () => { vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response(rooms))); expect((await api.getRooms()).data).toHaveLength(4); });
+  it("parses a successful response", async () => { vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response(rooms))); expect((await api.getRooms()).data).toHaveLength(155); });
   it.each([[400, validationError], [404, notFound]])("normalizes HTTP %s", async (status, body) => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response(body, status)));
     await expect(api.getRooms()).rejects.toMatchObject({ status, code: body.error.code, message: body.error.message });

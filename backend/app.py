@@ -119,7 +119,6 @@ def create_app(
             session_factory, active_settings.raw_sample_interval_seconds,
         )
         # Load room configs from mock fixtures to discover simulated cameras
-        import json
         rooms_path = active_settings.mock_data_dir / "rooms.json"
         rooms_payload = json.loads(rooms_path.read_text(encoding="utf-8"))
         live_ids = set(active_settings.live_camera_ids)
