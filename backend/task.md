@@ -1,6 +1,6 @@
 # Backend Developer Tasks
 
-Status: completed and re-audited on 2026-08-23. All 68 automated tests, contract-drift and compile checks, real HTTP model-contract ingestion, and Node frontend smoke tests against mock and freshly migrated database servers pass.
+Status: completed and re-audited on 2026-09-02. All 69 backend and 38 frontend automated tests, contract-drift and compile checks, real HTTP model-contract ingestion, and frontend smoke coverage pass.
 
 
 Complete these milestones in order. The product API, contract, mock repository, and core routes already exist. Extend and harden them; do not rebuild the foundation or expose a second API shape.
@@ -55,7 +55,7 @@ Confirm API documentation at `http://127.0.0.1:8000/docs`.
 
 ### Tasks
 
-- [x] Test all seven room/camera mappings.
+- [x] Test all 155 room/camera mappings across floors 0-9.
 - [x] Test valid zero occupancy and over-capacity raw occupancy.
 - [x] Test partial coverage and empty history.
 - [x] Test duplicate room IDs and camera IDs.
@@ -87,7 +87,7 @@ Use `backend/database-schema.md` as the implementation specification. Any schema
 - [x] Implement SQLAlchemy models for `rooms`, `cameras`, `camera_states`, `occupancy_samples`, and `occupancy_buckets_5m`.
 - [x] Create the initial Alembic migration with all foreign keys, checks, uniqueness constraints, and indexes.
 - [x] Implement `DatabaseOccupancyRepository` using the existing repository protocol.
-- [x] Add an idempotent seed command for the seven canonical rooms and cameras.
+- [x] Add an idempotent seed command for the 155 canonical rooms and cameras.
 - [x] Add an optional development importer for `mock/generated/history_5min_7days.json`.
 - [x] Ensure seed/import retries do not duplicate records or change canonical IDs silently.
 - [x] Add migration tests using a temporary SQLite database.
@@ -148,13 +148,13 @@ The model server feeds a backend-owned ingestion service. API routes continue re
 - [x] Existing frontend parsing does not change.
 - [x] Model-server downtime does not block API reads of the last durable state.
 
-## Milestone 5: Resolve seven-room live coverage
+## Milestone 5: Resolve full-building live coverage
 
-The model-server configuration has three cameras, while the product contract has seven.
+The model-server configuration has three cameras, while the product contract has 155 spaces.
 
 ### Tasks
 
-- [x] Confirm whether four additional camera sources will be configured.
+- [x] Confirm whether additional camera sources will be configured.
 - [x] If sources are unavailable, retain all rooms and return unavailable/offline occupancy for those cameras.
 - [x] Do not silently omit unconfigured rooms from `/api/rooms`.
 - [x] Do not renumber or alias camera IDs differently between sources.
@@ -163,7 +163,7 @@ The model-server configuration has three cameras, while the product contract has
 
 ### Acceptance gate
 
-- [x] All seven rooms behave predictably in both data-source modes.
+- [x] All 155 rooms behave predictably in both data-source modes.
 - [x] The frontend needs no separate mock-mode and live-mode room logic.
 
 ## Milestone 6: Historical aggregation and retention

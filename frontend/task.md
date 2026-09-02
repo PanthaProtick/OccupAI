@@ -24,7 +24,7 @@ VITE_API_BASE_URL=http://127.0.0.1:8000/api
 
 ## Required conventions
 
-- [x] Use `cam_001`–`cam_007` and room IDs returned by the API.
+- [x] Use canonical `cam_NNN` IDs and room IDs returned by the API.
 - [x] Treat `online`, `stale`, and `offline` as different UI states.
 - [x] Treat `0` occupancy as a valid measurement and `null` as unavailable.
 - [x] Never display an occupancy percentage above `100%`.
@@ -86,8 +86,8 @@ VITE_API_BASE_URL=http://127.0.0.1:8000/api
 
 ### Acceptance gate
 
-- [x] All seven mock rooms render from the running API.
-- [x] `cam_001`–`cam_007` map to the correct rooms.
+- [x] All 155 mock rooms render from the running API and filter by floor.
+- [x] `cam_001`–`cam_155` map to the correct rooms.
 - [x] No dashboard data is hardcoded or imported from fixtures.
 
 ## Milestone 4: Status and edge-case UX
