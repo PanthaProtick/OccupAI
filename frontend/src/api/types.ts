@@ -2,6 +2,18 @@ export type CameraStatus = "online" | "stale" | "offline";
 export type HistoryRange = "hour" | "day" | "week";
 export type HistoryMetric = "occupancy" | "percentage";
 
+export interface Profile { id:string; name:string; email:string; created_at:string; updated_at:string }
+export interface AppNotification {
+  id:string; type:string; category:string; title:string; message:string;
+  room_id:string|null; suggested_room_id:string|null; occupancy_percentage:number|null;
+  created_at:string; read_at:string|null; dismissed_at:string|null;
+}
+export interface NotificationsResponse { items:AppNotification[]; unread_count:number; next_cursor:string|null }
+export interface NotificationPreferences {
+  in_app_enabled:boolean; high_occupancy_enabled:boolean;
+  high_occupancy_threshold:number; cooldown_minutes:number;
+}
+
 export interface CollectionMeta { count: number; generated_at?: string | null }
 export interface Room {
   room_id: string; name: string; capacity: number; building: string; floor: number;

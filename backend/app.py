@@ -18,6 +18,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from backend.config import Settings
 from backend.models import (
     AuthResponse,
+    ChangePasswordRequest,
     CollectionMeta,
     ErrorBody,
     ErrorResponse,
@@ -27,8 +28,14 @@ from backend.models import (
     HistoryRange,
     HistoryResponse,
     LoginRequest,
+    Notification,
+    NotificationPreferences,
+    NotificationPreferencesUpdate,
+    NotificationsResponse,
     OccupancyListResponse,
     OccupancyResponse,
+    Profile,
+    ProfileUpdateRequest,
     RoomResponse,
     RoomsResponse,
     SignupRequest,
@@ -37,6 +44,7 @@ from backend.auth import AuthError, AuthService, get_current_user
 from backend.database import create_database_engine, make_session_factory
 from backend.ingestion import ModelServerIngestionAdapter, ModelServerIngestionService, SerializedDatabaseWriter
 from backend.maintenance import DatabaseMaintenanceService
+from backend.notifications import NotificationService
 from backend.repositories import DatabaseOccupancyRepository, MockOccupancyRepository, OccupancyRepository
 from backend.simulation import SimulatedCamera, SimulatedIngestionService
 from backend.security import AuthenticationRateLimiter
@@ -182,11 +190,12 @@ def create_app(
         active_settings.auth_rate_limit_attempts,
         active_settings.auth_rate_limit_window_seconds,
     )
+    app.state.notification_service = None
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(active_settings.frontend_origins),
         allow_credentials=True,
-        allow_methods=["GET", "POST"],
+        allow_methods=["GET", "POST", "PATCH"],
         allow_headers=["Accept", "Content-Type", "X-Request-ID"],
     )
 
@@ -215,15 +224,23 @@ def create_app(
         response.headers["X-Request-ID"] = request_id
         if request.url.path == "/api/rooms":
             response.headers["Cache-Control"] = "public, max-age=300"
-        elif request.url.path.startswith("/api/occupancy"):
+        elif (request.url.path.startswith("/api/occupancy")
+              or request.url.path.startswith("/api/profile")
+              or request.url.path.startswith("/api/notifications")
+              or request.url.path.startswith("/api/notification-preferences")):
             response.headers["Cache-Control"] = "no-store"
         _log("request", request_id=request_id, method=request.method, path=request.url.path,
              status=response.status_code, duration_ms=round((time.perf_counter() - started) * 1000, 2))
         return response
 
     @app.exception_handler(RequestValidationError)
-    async def validation_error_handler(_: Request, exc: RequestValidationError) -> JSONResponse:
-        return _error(400, "invalid_request", "Request validation failed", {"errors": exc.errors()})
+    async def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+        status = 422 if request.url.path == "/api/notification-preferences" else 400
+        errors = [
+            {key: value for key, value in error.items() if key != "ctx"}
+            for error in exc.errors()
+        ]
+        return _error(status, "invalid_request", "Request validation failed", {"errors": errors})
 
     @app.exception_handler(AuthError)
     async def auth_error_handler(_: Request, exc: AuthError) -> JSONResponse:
@@ -256,7 +273,10 @@ def create_app(
         if app.state.auth_service is None:
             engine = create_database_engine(active_settings.database_url, active_settings.sqlite_busy_timeout_ms)
             try:
-                missing = {"users", "authentication_sessions"} - set(inspect(engine).get_table_names())
+                missing = {
+                    "users", "authentication_sessions", "notification_preferences",
+                    "user_notifications",
+                } - set(inspect(engine).get_table_names())
             except Exception as exc:
                 engine.dispose()
                 raise RuntimeError("Authentication database is unavailable") from exc
@@ -271,6 +291,11 @@ def create_app(
         return app.state.auth_service
 
     app.state.get_auth_service = auth_service
+
+    def notification_service() -> NotificationService:
+        if app.state.notification_service is None:
+            app.state.notification_service = NotificationService(auth_service().session_factory)
+        return app.state.notification_service
 
     def validate_auth_origin(request: Request) -> None:
         if request.headers.get("Origin") not in active_settings.frontend_origins:
@@ -320,6 +345,109 @@ def create_app(
     @app.get("/api/auth/me", response_model=AuthResponse, tags=["authentication"])
     def me(user=Depends(get_current_user)) -> AuthResponse:
         return AuthResponse(data=user)
+
+    @app.get("/api/profile", response_model=Profile, tags=["profile"])
+    def get_profile(user=Depends(get_current_user)) -> Profile:
+        return auth_service().get_profile(user.id)
+
+    @app.patch("/api/profile", response_model=Profile, tags=["profile"])
+    def update_profile(
+        payload: ProfileUpdateRequest,
+        request: Request,
+        user=Depends(get_current_user),
+    ) -> Profile:
+        validate_auth_origin(request)
+        return auth_service().update_profile_name(user.id, payload.name)
+
+    @app.post("/api/profile/change-password", status_code=204, tags=["profile"])
+    def change_password(
+        payload: ChangePasswordRequest,
+        request: Request,
+        response: Response,
+        user=Depends(get_current_user),
+    ) -> None:
+        validate_auth_origin(request)
+        rate_key = f"change-password:{user.id}"
+        app.state.auth_rate_limiter.check(rate_key)
+        token = auth_service().change_password(
+            user.id,
+            payload.current_password,
+            payload.new_password,
+            request.headers.get("User-Agent"),
+        )
+        set_session_cookie(response, token)
+        app.state.auth_rate_limiter.reset(rate_key)
+
+    @app.get("/api/notifications", response_model=NotificationsResponse, tags=["notifications"])
+    def list_notifications(
+        limit: int = Query(default=20, ge=1, le=100),
+        cursor: str | None = Query(default=None, min_length=1, max_length=1024),
+        unread_only: bool = Query(default=False),
+        include_dismissed: bool = Query(default=False),
+        user=Depends(get_current_user),
+    ) -> NotificationsResponse:
+        return notification_service().list_notifications(
+            user.id,
+            limit=limit,
+            cursor=cursor,
+            unread_only=unread_only,
+            include_dismissed=include_dismissed,
+        )
+
+    @app.post(
+        "/api/notifications/{notification_id}/read",
+        response_model=Notification,
+        tags=["notifications"],
+    )
+    def mark_notification_read(
+        notification_id: str,
+        request: Request,
+        user=Depends(get_current_user),
+    ) -> Notification:
+        validate_auth_origin(request)
+        return notification_service().mark_read(user.id, notification_id)
+
+    @app.post("/api/notifications/read-all", status_code=204, tags=["notifications"])
+    def mark_all_notifications_read(
+        request: Request,
+        user=Depends(get_current_user),
+    ) -> None:
+        validate_auth_origin(request)
+        notification_service().mark_all_read(user.id)
+
+    @app.post(
+        "/api/notifications/{notification_id}/dismiss",
+        status_code=204,
+        tags=["notifications"],
+    )
+    def dismiss_notification(
+        notification_id: str,
+        request: Request,
+        user=Depends(get_current_user),
+    ) -> None:
+        validate_auth_origin(request)
+        notification_service().dismiss(user.id, notification_id)
+
+    @app.get(
+        "/api/notification-preferences",
+        response_model=NotificationPreferences,
+        tags=["notifications"],
+    )
+    def get_notification_preferences(user=Depends(get_current_user)) -> NotificationPreferences:
+        return notification_service().get_preferences(user.id)
+
+    @app.patch(
+        "/api/notification-preferences",
+        response_model=NotificationPreferences,
+        tags=["notifications"],
+    )
+    def update_notification_preferences(
+        payload: NotificationPreferencesUpdate,
+        request: Request,
+        user=Depends(get_current_user),
+    ) -> NotificationPreferences:
+        validate_auth_origin(request)
+        return notification_service().update_preferences(user.id, payload)
 
     @app.get("/ready", response_model=HealthResponse, tags=["system"])
     def ready() -> HealthResponse:

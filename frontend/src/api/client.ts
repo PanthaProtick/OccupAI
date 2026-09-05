@@ -1,11 +1,11 @@
 import { env } from "../config/env";
-import type { ApiErrorResponse, HistoryMetric, HistoryRange } from "./types";
-import { parseHistory, parseOccupancy, parseOccupancyList, parseRoom, parseRooms } from "./validation";
+import type { ApiErrorResponse, HistoryMetric, HistoryRange, NotificationPreferences } from "./types";
+import { parseHistory, parseNotification, parseNotificationPreferences, parseNotifications, parseOccupancy, parseOccupancyList, parseProfile, parseRoom, parseRooms } from "./validation";
 
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number | null, public readonly code: string, public readonly details?: Record<string, unknown>) { super(message); this.name = "ApiError"; }
 }
-export interface RequestOptions { signal?: AbortSignal; timeoutMs?: number; method?: "GET"|"POST"; body?: unknown }
+export interface RequestOptions { signal?: AbortSignal; timeoutMs?: number; method?: "GET"|"POST"|"PATCH"; body?: unknown }
 
 async function request(path: string, { signal, timeoutMs = 10_000, method = "GET", body: requestBody }: RequestOptions = {}): Promise<unknown> {
   const controller = new AbortController();
@@ -38,6 +38,15 @@ export const api = {
   login: (value: {email:string;password:string}) => request("/auth/login", {method:"POST",body:value}) as Promise<{data:AuthUser}>,
   logout: () => request("/auth/logout", {method:"POST"}),
   me: () => request("/auth/me") as Promise<{data:AuthUser}>,
+  getProfile: (options?: RequestOptions) => request("/profile", options).then(parseProfile),
+  updateProfile: (value: {name:string}) => request("/profile", {method:"PATCH",body:value}).then(parseProfile),
+  changePassword: (value: {current_password:string;new_password:string}) => request("/profile/change-password", {method:"POST",body:value}),
+  getNotifications: (options?: RequestOptions) => request("/notifications", options).then(parseNotifications),
+  markNotificationRead: (id:string) => request(`/notifications/${segment(id)}/read`, {method:"POST"}).then(parseNotification),
+  markAllNotificationsRead: () => request("/notifications/read-all", {method:"POST"}),
+  dismissNotification: (id:string) => request(`/notifications/${segment(id)}/dismiss`, {method:"POST"}),
+  getNotificationPreferences: (options?: RequestOptions) => request("/notification-preferences", options).then(parseNotificationPreferences),
+  updateNotificationPreferences: (value: Partial<NotificationPreferences>) => request("/notification-preferences", {method:"PATCH",body:value}).then(parseNotificationPreferences),
   getRooms: (options?: RequestOptions) => request("/rooms", options).then(parseRooms),
   getRoom: (roomId: string, options?: RequestOptions) => request(`/rooms/${segment(roomId)}`, options).then(parseRoom),
   getOccupancy: (options?: RequestOptions) => request("/occupancy", options).then(parseOccupancyList),

@@ -7,12 +7,22 @@ from datetime import datetime, timezone
 from typing import Any
 import json
 import urllib.request
+import uuid
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import or_, select
 from sqlalchemy.dialects.sqlite import insert
 
-from backend.database import CameraRow, CameraStateRow, IngestionReceiptRow, OccupancySampleRow
+from backend.database import (
+    CameraRow,
+    CameraStateRow,
+    IngestionReceiptRow,
+    NotificationPreferenceRow,
+    OccupancySampleRow,
+    RoomRow,
+    UserNotificationRow,
+    UserRow,
+)
 from backend.maintenance import iso
 
 
@@ -97,6 +107,13 @@ class SerializedDatabaseWriter:
                 diagnostics["source_event_id"] = record.source_event_id
             if record.source_sequence is not None:
                 diagnostics["source_sequence"] = record.source_sequence
+            self._create_high_occupancy_notifications(
+                session,
+                camera,
+                previous,
+                record,
+                timestamp,
+            )
             state = dict(camera_id=record.camera_id, raw_occupancy=record.raw_occupancy, occupancy=record.occupancy,
                          status=record.status, observed_at=timestamp, updated_at=iso(datetime.now(timezone.utc)),
                          diagnostics_json=json.dumps(diagnostics, sort_keys=True))
@@ -116,6 +133,113 @@ class SerializedDatabaseWriter:
                 statement = insert(OccupancySampleRow).values(**sample).on_conflict_do_nothing()
                 session.execute(statement)
             return True
+
+    @staticmethod
+    def _recommended_room(
+        session,
+        crowded_camera: CameraRow,
+        crowded_percentage: float,
+        event_time: datetime,
+    ) -> str | None:
+        candidates: list[tuple[tuple[int, int, int, float, str], str]] = []
+        rows = session.execute(
+            select(RoomRow, CameraRow, CameraStateRow)
+            .join(CameraRow, CameraRow.room_id == RoomRow.room_id)
+            .join(CameraStateRow, CameraStateRow.camera_id == CameraRow.camera_id)
+            .where(
+                RoomRow.room_id != crowded_camera.room_id,
+                CameraRow.enabled.is_(True),
+                CameraStateRow.status == "online",
+                CameraStateRow.occupancy.is_not(None),
+            )
+        )
+        for room, camera, state in rows:
+            if state.observed_at is None:
+                continue
+            observed_at = datetime.fromisoformat(state.observed_at).astimezone(timezone.utc)
+            if (event_time - observed_at).total_seconds() > camera.stale_after_seconds:
+                continue
+            percentage = state.occupancy * 100 / room.capacity
+            if percentage >= crowded_percentage:
+                continue
+            rank = (
+                0 if room.building == crowded_camera.room.building else 1,
+                0 if room.floor == crowded_camera.room.floor else 1,
+                0 if percentage < 40 else 1,
+                percentage,
+                room.room_id,
+            )
+            candidates.append((rank, room.room_id))
+        return min(candidates)[1] if candidates else None
+
+    def _create_high_occupancy_notifications(
+        self,
+        session,
+        camera: CameraRow,
+        previous: CameraStateRow | None,
+        record: IngestionRecord,
+        timestamp: str,
+    ) -> None:
+        if record.status != "online":
+            return
+        current_percentage = min(100.0, record.occupancy * 100 / camera.room.capacity)
+        user_preferences = session.execute(
+            select(UserRow, NotificationPreferenceRow)
+            .outerjoin(NotificationPreferenceRow, NotificationPreferenceRow.user_id == UserRow.id)
+            .where(UserRow.is_active.is_(True))
+        )
+        recommendation: str | None = None
+        recommendation_loaded = False
+        event_time = record.observed_at.astimezone(timezone.utc)
+        for user, preference in user_preferences:
+            in_app_enabled = preference.in_app_enabled if preference else True
+            high_occupancy_enabled = preference.high_occupancy_enabled if preference else True
+            threshold = preference.high_occupancy_threshold if preference else 80
+            cooldown_minutes = preference.cooldown_minutes if preference else 30
+            if not in_app_enabled or not high_occupancy_enabled or current_percentage < threshold:
+                continue
+            previous_percentage = None
+            if previous and previous.status == "online" and previous.occupancy is not None:
+                previous_percentage = min(100.0, previous.occupancy * 100 / camera.room.capacity)
+            if previous_percentage is not None and previous_percentage >= threshold:
+                continue
+
+            latest = session.scalar(
+                select(UserNotificationRow.created_at)
+                .where(
+                    UserNotificationRow.user_id == user.id,
+                    UserNotificationRow.type == "high_occupancy",
+                    UserNotificationRow.room_id == camera.room_id,
+                )
+                .order_by(UserNotificationRow.created_at.desc())
+                .limit(1)
+            )
+            if latest is not None:
+                last_time = datetime.fromisoformat(latest).astimezone(timezone.utc)
+                if (event_time - last_time).total_seconds() < cooldown_minutes * 60:
+                    continue
+            if not recommendation_loaded:
+                recommendation = self._recommended_room(
+                    session, camera, current_percentage, event_time
+                )
+                recommendation_loaded = True
+            room_name = camera.room.name
+            message = f"{room_name} is {current_percentage:.1f}% occupied. Consider another room."
+            if recommendation:
+                message += " A less occupied nearby room is available."
+            session.add(UserNotificationRow(
+                id=str(uuid.uuid4()),
+                user_id=user.id,
+                type="high_occupancy",
+                category="occupancy",
+                title=f"High occupancy in {room_name}",
+                message=message,
+                room_id=camera.room_id,
+                suggested_room_id=recommendation,
+                occupancy_percentage=round(current_percentage, 2),
+                deduplication_key=f"high_occupancy:{user.id}:{camera.room_id}:{timestamp}",
+                created_at=timestamp,
+            ))
 
     def mark_offline(self, camera_id: str, diagnostics: str | None = None) -> bool:
         with self._lock, self.session_factory.begin() as session:

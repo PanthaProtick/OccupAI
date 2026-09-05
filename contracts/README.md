@@ -19,3 +19,8 @@ uv run python -m scripts.export_api_contract
 
 The backend test suite detects a checked-in contract that has drifted from the application.
 
+Authenticated account routes use the HttpOnly session cookie and return `no-store` data.
+The contract includes database-backed profile reads/updates, password change, persistent
+notification cursor pagination and mutations, and per-user notification preferences.
+Mutation requests must originate from a configured `FRONTEND_ORIGINS` value.
+

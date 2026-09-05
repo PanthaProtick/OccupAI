@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from enum import StrEnum
 from typing import Annotated, Any
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
 
 
 def _require_utc(value: datetime) -> datetime:
@@ -145,3 +145,61 @@ class PublicUser(ApiModel):
 
 class AuthResponse(ApiModel):
     data: PublicUser
+
+
+class Profile(ApiModel):
+    id: str
+    name: str
+    email: str
+    created_at: UtcDateTime
+    updated_at: UtcDateTime
+
+
+class ProfileUpdateRequest(ApiModel):
+    name: str
+
+
+class ChangePasswordRequest(ApiModel):
+    current_password: str
+    new_password: str
+
+
+class Notification(ApiModel):
+    id: str
+    type: str
+    category: str
+    title: str
+    message: str
+    room_id: str | None = None
+    suggested_room_id: str | None = None
+    occupancy_percentage: float | None = Field(default=None, ge=0, le=100)
+    created_at: UtcDateTime
+    read_at: UtcDateTime | None = None
+    dismissed_at: UtcDateTime | None = None
+
+
+class NotificationsResponse(ApiModel):
+    items: list[Notification]
+    unread_count: int = Field(ge=0)
+    next_cursor: str | None = None
+
+
+class NotificationPreferences(ApiModel):
+    in_app_enabled: bool
+    high_occupancy_enabled: bool
+    high_occupancy_threshold: int = Field(ge=50, le=100)
+    cooldown_minutes: int = Field(gt=0, le=10_080)
+
+
+class NotificationPreferencesUpdate(ApiModel):
+    in_app_enabled: bool | None = Field(default=None, strict=True)
+    high_occupancy_enabled: bool | None = Field(default=None, strict=True)
+    high_occupancy_threshold: int | None = Field(default=None, strict=True, ge=50, le=100)
+    cooldown_minutes: int | None = Field(default=None, strict=True, gt=0, le=10_080)
+
+    @model_validator(mode="after")
+    def require_non_null_update(self):
+        provided = self.model_fields_set
+        if not provided or any(getattr(self, field) is None for field in provided):
+            raise ValueError("At least one non-null preference is required")
+        return self

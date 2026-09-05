@@ -1,23 +1,32 @@
 import { LogOut, User } from "lucide-react";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { useRef } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/session";
 import { NotificationPanel } from "../components/NotificationPanel";
 
 export function AppLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const {logout}=useAuth();
+  const lastDashboardSearch = useRef("");
+  if (location.pathname === "/dashboard") {
+    lastDashboardSearch.current = location.search;
+  }
+  const dashboardSection = (section: string) =>
+    `/dashboard${lastDashboardSearch.current}#${section}`;
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">Skip to main content</a>
       <header className="site-header">
-        <Link className="brand" to="/dashboard" aria-label="OccupAI dashboard">
+        <Link className="brand" to="/dashboard" aria-label="OccupAI dashboard"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
           <span className="brand__mark"><img src="/occupai-logo.png" alt="" /></span>
           <span className="brand__name">Occup<span>AI</span></span>
         </Link>
         <nav className="site-nav" aria-label="Dashboard sections">
-          <a href="#overview">Overview</a>
-          <a href="#floor-map">Floor map</a>
-          <a href="#rooms">Rooms</a>
+          <Link to={dashboardSection("overview")}>Overview</Link>
+          <Link to={dashboardSection("floor-map")}>Floor map</Link>
+          <Link to={dashboardSection("rooms")}>Rooms</Link>
         </nav>
         <div className="site-header__actions">
           <p className="site-header__context"><span /> Campus live</p>

@@ -1,4 +1,4 @@
-import type { CameraStatus, HistoryMetric, HistoryRange, HistoryResponse, Occupancy, OccupancyListResponse, OccupancyResponse, Room, RoomResponse, RoomsResponse } from "./types";
+import type { AppNotification, CameraStatus, HistoryMetric, HistoryRange, HistoryResponse, NotificationPreferences, NotificationsResponse, Occupancy, OccupancyListResponse, OccupancyResponse, Profile, Room, RoomResponse, RoomsResponse } from "./types";
 
 type Json = Record<string, unknown>;
 const object = (v: unknown): v is Json => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -44,4 +44,36 @@ export function parseHistory(v: unknown): HistoryResponse {
   if (!object(v) || !Array.isArray(v.data) || !v.data.every((p) => object(p) && timestamp(p.bucket_start) && finite(p.value) && p.value >= 0 && finite(p.coverage_percentage) && p.coverage_percentage >= 0 && p.coverage_percentage <= 100) ||
       !object(v.meta) || !text(v.meta.room_id) || !range(v.meta.range) || !metric(v.meta.metric) || !meta(v.meta) || v.meta.count !== v.data.length) throw new Error("Malformed history response");
   return v as unknown as HistoryResponse;
+}
+export function parseProfile(v: unknown): Profile {
+  if (!object(v) || !text(v.id) || !text(v.name) || !text(v.email) ||
+      !timestamp(v.created_at) || !timestamp(v.updated_at)) throw new Error("Malformed profile response");
+  return v as unknown as Profile;
+}
+function notification(v: unknown): v is AppNotification {
+  return object(v) && text(v.id) && text(v.type) && text(v.category) && text(v.title) &&
+    text(v.message) && (v.room_id === null || text(v.room_id)) &&
+    (v.suggested_room_id === null || text(v.suggested_room_id)) && nullableNumber(v.occupancy_percentage) &&
+    timestamp(v.created_at) && (v.read_at === null || timestamp(v.read_at)) &&
+    (v.dismissed_at === null || timestamp(v.dismissed_at));
+}
+export function parseNotifications(v: unknown): NotificationsResponse {
+  if (!object(v) || !Array.isArray(v.items) || !v.items.every(notification) ||
+      !integer(v.unread_count) || !(v.next_cursor === null || text(v.next_cursor))) {
+    throw new Error("Malformed notifications response");
+  }
+  return v as unknown as NotificationsResponse;
+}
+export function parseNotification(v: unknown): AppNotification {
+  if (!notification(v)) throw new Error("Malformed notification response");
+  return v;
+}
+export function parseNotificationPreferences(v: unknown): NotificationPreferences {
+  if (!object(v) || typeof v.in_app_enabled !== "boolean" ||
+      typeof v.high_occupancy_enabled !== "boolean" || !integer(v.high_occupancy_threshold) ||
+      v.high_occupancy_threshold < 50 || v.high_occupancy_threshold > 100 ||
+      !integer(v.cooldown_minutes) || v.cooldown_minutes < 1) {
+    throw new Error("Malformed notification preferences response");
+  }
+  return v as unknown as NotificationPreferences;
 }

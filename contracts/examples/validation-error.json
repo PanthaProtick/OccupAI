@@ -11,10 +11,7 @@
             "range"
           ],
           "msg": "Input should be 'hour', 'day' or 'week'",
-          "input": "month",
-          "ctx": {
-            "expected": "'hour', 'day' or 'week'"
-          }
+          "input": "month"
         }
       ]
     }

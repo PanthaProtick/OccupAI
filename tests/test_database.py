@@ -55,18 +55,55 @@ class DatabaseTests(unittest.TestCase):
     def test_migration_schema_constraints_and_pragmas(self):
         self.assertEqual(set(inspect(self.engine).get_table_names()), {
             "alembic_version", "rooms", "cameras", "camera_states", "ingestion_receipts",
-            "occupancy_samples", "occupancy_buckets_5m", "users", "authentication_sessions"})
+            "occupancy_samples", "occupancy_buckets_5m", "users", "authentication_sessions",
+            "notification_preferences", "user_notifications"})
         with self.engine.connect() as connection:
             self.assertEqual(connection.scalar(text("PRAGMA foreign_keys")), 1)
             self.assertGreaterEqual(connection.scalar(text("PRAGMA busy_timeout")), 5000)
             self.assertEqual(connection.scalar(text("PRAGMA journal_mode")), "wal")
-            self.assertEqual(connection.scalar(text("SELECT version_num FROM alembic_version")), "0003")
+            self.assertEqual(connection.scalar(text("SELECT version_num FROM alembic_version")), "0005")
         inspector = inspect(self.engine)
         self.assertEqual({fk["referred_table"] for fk in inspector.get_foreign_keys("cameras")}, {"rooms"})
         self.assertEqual({fk["referred_table"] for fk in inspector.get_foreign_keys("camera_states")}, {"cameras"})
         self.assertIn("ix_occupancy_samples_camera_time", {item["name"] for item in inspector.get_indexes("occupancy_samples")})
         self.assertIn("ix_occupancy_buckets_time", {item["name"] for item in inspector.get_indexes("occupancy_buckets_5m")})
         self.assertTrue(inspector.get_check_constraints("occupancy_buckets_5m"))
+        self.assertEqual(
+            {fk["referred_table"] for fk in inspector.get_foreign_keys("notification_preferences")},
+            {"users"},
+        )
+        self.assertEqual(
+            {fk["referred_table"] for fk in inspector.get_foreign_keys("user_notifications")},
+            {"users", "rooms"},
+        )
+        notification_indexes = {item["name"] for item in inspector.get_indexes("user_notifications")}
+        self.assertTrue({
+            "ix_user_notifications_user_id", "ix_user_notifications_created_at",
+            "ix_user_notifications_read_at", "ix_user_notifications_dismissed_at",
+            "ix_user_notifications_user_created", "ix_user_notifications_deduplication_key",
+        }.issubset(notification_indexes))
+        deduplication_index = next(
+            item for item in inspector.get_indexes("user_notifications")
+            if item["name"] == "ix_user_notifications_deduplication_key"
+        )
+        self.assertTrue(deduplication_index["unique"])
+
+    def test_notification_migration_upgrade_and_downgrade(self):
+        config = Config(str(PROJECT_ROOT / "alembic.ini"))
+        config.set_main_option("sqlalchemy.url", self.url)
+        command.downgrade(config, "0003")
+        tables = set(inspect(self.engine).get_table_names())
+        self.assertNotIn("notification_preferences", tables)
+        self.assertNotIn("user_notifications", tables)
+        with self.engine.connect() as connection:
+            self.assertEqual(connection.scalar(text("SELECT version_num FROM alembic_version")), "0003")
+
+        command.upgrade(config, "head")
+        tables = set(inspect(self.engine).get_table_names())
+        self.assertIn("notification_preferences", tables)
+        self.assertIn("user_notifications", tables)
+        with self.engine.connect() as connection:
+            self.assertEqual(connection.scalar(text("SELECT version_num FROM alembic_version")), "0005")
 
     def test_seed_is_idempotent_and_all_rooms_stay_visible(self):
         fixtures = PROJECT_ROOT / "mock" / "generated"

@@ -1,133 +1,110 @@
-import { useState } from "react";
-import { User, Mail, Shield, Save, ArrowLeft } from "lucide-react";
-import { useAuth } from "../auth/session";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { ArrowLeft, KeyRound, Mail, Save, Shield, User } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { api, ApiError } from "../api/client";
+import type { Profile } from "../api/types";
 
 export function ProfilePage() {
-  const { session } = useAuth();
-  
-  const [username, setUsername] = useState(session?.user?.username || "Campus Admin");
-  const [isEditingUsername, setIsEditingUsername] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
-  
-  const [passwordForm, setPasswordForm] = useState({ current: "", new: "", confirm: "" });
-  const [passResetStatus, setPassResetStatus] = useState<"idle" | "resetting" | "success" | "error">("idle");
+  const location = useLocation();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState(
+    (location.state as { passwordChanged?: boolean } | null)?.passwordChanged
+      ? "Password updated successfully."
+      : "",
+  );
 
-  const handleUsernameSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaveStatus("saving");
-    // Simulate API call
-    setTimeout(() => {
-      setSaveStatus("saved");
-      setIsEditingUsername(false);
-      setTimeout(() => setSaveStatus("idle"), 2000);
-    }, 800);
+  const load = async (signal?: AbortSignal) => {
+    setLoading(true);
+    setLoadError("");
+    try {
+      const value = await api.getProfile({ signal });
+      setProfile(value);
+      setName(value.name);
+    } catch (error) {
+      if (!(error instanceof ApiError && error.code === "cancelled")) {
+        setLoadError(error instanceof ApiError ? error.message : "Unable to load your profile.");
+      }
+    } finally {
+      if (!signal?.aborted) setLoading(false);
+    }
   };
 
-  const handlePasswordReset = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (passwordForm.new !== passwordForm.confirm) {
-      setPassResetStatus("error");
+  useEffect(() => {
+    const controller = new AbortController();
+    void load(controller.signal);
+    return () => controller.abort();
+  }, []);
+
+  const saveName = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const cleanName = name.trim().replace(/\s+/g, " ");
+    setMessage("");
+    if (!cleanName || cleanName.length > 120) {
+      setMessage("Enter a name between 1 and 120 characters.");
       return;
     }
-    setPassResetStatus("resetting");
-    // Simulate API call
-    setTimeout(() => {
-      setPassResetStatus("success");
-      setPasswordForm({ current: "", new: "", confirm: "" });
-      setTimeout(() => setPassResetStatus("idle"), 3000);
-    }, 1000);
+    setSaving(true);
+    try {
+      const updated = await api.updateProfile({ name: cleanName });
+      setProfile(updated);
+      setName(updated.name);
+      setEditing(false);
+      setMessage("Profile updated successfully.");
+    } catch (error) {
+      setMessage(error instanceof ApiError ? error.message : "Unable to update your profile.");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  return (
-    <div className="profile-container">
-      <div className="profile-header">
-        <Link to="/dashboard" className="back-link"><ArrowLeft size={16} /> Back to Dashboard</Link>
-        <h1>Account Settings</h1>
-        <p>Manage your profile, email, and security preferences.</p>
-      </div>
-
-      <div className="profile-grid">
-        <div className="profile-card profile-info">
-          <h2><User size={18} /> Profile Details</h2>
-          <div className="profile-details-content">
-            <div className="info-group">
-              <label><Mail size={14}/> Email Address</label>
-              <div className="info-value">{session?.user?.email || "admin@occupai.edu"}</div>
-              <span className="info-help">Your email is managed by your organization and cannot be changed here.</span>
-            </div>
-
-            <div className="info-group">
-              <label><User size={14}/> Username</label>
-              {!isEditingUsername ? (
-                <div className="info-value-row">
-                  <div className="info-value">{username}</div>
-                  <button className="edit-btn" onClick={() => setIsEditingUsername(true)}>Edit</button>
-                </div>
-              ) : (
-                <form onSubmit={handleUsernameSave} className="edit-username-form">
-                  <input 
-                    type="text" 
-                    value={username} 
-                    onChange={e => setUsername(e.target.value)} 
-                    autoFocus 
-                    className="profile-input"
-                  />
-                  <div className="edit-actions">
-                    <button type="button" className="cancel-btn" onClick={() => setIsEditingUsername(false)}>Cancel</button>
-                    <button type="submit" className="save-btn" disabled={saveStatus === 'saving'}>
-                      {saveStatus === 'saving' ? 'Saving...' : <><Save size={14}/> Save</>}
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
+  return <div className="profile-container">
+    <div className="profile-header">
+      <Link to="/dashboard" className="back-link"><ArrowLeft size={16} /> Back to Dashboard</Link>
+      <h1>Account Settings</h1>
+      <p>Manage your profile, email, and security preferences.</p>
+    </div>
+    {loading && <p role="status">Loading your profile…</p>}
+    {loadError && <div className="alert error" role="alert">{loadError} <button onClick={() => void load()}>Try again</button></div>}
+    {message && <div className={message.includes("successfully") ? "alert success" : "alert error"} role="status">{message}</div>}
+    {profile && !loading && <div className="profile-grid">
+      <div className="profile-card profile-info">
+        <h2><User size={18} /> Profile Details</h2>
+        <div className="profile-details-content">
+          <div className="info-group">
+            <label><Mail size={14}/> Email Address</label>
+            <div className="info-value">{profile.email}</div>
+            <span className="info-help">Your registered AUST email cannot be changed here.</span>
+          </div>
+          <div className="info-group">
+            <label htmlFor="profile-name"><User size={14}/> Name</label>
+            {!editing ? <div className="info-value-row">
+              <div className="info-value">{profile.name}</div>
+              <button className="edit-btn" onClick={() => { setEditing(true); setMessage(""); }}>Edit</button>
+            </div> : <form onSubmit={saveName} className="edit-username-form">
+              <input id="profile-name" type="text" value={name} maxLength={120}
+                onChange={(event) => setName(event.target.value)} autoFocus className="profile-input" />
+              <div className="edit-actions">
+                <button type="button" className="cancel-btn" onClick={() => { setName(profile.name); setEditing(false); }}>Cancel</button>
+                <button type="submit" className="save-btn" disabled={saving}>
+                  {saving ? "Saving…" : <><Save size={14}/> Save</>}
+                </button>
+              </div>
+            </form>}
           </div>
         </div>
-
-        <div className="profile-card profile-security">
-          <h2><Shield size={18} /> Password Reset</h2>
-          <form onSubmit={handlePasswordReset} className="password-form">
-            <div className="form-group">
-              <label>Current Password</label>
-              <input 
-                type="password" 
-                required 
-                value={passwordForm.current}
-                onChange={e => setPasswordForm({...passwordForm, current: e.target.value})}
-                className="profile-input"
-              />
-            </div>
-            <div className="form-group">
-              <label>New Password</label>
-              <input 
-                type="password" 
-                required 
-                value={passwordForm.new}
-                onChange={e => setPasswordForm({...passwordForm, new: e.target.value})}
-                className="profile-input"
-              />
-            </div>
-            <div className="form-group">
-              <label>Confirm New Password</label>
-              <input 
-                type="password" 
-                required 
-                value={passwordForm.confirm}
-                onChange={e => setPasswordForm({...passwordForm, confirm: e.target.value})}
-                className="profile-input"
-              />
-            </div>
-            
-            {passResetStatus === 'error' && <div className="alert error">Passwords do not match.</div>}
-            {passResetStatus === 'success' && <div className="alert success">Password updated successfully.</div>}
-            
-            <button type="submit" className="reset-btn" disabled={passResetStatus === 'resetting'}>
-              {passResetStatus === 'resetting' ? 'Resetting...' : 'Update Password'}
-            </button>
-          </form>
-        </div>
       </div>
-    </div>
-  );
+      <div className="profile-card profile-security">
+        <h2><Shield size={18} /> Account Security</h2>
+        <p className="info-help">Update your password from the protected password page.</p>
+        <Link className="reset-btn profile-change-password" to="/profile/change-password">
+          <KeyRound size={16}/> Change password
+        </Link>
+      </div>
+    </div>}
+  </div>;
 }

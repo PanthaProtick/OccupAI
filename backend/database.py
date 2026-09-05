@@ -36,6 +36,12 @@ class UserRow(Base):
     sessions: Mapped[list["AuthenticationSessionRow"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    notification_preferences: Mapped["NotificationPreferenceRow | None"] = relationship(
+        back_populates="user", cascade="all, delete-orphan", uselist=False
+    )
+    notifications: Mapped[list["UserNotificationRow"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class AuthenticationSessionRow(Base):
@@ -49,6 +55,68 @@ class AuthenticationSessionRow(Base):
     revoked_at: Mapped[str | None] = mapped_column(String, nullable=True)
     user_agent: Mapped[str | None] = mapped_column(String(512), nullable=True)
     user: Mapped[UserRow] = relationship(back_populates="sessions")
+
+
+class NotificationPreferenceRow(Base):
+    __tablename__ = "notification_preferences"
+    __table_args__ = (
+        CheckConstraint(
+            "high_occupancy_threshold BETWEEN 50 AND 100",
+            name="ck_notification_preferences_threshold",
+        ),
+        CheckConstraint(
+            "cooldown_minutes > 0",
+            name="ck_notification_preferences_cooldown",
+        ),
+    )
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    in_app_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    high_occupancy_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    high_occupancy_threshold: Mapped[int] = mapped_column(Integer, default=80)
+    cooldown_minutes: Mapped[int] = mapped_column(Integer, default=30)
+    created_at: Mapped[str] = mapped_column(String)
+    updated_at: Mapped[str] = mapped_column(String)
+    user: Mapped[UserRow] = relationship(back_populates="notification_preferences")
+
+
+class UserNotificationRow(Base):
+    __tablename__ = "user_notifications"
+    __table_args__ = (
+        CheckConstraint("length(trim(type)) > 0", name="ck_user_notifications_type"),
+        CheckConstraint("length(trim(category)) > 0", name="ck_user_notifications_category"),
+        CheckConstraint("length(trim(title)) > 0", name="ck_user_notifications_title"),
+        CheckConstraint("length(trim(message)) > 0", name="ck_user_notifications_message"),
+        CheckConstraint(
+            "occupancy_percentage IS NULL OR occupancy_percentage BETWEEN 0 AND 100",
+            name="ck_user_notifications_occupancy_percentage",
+        ),
+        Index("ix_user_notifications_user_created", "user_id", "created_at"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    type: Mapped[str] = mapped_column(String(64))
+    category: Mapped[str] = mapped_column(String(64))
+    title: Mapped[str] = mapped_column(String(200))
+    message: Mapped[str] = mapped_column(Text)
+    room_id: Mapped[str | None] = mapped_column(
+        ForeignKey("rooms.room_id", ondelete="SET NULL"), nullable=True
+    )
+    suggested_room_id: Mapped[str | None] = mapped_column(
+        ForeignKey("rooms.room_id", ondelete="SET NULL"), nullable=True
+    )
+    occupancy_percentage: Mapped[float | None] = mapped_column(Float, nullable=True)
+    deduplication_key: Mapped[str | None] = mapped_column(
+        String(255), nullable=True, unique=True
+    )
+    created_at: Mapped[str] = mapped_column(String, index=True)
+    read_at: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    dismissed_at: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    expires_at: Mapped[str | None] = mapped_column(String, nullable=True)
+    user: Mapped[UserRow] = relationship(back_populates="notifications")
 
 
 class RoomRow(Base):

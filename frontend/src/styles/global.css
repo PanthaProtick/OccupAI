@@ -1480,6 +1480,16 @@ body:after { opacity:.55; background-image:radial-gradient(circle at 16% 18%,rgb
 .notification-icon.type-success { background: #dcfce7; color: #22c55e; }
 .notification-content p { margin: 0 0 0.25rem 0; font-size: 0.85rem; color: #334155; line-height: 1.3; }
 .notification-content span { font-size: 0.7rem; color: #94a3b8; }
+.notification-main { display:flex; align-items:flex-start; gap:.75rem; min-width:0; flex:1; padding:0; border:0; text-align:left; background:transparent; cursor:pointer; }
+.notification-main:disabled { cursor:default; }
+.notification-content { display:grid; gap:.2rem; min-width:0; }
+.notification-content strong { color:#1e293b; font-size:.82rem; }
+.notification-content small { color:#94a3b8; font-size:.7rem; }
+.notification-content em { color:#6366f1; font-size:.72rem; font-style:normal; font-weight:700; }
+.notification-dismiss { align-self:flex-start; display:grid; place-items:center; padding:.3rem; border:0; border-radius:50%; color:#94a3b8; background:transparent; cursor:pointer; }
+.notification-dismiss:hover { color:#be185d; background:#fce7f3; }
+.notification-error { color:#b91c1c; }
+.notification-error button { margin-left:.3rem; border:0; color:#6d28d9; background:transparent; cursor:pointer; font-weight:700; }
 
 /* --- Profile Page --- */
 .profile-link { color: #625b78; }
@@ -1517,3 +1527,33 @@ body:after { opacity:.55; background-image:radial-gradient(circle at 16% 18%,rgb
 .alert { padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 500; }
 .alert.error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
 .alert.success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+.profile-change-password { display: inline-flex; align-items: center; gap: .45rem; text-decoration: none; }
+.password-input-wrap { position: relative; }
+.password-input-wrap .profile-input { padding-right: 3rem; }
+.password-input-wrap button { position: absolute; top: 50%; right: .7rem; display: grid; place-items: center; padding: .25rem; border: 0; color: #64748b; background: transparent; transform: translateY(-50%); cursor: pointer; }
+
+/* Keep Chromium/Edge autofill consistent with the translucent authentication fields. */
+.auth-form-wrap label > div:has(input:-webkit-autofill) {
+  background: #873b69;
+}
+
+.auth-form-wrap input:-webkit-autofill,
+.auth-form-wrap input:-webkit-autofill:hover,
+.auth-form-wrap input:-webkit-autofill:focus,
+.auth-form-wrap input:-webkit-autofill:active {
+  border-radius: .55rem;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: #fff !important;
+  caret-color: #fff !important;
+  box-shadow: 0 0 0 1000px #873b69 inset !important;
+  -webkit-box-shadow: 0 0 0 1000px #873b69 inset !important;
+}
+
+.auth-form-wrap input:autofill {
+  border-radius: .55rem;
+  background-color: #873b69 !important;
+  color: #fff !important;
+  caret-color: #fff !important;
+  box-shadow: 0 0 0 1000px #873b69 inset !important;
+}

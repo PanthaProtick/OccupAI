@@ -1,6 +1,7 @@
-# OccupAI SQLite Schema Proposal
+# OccupAI SQLite Schema
 
-Status: proposed design for backend implementation. This file is not an executable migration. The backend engineer should translate it into SQLAlchemy models and Alembic migrations, preserving the constraints and ownership rules below.
+Status: implemented through Alembic migrations. Migration `0004` adds persistent user
+notification tables; migration `0005` makes ingestion deduplication keys unique.
 
 ## Scope and decisions
 
@@ -238,6 +239,22 @@ Both `(camera_id, observed_at)` and `(camera_id, source_event_id)` are unique. R
 | `GET /api/occupancy` | `cameras`, `rooms`, and `camera_states` |
 | `GET /api/occupancy/{camera_id}` | `camera_states` joined with camera and room capacity |
 | `GET /api/history` | `occupancy_buckets_5m`, aggregated to requested hour/day/week granularity |
+| `GET/PATCH /api/profile` | authenticated row in `users` |
+| `GET/PATCH /api/notification-preferences` | authenticated row in `notification_preferences` |
+| notification list/read/dismiss routes | authenticated rows in `user_notifications` |
+
+## Account notification tables
+
+`notification_preferences` has one row per user (`user_id` primary key with cascade delete),
+boolean in-app/high-occupancy switches, a constrained 50–100 threshold, a positive cooldown,
+and UTC creation/update timestamps. Missing rows use and persist defaults of enabled, 80%,
+and 30 minutes.
+
+`user_notifications` stores a UUID, owning user, type/category/title/message, optional source
+and recommended room foreign keys, optional occupancy percentage, UTC created/read/dismissed/
+expiry timestamps, and an optional unique deduplication key. Indexes cover user, creation,
+read, dismissed, `(user_id, created_at)`, and deduplication lookup. A session logout never
+deletes or changes either account-owned table.
 
 Display percentage is calculated at the API/domain boundary:
 
