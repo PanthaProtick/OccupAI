@@ -7,7 +7,7 @@ import uuid
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
@@ -17,6 +17,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend.config import Settings
 from backend.models import (
+    AuthResponse,
     CollectionMeta,
     ErrorBody,
     ErrorResponse,
@@ -25,16 +26,20 @@ from backend.models import (
     HistoryMetric,
     HistoryRange,
     HistoryResponse,
+    LoginRequest,
     OccupancyListResponse,
     OccupancyResponse,
     RoomResponse,
     RoomsResponse,
+    SignupRequest,
 )
+from backend.auth import AuthError, AuthService, get_current_user
 from backend.database import create_database_engine, make_session_factory
 from backend.ingestion import ModelServerIngestionAdapter, ModelServerIngestionService, SerializedDatabaseWriter
 from backend.maintenance import DatabaseMaintenanceService
 from backend.repositories import DatabaseOccupancyRepository, MockOccupancyRepository, OccupancyRepository
 from backend.simulation import SimulatedCamera, SimulatedIngestionService
+from backend.security import AuthenticationRateLimiter
 
 
 logger = logging.getLogger(__name__)
@@ -81,6 +86,7 @@ def create_app(
     repository: OccupancyRepository | None = None,
 ) -> FastAPI:
     active_settings = settings or Settings.from_env()
+    repository_was_injected = repository is not None
     active_repository = repository or _build_repository(active_settings)
     ingestion_service: ModelServerIngestionService | None = None
     maintenance_service: DatabaseMaintenanceService | None = None
@@ -135,6 +141,8 @@ def create_app(
     @asynccontextmanager
     async def lifespan(_: FastAPI):
         _log("backend_startup", **active_settings.safe_summary())
+        if not repository_was_injected:
+            auth_service()
         if ingestion_service:
             ingestion_service.start()
         if simulation_service:
@@ -154,6 +162,8 @@ def create_app(
         engine = getattr(active_repository, "engine", None)
         if engine:
             engine.dispose()
+        if app.state.auth_engine is not None and app.state.auth_engine is not engine:
+            app.state.auth_engine.dispose()
 
     app = FastAPI(
         title="OccupAI Product API",
@@ -166,12 +176,18 @@ def create_app(
     app.state.ingestion_service = ingestion_service
     app.state.simulation_service = simulation_service
     app.state.maintenance_service = maintenance_service
+    app.state.auth_service = None
+    app.state.auth_engine = None
+    app.state.auth_rate_limiter = AuthenticationRateLimiter(
+        active_settings.auth_rate_limit_attempts,
+        active_settings.auth_rate_limit_window_seconds,
+    )
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(active_settings.frontend_origins),
-        allow_credentials=False,
-        allow_methods=["GET"],
-        allow_headers=["*"],
+        allow_credentials=True,
+        allow_methods=["GET", "POST"],
+        allow_headers=["Accept", "Content-Type", "X-Request-ID"],
     )
 
     @app.middleware("http")
@@ -209,6 +225,10 @@ def create_app(
     async def validation_error_handler(_: Request, exc: RequestValidationError) -> JSONResponse:
         return _error(400, "invalid_request", "Request validation failed", {"errors": exc.errors()})
 
+    @app.exception_handler(AuthError)
+    async def auth_error_handler(_: Request, exc: AuthError) -> JSONResponse:
+        return _error(exc.status, exc.code, exc.message)
+
     @app.exception_handler(HTTPException)
     async def http_error_handler(_: Request, exc: HTTPException) -> JSONResponse:
         detail = exc.detail if isinstance(exc.detail, dict) else {"message": str(exc.detail)}
@@ -231,6 +251,74 @@ def create_app(
     @app.get("/health", response_model=HealthResponse, tags=["system"])
     def health() -> HealthResponse:
         return HealthResponse(data_source=active_settings.data_source)
+
+    def auth_service() -> AuthService:
+        if app.state.auth_service is None:
+            engine = create_database_engine(active_settings.database_url, active_settings.sqlite_busy_timeout_ms)
+            try:
+                missing = {"users", "authentication_sessions"} - set(inspect(engine).get_table_names())
+            except Exception as exc:
+                engine.dispose()
+                raise RuntimeError("Authentication database is unavailable") from exc
+            if missing:
+                engine.dispose()
+                raise RuntimeError("Authentication schema is not migrated; run `uv run alembic upgrade head`")
+            app.state.auth_engine = engine
+            app.state.auth_service = AuthService(
+                make_session_factory(engine), active_settings.auth_session_pepper,
+                active_settings.auth_session_ttl_seconds,
+            )
+        return app.state.auth_service
+
+    app.state.get_auth_service = auth_service
+
+    def validate_auth_origin(request: Request) -> None:
+        if request.headers.get("Origin") not in active_settings.frontend_origins:
+            raise AuthError(403, "invalid_origin", "The request origin is not allowed.")
+
+    def client_key(request: Request) -> str:
+        return request.client.host if request.client else "unknown"
+
+    def set_session_cookie(response: Response, token: str) -> None:
+        response.set_cookie(
+            active_settings.auth_cookie_name, token,
+            max_age=active_settings.auth_session_ttl_seconds,
+            httponly=True, secure=active_settings.auth_cookie_secure,
+            samesite=active_settings.auth_cookie_samesite, path="/",
+        )
+
+    @app.post("/api/auth/signup", response_model=AuthResponse, status_code=201, tags=["authentication"])
+    def signup(payload: SignupRequest, request: Request, response: Response) -> AuthResponse:
+        validate_auth_origin(request)
+        app.state.auth_rate_limiter.check(f"signup:{client_key(request)}")
+        user, token = auth_service().signup(payload.name, payload.email, payload.password,
+                                            request.headers.get("User-Agent"))
+        set_session_cookie(response, token)
+        return AuthResponse(data=user)
+
+    @app.post("/api/auth/login", response_model=AuthResponse, tags=["authentication"])
+    def login(payload: LoginRequest, request: Request, response: Response) -> AuthResponse:
+        validate_auth_origin(request)
+        rate_key = f"login:{client_key(request)}:{payload.email.strip().lower()}"
+        app.state.auth_rate_limiter.check(rate_key)
+        auth_service().logout(request.cookies.get(active_settings.auth_cookie_name))
+        user, token = auth_service().login(payload.email, payload.password,
+                                           request.headers.get("User-Agent"))
+        set_session_cookie(response, token)
+        app.state.auth_rate_limiter.reset(rate_key)
+        return AuthResponse(data=user)
+
+    @app.post("/api/auth/logout", status_code=204, tags=["authentication"])
+    def logout(request: Request, response: Response) -> None:
+        validate_auth_origin(request)
+        auth_service().logout(request.cookies.get(active_settings.auth_cookie_name))
+        response.delete_cookie(active_settings.auth_cookie_name, path="/",
+                               secure=active_settings.auth_cookie_secure, httponly=True,
+                               samesite=active_settings.auth_cookie_samesite)
+
+    @app.get("/api/auth/me", response_model=AuthResponse, tags=["authentication"])
+    def me(user=Depends(get_current_user)) -> AuthResponse:
+        return AuthResponse(data=user)
 
     @app.get("/ready", response_model=HealthResponse, tags=["system"])
     def ready() -> HealthResponse:

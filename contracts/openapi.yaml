@@ -17,6 +17,73 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
+  /api/auth/signup:
+    post:
+      tags:
+      - authentication
+      summary: Signup
+      operationId: signup_api_auth_signup_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400': &id001
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/auth/login:
+    post:
+      tags:
+      - authentication
+      summary: Login
+      operationId: login_api_auth_login_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400': *id001
+  /api/auth/logout:
+    post:
+      tags:
+      - authentication
+      summary: Logout
+      operationId: logout_api_auth_logout_post
+      responses:
+        '204':
+          description: Successful Response
+  /api/auth/me:
+    get:
+      tags:
+      - authentication
+      summary: Me
+      operationId: me_api_auth_me_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
   /ready:
     get:
       tags:
@@ -69,12 +136,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
           description: Not Found
-        '400': &id001
-          description: Invalid request parameters
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+        '400': *id001
   /api/occupancy:
     get:
       tags:
@@ -163,6 +225,15 @@ paths:
         '400': *id001
 components:
   schemas:
+    AuthResponse:
+      properties:
+        data:
+          $ref: '#/components/schemas/PublicUser'
+      additionalProperties: false
+      type: object
+      required:
+      - data
+      title: AuthResponse
     CameraStatus:
       type: string
       enum:
@@ -314,6 +385,24 @@ components:
       - data
       - meta
       title: HistoryResponse
+    LoginRequest:
+      properties:
+        email:
+          type: string
+          maxLength: 320
+          minLength: 3
+          title: Email
+        password:
+          type: string
+          maxLength: 128
+          minLength: 1
+          title: Password
+      additionalProperties: false
+      type: object
+      required:
+      - email
+      - password
+      title: LoginRequest
     Occupancy:
       properties:
         camera_id:
@@ -386,6 +475,33 @@ components:
       required:
       - data
       title: OccupancyResponse
+    PublicUser:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+        email:
+          type: string
+          title: Email
+        role:
+          type: string
+          title: Role
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - name
+      - email
+      - role
+      - created_at
+      title: PublicUser
     Room:
       properties:
         room_id:
@@ -524,6 +640,30 @@ components:
       - data
       - meta
       title: RoomsResponse
+    SignupRequest:
+      properties:
+        name:
+          type: string
+          maxLength: 120
+          minLength: 2
+          title: Name
+        email:
+          type: string
+          maxLength: 320
+          minLength: 3
+          title: Email
+        password:
+          type: string
+          maxLength: 128
+          minLength: 1
+          title: Password
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      - email
+      - password
+      title: SignupRequest
     ValidationError:
       properties:
         loc:

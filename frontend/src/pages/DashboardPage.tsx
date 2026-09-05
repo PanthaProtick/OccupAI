@@ -10,6 +10,7 @@ import { useSearchParams } from "react-router-dom";
 import { motion, type Variants } from "framer-motion";
 import { Activity, Building2, DoorOpen, Gauge, RefreshCw, Sparkles, TrendingUp, Users } from "lucide-react";
 import { SmartRecommendations } from "../components/recommendations/SmartRecommendations";
+import { groupRoomsByBlock } from "../components/rooms/roomBlocks";
 
 const textVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
@@ -31,6 +32,7 @@ export function DashboardPage() {
   const floors = useMemo(() => [...new Set((data ?? []).filter(({ room }) => room.building === building).map(({ room }) => room.floor))].sort((a, b) => a - b), [data, building]);
   const floor = selectedFloor === "" || !floors.includes(Number(selectedFloor)) ? floors[0] : Number(selectedFloor);
   const mapData = allData.filter(({ room }) => room.building === building && room.floor === floor);
+  const roomBlocks = useMemo(() => groupRoomsByBlock(mapData), [mapData]);
   const liveRooms = mapData.filter(({ occupancy }) => occupancy.status === "online" && occupancy.occupancy !== null);
   const allLiveRooms = allData.filter(({ occupancy }) => occupancy.status === "online" && occupancy.occupancy !== null);
   const people = allLiveRooms.reduce((total, { occupancy }) => total + (occupancy.occupancy ?? 0), 0);
@@ -149,10 +151,8 @@ export function DashboardPage() {
 
 
       <div className="room-section-heading" id="rooms"><div><p className="eyebrow">Room directory</p><h2>Spaces on this floor</h2></div><span>{mapData.length} rooms</span></div>
-      <section className="room-grid" aria-label="Rooms">
-        {mapData.map(({ room, occupancy }, i) => (
-          <RoomCard key={room.room_id} room={room} occupancy={occupancy} index={i} />
-        ))}
+      <section className="block-directory" aria-label="Rooms">
+        {roomBlocks.map(({block,rooms})=><section className={`block-directory__group block-directory__group--${block.toLowerCase()}`} aria-labelledby={`block-${block}`} key={block}><div className="block-directory__heading"><div><p>Building wing</p><h3 id={`block-${block}`}>{block} Block</h3></div><strong>{rooms.length} {rooms.length===1?"room":"rooms"}</strong></div><div className="room-grid">{rooms.map(({room,occupancy},index)=><RoomCard key={room.room_id} room={room} occupancy={occupancy} index={index}/>)}</div></section>)}
       </section>
 
       <SmartRecommendations data={mapData} />

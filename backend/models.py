@@ -122,3 +122,26 @@ class ErrorBody(ApiModel):
 
 class ErrorResponse(ApiModel):
     error: ErrorBody
+
+
+class SignupRequest(ApiModel):
+    name: str = Field(min_length=2, max_length=120)
+    email: str = Field(min_length=3, max_length=320)
+    password: str = Field(min_length=1, max_length=128)
+
+
+class LoginRequest(ApiModel):
+    email: str = Field(min_length=3, max_length=320)
+    password: str = Field(min_length=1, max_length=128)
+
+
+class PublicUser(ApiModel):
+    id: str
+    name: str
+    email: str
+    role: str
+    created_at: UtcDateTime
+
+
+class AuthResponse(ApiModel):
+    data: PublicUser

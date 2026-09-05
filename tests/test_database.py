@@ -55,12 +55,12 @@ class DatabaseTests(unittest.TestCase):
     def test_migration_schema_constraints_and_pragmas(self):
         self.assertEqual(set(inspect(self.engine).get_table_names()), {
             "alembic_version", "rooms", "cameras", "camera_states", "ingestion_receipts",
-            "occupancy_samples", "occupancy_buckets_5m"})
+            "occupancy_samples", "occupancy_buckets_5m", "users", "authentication_sessions"})
         with self.engine.connect() as connection:
             self.assertEqual(connection.scalar(text("PRAGMA foreign_keys")), 1)
             self.assertGreaterEqual(connection.scalar(text("PRAGMA busy_timeout")), 5000)
             self.assertEqual(connection.scalar(text("PRAGMA journal_mode")), "wal")
-            self.assertEqual(connection.scalar(text("SELECT version_num FROM alembic_version")), "0002")
+            self.assertEqual(connection.scalar(text("SELECT version_num FROM alembic_version")), "0003")
         inspector = inspect(self.engine)
         self.assertEqual({fk["referred_table"] for fk in inspector.get_foreign_keys("cameras")}, {"rooms"})
         self.assertEqual({fk["referred_table"] for fk in inspector.get_foreign_keys("camera_states")}, {"cameras"})
@@ -105,8 +105,8 @@ class DatabaseTests(unittest.TestCase):
     def test_import_history_and_repository_aggregations(self):
         seed_canonical(self.sessions, PROJECT_ROOT / "mock" / "generated")
         path = PROJECT_ROOT / "mock" / "generated" / "history_5min_7days.json"
-        self.assertEqual(import_history(self.sessions, path), 8064)
-        self.assertEqual(import_history(self.sessions, path), 8064)
+        self.assertEqual(import_history(self.sessions, path), 312480)
+        self.assertEqual(import_history(self.sessions, path), 312480)
         repository = DatabaseOccupancyRepository(self.sessions)
         for granularity, expected in ((HistoryRange.HOUR, 168), (HistoryRange.DAY, 7), (HistoryRange.WEEK, 1)):
             self.assertEqual(len(repository.get_history("room_tt_ground", granularity, HistoryMetric.PERCENTAGE)), expected)
