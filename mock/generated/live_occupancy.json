@@ -2,933 +2,933 @@
   "cameras": [
     {
       "camera_id": "cam_001",
-      "occupancy": 22,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
+      "occupancy": 48,
+      "updated_at": "2026-09-01T13:00:00Z",
       "status": "online"
     },
     {
       "camera_id": "cam_002",
-      "occupancy": 36,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
+      "occupancy": 28,
+      "updated_at": "2026-09-01T13:00:00Z",
       "status": "online"
     },
     {
       "camera_id": "cam_003",
-      "occupancy": 20,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 96,
+      "updated_at": "2026-09-01T12:49:00Z",
+      "status": "stale"
     },
     {
       "camera_id": "cam_004",
-      "occupancy": 8,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
+      "occupancy": 12,
+      "updated_at": "2026-09-01T13:00:00Z",
       "status": "online"
     },
     {
       "camera_id": "cam_005",
-      "occupancy": 45,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_006",
-      "occupancy": 18,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_007",
-      "occupancy": 20,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_008",
-      "occupancy": 8,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_009",
-      "occupancy": 21,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_010",
-      "occupancy": 38,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_011",
-      "occupancy": 19,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_012",
-      "occupancy": 8,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_013",
-      "occupancy": 45,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_014",
-      "occupancy": 36,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_015",
-      "occupancy": 22,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_016",
-      "occupancy": 4,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_017",
-      "occupancy": 88,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_018",
-      "occupancy": 18,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_019",
-      "occupancy": 22,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_020",
-      "occupancy": 8,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_021",
-      "occupancy": 21,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_022",
-      "occupancy": 36,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_023",
-      "occupancy": 10,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_024",
-      "occupancy": 19,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_025",
-      "occupancy": 43,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_026",
-      "occupancy": 36,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_027",
-      "occupancy": 11,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_028",
-      "occupancy": 8,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_029",
-      "occupancy": 20,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_030",
-      "occupancy": 18,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_031",
-      "occupancy": 10,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_032",
-      "occupancy": 4,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_033",
-      "occupancy": 56,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_034",
-      "occupancy": 17,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_035",
-      "occupancy": 22,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_036",
-      "occupancy": 9,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_037",
-      "occupancy": 45,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_038",
-      "occupancy": 35,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_039",
-      "occupancy": 21,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_040",
-      "occupancy": 9,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_041",
-      "occupancy": 22,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_042",
-      "occupancy": 36,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_043",
-      "occupancy": 10,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_044",
-      "occupancy": 7,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_045",
-      "occupancy": 22,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_046",
-      "occupancy": 35,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_047",
-      "occupancy": 10,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_048",
-      "occupancy": 8,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_049",
-      "occupancy": 45,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_050",
-      "occupancy": 38,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_051",
-      "occupancy": 20,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_052",
-      "occupancy": 7,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_053",
-      "occupancy": 22,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_054",
-      "occupancy": 18,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_055",
-      "occupancy": 22,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_056",
-      "occupancy": 4,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_057",
-      "occupancy": 43,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_058",
-      "occupancy": 18,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_059",
-      "occupancy": 10,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_060",
-      "occupancy": 8,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_061",
-      "occupancy": 22,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_062",
-      "occupancy": 37,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_063",
-      "occupancy": 21,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_064",
-      "occupancy": 8,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_065",
-      "occupancy": 44,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_066",
-      "occupancy": 19,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_067",
-      "occupancy": 29,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_068",
-      "occupancy": 8,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_069",
-      "occupancy": 44,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_070",
-      "occupancy": 17,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_071",
-      "occupancy": 11,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_072",
-      "occupancy": 4,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_073",
-      "occupancy": 43,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_074",
-      "occupancy": 37,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_075",
-      "occupancy": 11,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_076",
-      "occupancy": 6,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_077",
-      "occupancy": 46,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_078",
-      "occupancy": 19,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_079",
-      "occupancy": 10,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_080",
-      "occupancy": 8,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_081",
-      "occupancy": 42,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_082",
-      "occupancy": 17,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_083",
-      "occupancy": 11,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_084",
-      "occupancy": 6,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_085",
-      "occupancy": 46,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_086",
-      "occupancy": 36,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_087",
-      "occupancy": 11,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_088",
-      "occupancy": 6,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_089",
-      "occupancy": 22,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_090",
-      "occupancy": 17,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_091",
-      "occupancy": 21,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_092",
-      "occupancy": 4,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_093",
-      "occupancy": 45,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_094",
-      "occupancy": 36,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_095",
-      "occupancy": 22,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_096",
-      "occupancy": 7,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_097",
-      "occupancy": 22,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_098",
-      "occupancy": 34,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_099",
-      "occupancy": 21,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_100",
-      "occupancy": 4,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_101",
-      "occupancy": 44,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_102",
-      "occupancy": 18,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_103",
-      "occupancy": 11,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_104",
-      "occupancy": 4,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_105",
-      "occupancy": 45,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_106",
-      "occupancy": 19,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_107",
-      "occupancy": 20,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_108",
-      "occupancy": 10,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_109",
-      "occupancy": 44,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_110",
-      "occupancy": 37,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_111",
-      "occupancy": 9,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_112",
-      "occupancy": 4,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_113",
-      "occupancy": 136,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_114",
-      "occupancy": 40,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_115",
-      "occupancy": 22,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_116",
-      "occupancy": 4,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_117",
-      "occupancy": 22,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_118",
-      "occupancy": 18,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_119",
-      "occupancy": 10,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_120",
-      "occupancy": 9,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_121",
-      "occupancy": 45,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_122",
-      "occupancy": 37,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_123",
-      "occupancy": 22,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_124",
-      "occupancy": 5,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_125",
-      "occupancy": 21,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_126",
-      "occupancy": 37,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_127",
-      "occupancy": 10,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_128",
-      "occupancy": 4,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_129",
-      "occupancy": 22,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_130",
-      "occupancy": 35,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_131",
-      "occupancy": 21,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_132",
-      "occupancy": 4,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_133",
-      "occupancy": 45,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_134",
-      "occupancy": 35,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_135",
-      "occupancy": 11,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_136",
-      "occupancy": 6,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_137",
-      "occupancy": 41,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_138",
-      "occupancy": 36,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_139",
-      "occupancy": 11,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_140",
-      "occupancy": 4,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_141",
-      "occupancy": 23,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_142",
-      "occupancy": 35,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_143",
-      "occupancy": 10,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_144",
-      "occupancy": 11,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_145",
-      "occupancy": 45,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_146",
-      "occupancy": 36,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_147",
-      "occupancy": 11,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_148",
-      "occupancy": 8,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_149",
-      "occupancy": 22,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_150",
-      "occupancy": 35,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_151",
-      "occupancy": 10,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_152",
-      "occupancy": 3,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_153",
-      "occupancy": 45,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_154",
-      "occupancy": 38,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     },
     {
       "camera_id": "cam_155",
-      "occupancy": 10,
-      "updated_at": "2026-09-05T06:21:37.644969Z",
-      "status": "online"
+      "occupancy": 0,
+      "updated_at": "2026-09-01T13:00:00Z",
+      "status": "offline"
     }
   ]
 }

@@ -12,6 +12,7 @@ DEFAULT_DATABASE_URL = "sqlite:///./data/occupai.db"
 
 @dataclass(frozen=True)
 class Settings:
+    app_environment: str = "development"
     data_source: str = "mock"
     mock_data_dir: Path = PROJECT_ROOT / "mock" / "generated"
     frontend_origins: tuple[str, ...] = ("http://localhost:5173", "http://127.0.0.1:5173")
@@ -30,6 +31,13 @@ class Settings:
     maintenance_interval_seconds: float = 60.0
     simulation_enabled: bool = False
     simulation_tick_interval_seconds: float = 10.0
+    auth_cookie_name: str = "occupai_session"
+    auth_session_ttl_seconds: int = 3600
+    auth_cookie_secure: bool = False
+    auth_cookie_samesite: str = "lax"
+    auth_session_pepper: str = "occupai-local-development-only-change-me"
+    auth_rate_limit_attempts: int = 10
+    auth_rate_limit_window_seconds: int = 300
 
     def __post_init__(self) -> None:
         if self.data_source not in {"mock", "database"}:
@@ -44,12 +52,30 @@ class Settings:
             "MODEL_SERVER_POLL_INTERVAL_SECONDS": self.model_server_poll_interval_seconds,
             "MAINTENANCE_INTERVAL_SECONDS": self.maintenance_interval_seconds,
             "SIMULATION_TICK_INTERVAL_SECONDS": self.simulation_tick_interval_seconds,
+            "AUTH_SESSION_TTL_SECONDS": self.auth_session_ttl_seconds,
+            "AUTH_RATE_LIMIT_ATTEMPTS": self.auth_rate_limit_attempts,
+            "AUTH_RATE_LIMIT_WINDOW_SECONDS": self.auth_rate_limit_window_seconds,
         }
         invalid = [name for name, value in positive.items() if value <= 0]
         if invalid:
             raise ValueError(f"Configuration values must be positive: {', '.join(invalid)}")
         if not self.database_url.strip():
             raise ValueError("DATABASE_URL must not be empty")
+        if not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", self.auth_cookie_name):
+            raise ValueError("AUTH_COOKIE_NAME is invalid")
+        if len(self.auth_session_pepper) < 24:
+            raise ValueError("AUTH_SESSION_PEPPER must contain at least 24 characters")
+        if self.auth_cookie_samesite not in {"lax", "strict", "none"}:
+            raise ValueError("AUTH_COOKIE_SAMESITE must be lax, strict, or none")
+        if self.auth_cookie_samesite == "none" and not self.auth_cookie_secure:
+            raise ValueError("AUTH_COOKIE_SAMESITE=none requires AUTH_COOKIE_SECURE=true")
+        if self.app_environment not in {"development", "test", "production"}:
+            raise ValueError("APP_ENVIRONMENT must be development, test, or production")
+        if self.app_environment == "production":
+            if not self.auth_cookie_secure:
+                raise ValueError("Production requires AUTH_COOKIE_SECURE=true")
+            if self.auth_session_pepper == "occupai-local-development-only-change-me":
+                raise ValueError("Production requires a unique AUTH_SESSION_PEPPER")
         if self.raw_sample_interval_seconds < 5 or self.raw_sample_interval_seconds > 10:
             raise ValueError("RAW_SAMPLE_INTERVAL_SECONDS must be between 5 and 10")
         if self.ingestion_enabled and self.data_source != "database":
@@ -76,6 +102,8 @@ class Settings:
             "live_camera_count": len(self.live_camera_ids),
             "maintenance_enabled": self.maintenance_enabled,
             "simulation_enabled": self.simulation_enabled,
+            "auth_cookie_secure": self.auth_cookie_secure,
+            "app_environment": self.app_environment,
         }
 
     @classmethod
@@ -100,6 +128,7 @@ class Settings:
             if origin.strip()
         )
         return cls(
+            app_environment=setting("APP_ENVIRONMENT", "development").strip().lower(),
             data_source=data_source,
             mock_data_dir=mock_data_dir.resolve(),
             frontend_origins=origins,
@@ -120,5 +149,14 @@ class Settings:
             maintenance_interval_seconds=float(setting("MAINTENANCE_INTERVAL_SECONDS", "60")),
             simulation_enabled=setting("SIMULATION_ENABLED", "false").strip().lower() in {"1", "true", "yes"},
             simulation_tick_interval_seconds=float(setting("SIMULATION_TICK_INTERVAL_SECONDS", "10")),
+            auth_cookie_name=setting("AUTH_COOKIE_NAME", "occupai_session"),
+            auth_session_ttl_seconds=int(setting("AUTH_SESSION_TTL_SECONDS", "3600")),
+            auth_cookie_secure=setting("AUTH_COOKIE_SECURE", "false").strip().lower() in {"1", "true", "yes"},
+            auth_cookie_samesite=setting("AUTH_COOKIE_SAMESITE", "lax").strip().lower(),
+            auth_session_pepper=setting(
+                "AUTH_SESSION_PEPPER", "occupai-local-development-only-change-me"
+            ),
+            auth_rate_limit_attempts=int(setting("AUTH_RATE_LIMIT_ATTEMPTS", "10")),
+            auth_rate_limit_window_seconds=int(setting("AUTH_RATE_LIMIT_WINDOW_SECONDS", "300")),
         )
 

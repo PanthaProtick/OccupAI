@@ -17,6 +17,7 @@ dependencies = [
     "sqlalchemy>=2.0.0",
     "alembic>=1.13.0",
     "dotenv>=0.9.9",
+    "argon2-cffi>=25.1.0",
 ]
 
 [[tool.uv.index]]

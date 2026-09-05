@@ -21,7 +21,7 @@ export function WelcomePage() {
           <motion.div {...reveal} transition={{...reveal.transition, delay:.24}} className="welcome-actions"><Link className="welcome-primary" to="/login?mode=signup">Explore OccupAI <ArrowRight size={18}/></Link><Link className="welcome-secondary" to="/login">View live dashboard</Link></motion.div>
           <motion.div {...reveal} className="welcome-trust"><span><i/>Privacy-first sensing</span><span><i/>Live operational data</span><span><i/>Actionable recommendations</span></motion.div>
         </div>
-        <motion.div initial={{opacity:0,x:24}} whileInView={{opacity:1,x:0}} viewport={{once:true,amount:.2}} transition={{duration:.7,ease:[.2,.8,.2,1]}} className="welcome-hero__visual"><img src="/aust-campus.jpg" alt="Ahsanullah University of Science and Technology campus in Tejgaon, Dhaka"/><span className="campus-photo-label">AUST · Tejgaon, Dhaka</span><span className="floating-stat floating-stat--one"><b>42%</b> campus utilization</span><span className="floating-stat floating-stat--two"><i/> 128 rooms live</span></motion.div>
+        <motion.div initial={{opacity:0,x:24}} whileInView={{opacity:1,x:0}} viewport={{once:true,amount:.2}} transition={{duration:.7,ease:[.2,.8,.2,1]}} className="welcome-hero__visual"><img src="/aust-campus.jpg" alt="Ahsanullah University of Science and Technology campus in Tejgaon, Dhaka"/></motion.div>
       </section>
 
       <section className="welcome-ideas" id="vision">

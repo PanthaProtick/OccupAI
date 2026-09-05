@@ -5,15 +5,18 @@ import { parseHistory, parseOccupancy, parseOccupancyList, parseRoom, parseRooms
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number | null, public readonly code: string, public readonly details?: Record<string, unknown>) { super(message); this.name = "ApiError"; }
 }
-export interface RequestOptions { signal?: AbortSignal; timeoutMs?: number }
+export interface RequestOptions { signal?: AbortSignal; timeoutMs?: number; method?: "GET"|"POST"; body?: unknown }
 
-async function request(path: string, { signal, timeoutMs = 10_000 }: RequestOptions = {}): Promise<unknown> {
+async function request(path: string, { signal, timeoutMs = 10_000, method = "GET", body: requestBody }: RequestOptions = {}): Promise<unknown> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort("timeout"), timeoutMs);
   const abort = () => controller.abort(signal?.reason);
   signal?.addEventListener("abort", abort, { once: true });
   try {
-    const response = await fetch(`${env.apiBaseUrl}${path}`, { headers: { Accept: "application/json" }, signal: controller.signal });
+    const response = await fetch(`${env.apiBaseUrl}${path}`, { method, credentials: "include", signal: controller.signal,
+      headers: { Accept: "application/json", ...(requestBody === undefined ? {} : { "Content-Type": "application/json" }) },
+      body: requestBody === undefined ? undefined : JSON.stringify(requestBody) });
+    if (response.status === 204) return undefined;
     let body: unknown;
     try { body = await response.json(); } catch { throw new ApiError("The server returned invalid JSON.", response.status, "invalid_json"); }
     if (!response.ok) {
@@ -31,6 +34,10 @@ async function request(path: string, { signal, timeoutMs = 10_000 }: RequestOpti
 }
 const segment = (value: string) => encodeURIComponent(value);
 export const api = {
+  signup: (value: {name:string;email:string;password:string}) => request("/auth/signup", {method:"POST",body:value}) as Promise<{data:AuthUser}>,
+  login: (value: {email:string;password:string}) => request("/auth/login", {method:"POST",body:value}) as Promise<{data:AuthUser}>,
+  logout: () => request("/auth/logout", {method:"POST"}),
+  me: () => request("/auth/me") as Promise<{data:AuthUser}>,
   getRooms: (options?: RequestOptions) => request("/rooms", options).then(parseRooms),
   getRoom: (roomId: string, options?: RequestOptions) => request(`/rooms/${segment(roomId)}`, options).then(parseRoom),
   getOccupancy: (options?: RequestOptions) => request("/occupancy", options).then(parseOccupancyList),
@@ -40,3 +47,4 @@ export const api = {
     return request(`/history?${query}`, options).then(parseHistory);
   },
 };
+export interface AuthUser { id:string; name:string; email:string; role:string }

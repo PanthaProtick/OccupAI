@@ -1,5 +1,37 @@
 # OccupAI backend operations
 
+## Authentication
+
+Registration accepts only an exact, normalized `@aust.edu` domain. Passwords are
+independently required to be 6–128 characters, then hashed with Argon2id. Opaque session tokens are stored only as
+keyed hashes; browsers receive the raw token in an HttpOnly cookie.
+
+Apply migrations before using authentication:
+
+```powershell
+$env:UV_CACHE_DIR = ".uv-cache"
+uv run alembic upgrade head
+```
+
+Auth routes are `POST /api/auth/signup`, `POST /api/auth/login`,
+`POST /api/auth/logout`, and `GET /api/auth/me`. Sessions default to one hour. Configure
+`AUTH_COOKIE_NAME`, `AUTH_SESSION_TTL_SECONDS`, `AUTH_COOKIE_SECURE`,
+`AUTH_COOKIE_SAMESITE`, and `AUTH_SESSION_PEPPER`; replace the example pepper with a long
+random secret. Local HTTP uses `AUTH_COOKIE_SECURE=false`, while production must use HTTPS
+and a secure cookie. Credentialed CORS is limited to `FRONTEND_ORIGINS`, and authentication
+POST requests validate `Origin` for CSRF protection. Password reset and email verification
+are intentionally future work.
+
+Set `APP_ENVIRONMENT=production` in production. Startup then refuses the development
+pepper and insecure cookies. `AUTH_RATE_LIMIT_ATTEMPTS` and
+`AUTH_RATE_LIMIT_WINDOW_SECONDS` control the per-client/email sliding-window limiter. For
+multi-instance deployment, replace the process-local limiter with a shared store such as
+Redis so limits apply consistently across every instance.
+
+To promote an existing account, stop the API, back up the database, and perform a reviewed
+database update setting that user's role to `admin`. Never create a hard-coded administrator
+or manually edit password hashes.
+
 The product API has one stable HTTP contract and two read sources: `mock` and `database`. Routes only use the `OccupancyRepository` protocol. The model server never writes SQLite; its `/occupancy` snapshot is validated by `ModelServerIngestionAdapter` and passed to the serialized backend writer.
 
 ## Install, migrate, seed, and run

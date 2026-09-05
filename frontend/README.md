@@ -33,6 +33,9 @@ npm run preview
 - History controls select aggregation across the retained seven-day dataset: `hour` (hourly), `day` (daily), and `week` (one weekly bucket). They do not select a lookback period.
 - Timestamps retain their UTC API strings in application data and are displayed in the browser's local timezone.
 - Offline occupancy is unavailable, while a measured zero remains `0`. Displayed percentages are capped at 100%.
+- Authentication uses the backend HttpOnly session cookie. `/api/auth/me` restores login
+  after reload, and no token or authentication proof is stored in browser storage. Sign-up
+  requires an exact `@aust.edu` address, with the backend as the authoritative validator.
 
 ## Testing
 

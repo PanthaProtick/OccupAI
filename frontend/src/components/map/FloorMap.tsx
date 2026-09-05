@@ -5,6 +5,7 @@ import { useState } from "react";
 import { formatTimestamp } from "../../utils/formatters";
 import type { RoomSnapshot } from "../../hooks/useDashboard";
 import { getMapRooms, occupancyLevel } from "./mapGeometry";
+import { groupRoomsByBlock } from "../rooms/roomBlocks";
 
 function occupancyLabel(snapshot: RoomSnapshot) {
   const { occupancy } = snapshot;
@@ -24,6 +25,7 @@ export function FloorMap({ snapshots }: { snapshots: RoomSnapshot[] }) {
   const height = 600;
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null);
   const activeRoom = mapRooms.find(({ room }) => room.room_id === activeRoomId);
+  const roomBlocks = groupRoomsByBlock(mapRooms);
 
   return (
     <div className="floor-map">
@@ -48,6 +50,9 @@ export function FloorMap({ snapshots }: { snapshots: RoomSnapshot[] }) {
           <rect className="floor-map__circulation" x="20" y="20" width="940" height={height - 40} rx="24" />
           <text className="floor-map__circulation-label" x="490" y="65" textAnchor="middle">Central circulation / connecting block</text>
           <text className="floor-map__circulation-metric" x="490" y="105" textAnchor="middle">{mapRooms.length} monitored spaces</text>
+          <text className="floor-map__block-label" x="126" y="42" textAnchor="middle">C BLOCK</text>
+          <text className="floor-map__block-label" x="490" y="145" textAnchor="middle">B BLOCK</text>
+          <text className="floor-map__block-label" x="854" y="42" textAnchor="middle">A BLOCK</text>
           {mapRooms.map((mapRoom) => {
             const level = occupancyLevel(mapRoom);
             return (
@@ -77,7 +82,7 @@ export function FloorMap({ snapshots }: { snapshots: RoomSnapshot[] }) {
         <span><i className="legend-swatch legend-swatch--unknown" /> Unavailable or offline</span>
       </div>
       <div className="floor-map__list" aria-label="Rooms on this floor">
-        {mapRooms.map(({ room, occupancy }, index) => <motion.div key={room.room_id} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: false, amount: .2 }} transition={{ delay: Math.min(index * .035, .3) }}><Link to={`/rooms/${room.room_id}`}><span>{room.name}<small>Capacity {room.capacity}</small></span><span>{occupancyLabel({ room, occupancy })}<ArrowUpRight size={15} /></span></Link></motion.div>)}
+        {roomBlocks.map(({block,rooms})=><section className="floor-map__list-block" aria-labelledby={`map-list-${block}`} key={block}><h3 id={`map-list-${block}`}>{block} Block <span>{rooms.length}</span></h3>{rooms.map(({ room, occupancy }, index) => <motion.div key={room.room_id} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: false, amount: .2 }} transition={{ delay: Math.min(index * .035, .3) }}><Link to={`/rooms/${room.room_id}`}><span>{room.name}<small>Capacity {room.capacity}</small></span><span>{occupancyLabel({ room, occupancy })}<ArrowUpRight size={15} /></span></Link></motion.div>)}</section>)}
       </div>
     </div>
   );

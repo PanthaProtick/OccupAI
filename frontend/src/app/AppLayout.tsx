@@ -1,9 +1,10 @@
 import { LogOut } from "lucide-react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { endSession } from "../auth/session";
+import { useAuth } from "../auth/session";
 
 export function AppLayout() {
   const navigate = useNavigate();
+  const {logout}=useAuth();
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">Skip to main content</a>
@@ -19,7 +20,7 @@ export function AppLayout() {
         </nav>
         <div className="site-header__actions">
           <p className="site-header__context"><span /> Campus live</p>
-          <button className="logout-button" onClick={() => { endSession(); navigate("/"); }} aria-label="Log out"><LogOut size={16} /><span>Log out</span></button>
+          <button className="logout-button" onClick={async () => { await logout(); navigate("/"); }} aria-label="Log out"><LogOut size={16} /><span>Log out</span></button>
         </div>
       </header>
       <main className="page-container" id="main-content">

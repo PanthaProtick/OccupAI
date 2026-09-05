@@ -1,4 +1,5 @@
 import type { RoomSnapshot } from "../../hooks/useDashboard";
+import { sortRoomsByNumber } from "../rooms/roomBlocks";
 
 export type MapRoom = RoomSnapshot & {
   x: number;
@@ -43,7 +44,7 @@ function upperFloorGeometry(name: string): Geometry | undefined {
 
 export function getMapRooms(snapshots: RoomSnapshot[]): MapRoom[] {
   const fallback = (index: number) => ({ x: 36 + (index % 4) * 190, y: 92 + Math.floor(index / 4) * 100, width: 176, height: 86 });
-  return snapshots.map((snapshot, index) => ({
+  return [...snapshots].sort(sortRoomsByNumber).map((snapshot, index) => ({
     ...snapshot,
     ...(groundFloorLayout[snapshot.room.room_id]
       ?? firstFloorLayout[snapshot.room.name]
