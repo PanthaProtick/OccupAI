@@ -1,6 +1,6 @@
 import { FormEvent, useState } from "react";
 import { ArrowLeft, ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Sparkles, User } from "lucide-react";
-import { Link, Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "../auth/session";
 import { ApiError } from "../api/client";
@@ -13,7 +13,6 @@ export function AuthPage(){
   const setMode=(value:boolean)=>setParams(value?{mode:"signup"}:{});
   const destination=(location.state as {from?:string}|null)?.from ?? "/dashboard";
   const submit=async(event:FormEvent)=>{event.preventDefault();setError("");setPending(true);try{if(signup)await auth.signup(name,email,password);else await auth.login(email,password);navigate(destination,{replace:true})}catch(value){setError(value instanceof ApiError?value.message:"Authentication failed. Please try again.")}finally{setPending(false)}};
-  if(auth.user) return <Navigate to="/dashboard" replace/>;
   return <div className="auth-page">
     <Link className="auth-back" to="/"><ArrowLeft size={17}/> Back home</Link>
     <motion.section initial={{opacity:0,y:24,scale:.98}} animate={{opacity:1,y:0,scale:1}} className="auth-shell">
