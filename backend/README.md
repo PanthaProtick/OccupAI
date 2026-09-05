@@ -19,8 +19,31 @@ Auth routes are `POST /api/auth/signup`, `POST /api/auth/login`,
 `AUTH_COOKIE_SAMESITE`, and `AUTH_SESSION_PEPPER`; replace the example pepper with a long
 random secret. Local HTTP uses `AUTH_COOKIE_SECURE=false`, while production must use HTTPS
 and a secure cookie. Credentialed CORS is limited to `FRONTEND_ORIGINS`, and authentication
-POST requests validate `Origin` for CSRF protection. Password reset and email verification
-are intentionally future work.
+POST/PATCH account mutations validate `Origin` for CSRF protection. Authenticated users
+can change a known password through `POST /api/profile/change-password`; forgotten-password
+email recovery and email verification are intentionally future work.
+
+## Profiles and notifications
+
+`GET /api/profile` returns the authenticated user's persisted registration name and
+normalized AUST email. `PATCH /api/profile` changes only the name. Neither route accepts a
+client-selected user ID, and account responses are `no-store`.
+
+Notification routes are:
+
+- `GET /api/notifications` with bounded `limit`, opaque `cursor`, `unread_only`, and
+  `include_dismissed` query parameters.
+- `POST /api/notifications/{id}/read`, `POST /api/notifications/read-all`, and
+  `POST /api/notifications/{id}/dismiss`.
+- `GET` and `PATCH /api/notification-preferences` for per-user in-app/high-occupancy
+  settings, threshold (50–100), and cooldown (1–10080 minutes).
+
+Notifications, read/dismissed state, and preferences belong to the user row and survive
+logout. Logout revokes only the presented session. High-occupancy notifications are created
+inside the accepted ingestion transaction on a below-to-at/above-threshold transition.
+Online lower-occupancy recommendations prefer the same building, then floor, then rooms
+below 40%. Remaining above the threshold, stale/offline input, disabled preferences, and
+events inside the cooldown do not create another alert.
 
 Set `APP_ENVIRONMENT=production` in production. Startup then refuses the development
 pepper and insecure cookies. `AUTH_RATE_LIMIT_ATTEMPTS` and
@@ -74,6 +97,8 @@ Run all tests with `.\scripts\test.ps1`. API documentation is at `/docs`. `/heal
 - `SIMULATION_ENABLED`: starts synthetic ingestion for every canonical camera not listed in `LIVE_CAMERA_IDS`; requires database mode.
 - `SIMULATION_TICK_INTERVAL_SECONDS`: synthetic-reading cadence, default 10 seconds.
 - `FRONTEND_ORIGINS`: comma-separated CORS allowlist.
+- `AUTH_RATE_LIMIT_ATTEMPTS` / `AUTH_RATE_LIMIT_WINDOW_SECONDS`: process-local limits for
+  login, signup, and password-change attempts (use a shared limiter for multi-instance deployments).
 
 Every SQLite connection enables foreign keys, WAL, and the busy timeout. Writes use short transactions and the ingestion writer is serialized. API reads continue serving the last durable state during model-server downtime. A successful stale result preserves its last occupancy and observation time; offline remains unavailable and distinct from a measured zero. One malformed camera result is isolated from other cameras.
 

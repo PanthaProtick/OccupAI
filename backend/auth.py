@@ -10,13 +10,14 @@ from datetime import datetime, timedelta, timezone
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerifyMismatchError
 from fastapi import Depends, Request
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, update
 from sqlalchemy.exc import IntegrityError
 
 from backend.database import AuthenticationSessionRow, UserRow
-from backend.models import PublicUser
+from backend.models import Profile, PublicUser
 
 AUST_EMAIL_MESSAGE = "Use your AUST email address ending in @aust.edu."
+MAX_PASSWORD_LENGTH = 128
 _EMAIL_LOCAL = re.compile(r"^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+$")
 _DUMMY_HASHER = PasswordHasher()
 _DUMMY_HASH = _DUMMY_HASHER.hash("not-a-real-password-Only4Timing!")
@@ -48,6 +49,12 @@ def normalize_email(value: str, *, require_aust: bool = False) -> str:
 def validate_password(password: str) -> None:
     if len(password) < 6:
         raise AuthError(422, "weak_password", "Use at least 6 characters.")
+    if len(password) > MAX_PASSWORD_LENGTH:
+        raise AuthError(
+            422,
+            "weak_password",
+            f"Password must be {MAX_PASSWORD_LENGTH} characters or fewer.",
+        )
 
 
 class AuthService:
@@ -64,6 +71,16 @@ class AuthService:
     def _public(user: UserRow) -> PublicUser:
         return PublicUser(id=user.id, name=user.name, email=user.normalized_email,
                           role=user.role, created_at=datetime.fromisoformat(user.created_at))
+
+    @staticmethod
+    def _profile(user: UserRow) -> Profile:
+        return Profile(
+            id=user.id,
+            name=user.name,
+            email=user.normalized_email,
+            created_at=datetime.fromisoformat(user.created_at),
+            updated_at=datetime.fromisoformat(user.updated_at),
+        )
 
     def _new_session(self, db, user: UserRow, user_agent: str | None) -> str:
         token = secrets.token_urlsafe(32)
@@ -148,6 +165,69 @@ class AuthService:
             if session and session.revoked_at is None:
                 session.revoked_at = datetime.now(timezone.utc).isoformat()
                 db.commit()
+
+    def get_profile(self, user_id: str) -> Profile:
+        with self.session_factory() as db:
+            user = db.get(UserRow, user_id)
+            if not user or not user.is_active:
+                raise AuthError(401, "authentication_required", "Authentication is required.")
+            return self._profile(user)
+
+    def update_profile_name(self, user_id: str, name: str) -> Profile:
+        clean_name = " ".join(name.split())
+        if not clean_name:
+            raise AuthError(422, "invalid_name", "Name cannot be empty.")
+        if len(clean_name) > 120:
+            raise AuthError(422, "invalid_name", "Name must be 120 characters or fewer.")
+        with self.session_factory() as db:
+            user = db.get(UserRow, user_id)
+            if not user or not user.is_active:
+                raise AuthError(401, "authentication_required", "Authentication is required.")
+            user.name = clean_name
+            user.updated_at = datetime.now(timezone.utc).isoformat()
+            db.commit()
+            return self._profile(user)
+
+    def change_password(
+        self,
+        user_id: str,
+        current_password: str,
+        new_password: str,
+        user_agent: str | None,
+    ) -> str:
+        with self.session_factory() as db:
+            user = db.get(UserRow, user_id)
+            if not user or not user.is_active:
+                raise AuthError(401, "authentication_required", "Authentication is required.")
+            try:
+                current_is_valid = self.passwords.verify(user.password_hash, current_password)
+            except (VerifyMismatchError, InvalidHashError):
+                current_is_valid = False
+            if not current_is_valid:
+                raise AuthError(400, "invalid_current_password", "Password could not be changed.")
+
+            validate_password(new_password)
+            try:
+                password_is_unchanged = self.passwords.verify(user.password_hash, new_password)
+            except (VerifyMismatchError, InvalidHashError):
+                password_is_unchanged = False
+            if password_is_unchanged:
+                raise AuthError(422, "password_unchanged", "Choose a different password.")
+
+            now = datetime.now(timezone.utc).isoformat()
+            user.password_hash = self.passwords.hash(new_password)
+            user.updated_at = now
+            db.execute(
+                update(AuthenticationSessionRow)
+                .where(
+                    AuthenticationSessionRow.user_id == user.id,
+                    AuthenticationSessionRow.revoked_at.is_(None),
+                )
+                .values(revoked_at=now)
+            )
+            token = self._new_session(db, user, user_agent)
+            db.commit()
+            return token
 
 
 def get_current_user(request: Request) -> PublicUser:

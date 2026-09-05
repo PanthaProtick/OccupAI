@@ -6,10 +6,11 @@ import { PreAuthAmbient } from "../components/visual/PreAuthAmbient";
 const reveal = { initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, amount: .22 }, transition: { duration: .6, ease: [0.2, 0.8, 0.2, 1] as [number, number, number, number] } };
 
 export function WelcomePage() {
+  const returnToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
   return <div className="welcome-page">
     <PreAuthAmbient />
     <header className="welcome-nav">
-      <Link className="welcome-brand" to="/"><img src="/occupai-logo.png" alt=""/><span>Occup<span>AI</span></span></Link>
+      <Link className="welcome-brand" to="/" aria-label="OccupAI home" onClick={returnToTop}><img src="/occupai-logo.png" alt=""/><span>Occup<span>AI</span></span></Link>
       <nav aria-label="Welcome navigation"><a href="#vision">Vision</a><a href="#intelligence">Intelligence</a><Link to="/login">Log in</Link><Link className="welcome-nav__cta" to="/login?mode=signup">Get started <ArrowRight size={15}/></Link></nav>
     </header>
     <main>
@@ -38,6 +39,6 @@ export function WelcomePage() {
 
       <motion.section {...reveal} className="welcome-final"><div><p>Ready to see space differently?</p><h2>Make every square metre count.</h2></div><Link to="/login?mode=signup">Get started <ArrowRight size={18}/></Link></motion.section>
     </main>
-    <footer className="welcome-footer"><Link className="welcome-brand" to="/"><img src="/occupai-logo.png" alt=""/><span>Occup<span>AI</span></span></Link><span>Privacy-first campus intelligence.</span><span>© 2026 OccupAI</span></footer>
+    <footer className="welcome-footer"><Link className="welcome-brand" to="/" aria-label="OccupAI home (footer)" onClick={returnToTop}><img src="/occupai-logo.png" alt=""/><span>Occup<span>AI</span></span></Link><span>Privacy-first campus intelligence.</span><span>© 2026 OccupAI</span></footer>
   </div>;
 }

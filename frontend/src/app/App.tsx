@@ -7,6 +7,7 @@ import { WelcomePage } from "../pages/WelcomePage";
 import { AuthPage } from "../pages/AuthPage";
 import { ProtectedRoute } from "../auth/ProtectedRoute";
 import { ProfilePage } from "../pages/ProfilePage";
+import { ChangePasswordPage } from "../pages/ChangePasswordPage";
 
 export function App() {
   return (
@@ -18,6 +19,7 @@ export function App() {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="rooms/:roomId" element={<RoomDetailPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="profile/change-password" element={<ChangePasswordPage />} />
         </Route>
       </Route>
       <Route path="*" element={<NotFound />} />

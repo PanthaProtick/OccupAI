@@ -5,8 +5,8 @@ import { RoomCard } from "../components/rooms/RoomCard";
 import { FloorMap } from "../components/map/FloorMap";
 import { useDashboard } from "../hooks/useDashboard";
 import { formatTimestamp } from "../utils/formatters";
-import { useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useEffect, useMemo, useRef } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { motion, type Variants } from "framer-motion";
 import { Activity, Building2, DoorOpen, Gauge, RefreshCw, Sparkles, TrendingUp, Users } from "lucide-react";
 import { SmartRecommendations } from "../components/recommendations/SmartRecommendations";
@@ -23,6 +23,8 @@ const textVariants: Variants = {
 
 export function DashboardPage() {
   const { data, error, isRefreshing, lastRefresh, refresh } = useDashboard();
+  const location = useLocation();
+  const handledScrollRequest = useRef("");
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedBuilding = searchParams.get("building") ?? "";
   const selectedFloor = searchParams.get("floor") ?? "";
@@ -47,6 +49,17 @@ export function DashboardPage() {
     { label: "Available now", value: availableRooms.toString(), detail: "Rooms below 40%", icon: DoorOpen },
     { label: "Live coverage", value: `${allLiveRooms.length}/${allData.length}`, detail: `${allData.length - allLiveRooms.length} feeds need attention`, icon: Activity }
   ];
+
+  useEffect(() => {
+    const sectionId = location.hash.slice(1);
+    const scrollRequest = `${location.key}:${location.hash}`;
+    if (!sectionId || !data?.length || handledScrollRequest.current === scrollRequest) return;
+    handledScrollRequest.current = scrollRequest;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [data?.length, location.hash, location.key]);
 
   if (!data && isRefreshing) return <LoadingState label="Loading room occupancy" />;
   if (!data && error) return <ErrorState message={error} onRetry={() => void refresh()} />;

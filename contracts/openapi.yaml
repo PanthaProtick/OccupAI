@@ -84,6 +84,181 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
+  /api/profile:
+    get:
+      tags:
+      - profile
+      summary: Get Profile
+      operationId: get_profile_api_profile_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+    patch:
+      tags:
+      - profile
+      summary: Update Profile
+      operationId: update_profile_api_profile_patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdateRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '400': *id001
+  /api/profile/change-password:
+    post:
+      tags:
+      - profile
+      summary: Change Password
+      operationId: change_password_api_profile_change_password_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+        required: true
+      responses:
+        '204':
+          description: Successful Response
+        '400': *id001
+  /api/notifications:
+    get:
+      tags:
+      - notifications
+      summary: List Notifications
+      operationId: list_notifications_api_notifications_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      - name: cursor
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            minLength: 1
+            maxLength: 1024
+          - type: 'null'
+          title: Cursor
+      - name: unread_only
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Unread Only
+      - name: include_dismissed
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Include Dismissed
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationsResponse'
+        '400': *id001
+  /api/notifications/{notification_id}/read:
+    post:
+      tags:
+      - notifications
+      summary: Mark Notification Read
+      operationId: mark_notification_read_api_notifications__notification_id__read_post
+      parameters:
+      - name: notification_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Notification Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+        '400': *id001
+  /api/notifications/read-all:
+    post:
+      tags:
+      - notifications
+      summary: Mark All Notifications Read
+      operationId: mark_all_notifications_read_api_notifications_read_all_post
+      responses:
+        '204':
+          description: Successful Response
+  /api/notifications/{notification_id}/dismiss:
+    post:
+      tags:
+      - notifications
+      summary: Dismiss Notification
+      operationId: dismiss_notification_api_notifications__notification_id__dismiss_post
+      parameters:
+      - name: notification_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Notification Id
+      responses:
+        '204':
+          description: Successful Response
+        '400': *id001
+  /api/notification-preferences:
+    get:
+      tags:
+      - notifications
+      summary: Get Notification Preferences
+      operationId: get_notification_preferences_api_notification_preferences_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+    patch:
+      tags:
+      - notifications
+      summary: Update Notification Preferences
+      operationId: update_notification_preferences_api_notification_preferences_patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationPreferencesUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+        '400': *id001
   /ready:
     get:
       tags:
@@ -241,6 +416,20 @@ components:
       - stale
       - offline
       title: CameraStatus
+    ChangePasswordRequest:
+      properties:
+        current_password:
+          type: string
+          title: Current Password
+        new_password:
+          type: string
+          title: New Password
+      additionalProperties: false
+      type: object
+      required:
+      - current_password
+      - new_password
+      title: ChangePasswordRequest
     CollectionMeta:
       properties:
         count:
@@ -403,6 +592,143 @@ components:
       - email
       - password
       title: LoginRequest
+    Notification:
+      properties:
+        id:
+          type: string
+          title: Id
+        type:
+          type: string
+          title: Type
+        category:
+          type: string
+          title: Category
+        title:
+          type: string
+          title: Title
+        message:
+          type: string
+          title: Message
+        room_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Room Id
+        suggested_room_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Suggested Room Id
+        occupancy_percentage:
+          anyOf:
+          - type: number
+            maximum: 100.0
+            minimum: 0.0
+          - type: 'null'
+          title: Occupancy Percentage
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        read_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Read At
+        dismissed_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Dismissed At
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - type
+      - category
+      - title
+      - message
+      - created_at
+      title: Notification
+    NotificationPreferences:
+      properties:
+        in_app_enabled:
+          type: boolean
+          title: In App Enabled
+        high_occupancy_enabled:
+          type: boolean
+          title: High Occupancy Enabled
+        high_occupancy_threshold:
+          type: integer
+          maximum: 100.0
+          minimum: 50.0
+          title: High Occupancy Threshold
+        cooldown_minutes:
+          type: integer
+          maximum: 10080.0
+          exclusiveMinimum: 0.0
+          title: Cooldown Minutes
+      additionalProperties: false
+      type: object
+      required:
+      - in_app_enabled
+      - high_occupancy_enabled
+      - high_occupancy_threshold
+      - cooldown_minutes
+      title: NotificationPreferences
+    NotificationPreferencesUpdate:
+      properties:
+        in_app_enabled:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: In App Enabled
+        high_occupancy_enabled:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: High Occupancy Enabled
+        high_occupancy_threshold:
+          anyOf:
+          - type: integer
+            maximum: 100.0
+            minimum: 50.0
+          - type: 'null'
+          title: High Occupancy Threshold
+        cooldown_minutes:
+          anyOf:
+          - type: integer
+            maximum: 10080.0
+            exclusiveMinimum: 0.0
+          - type: 'null'
+          title: Cooldown Minutes
+      additionalProperties: false
+      type: object
+      title: NotificationPreferencesUpdate
+    NotificationsResponse:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/Notification'
+          type: array
+          title: Items
+        unread_count:
+          type: integer
+          minimum: 0.0
+          title: Unread Count
+        next_cursor:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Next Cursor
+      additionalProperties: false
+      type: object
+      required:
+      - items
+      - unread_count
+      title: NotificationsResponse
     Occupancy:
       properties:
         camera_id:
@@ -475,6 +801,44 @@ components:
       required:
       - data
       title: OccupancyResponse
+    Profile:
+      properties:
+        id:
+          type: string
+          title: Id
+        name:
+          type: string
+          title: Name
+        email:
+          type: string
+          title: Email
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - name
+      - email
+      - created_at
+      - updated_at
+      title: Profile
+    ProfileUpdateRequest:
+      properties:
+        name:
+          type: string
+          title: Name
+      additionalProperties: false
+      type: object
+      required:
+      - name
+      title: ProfileUpdateRequest
     PublicUser:
       properties:
         id:

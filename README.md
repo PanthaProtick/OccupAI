@@ -118,6 +118,11 @@ npm run dev
 
 The frontend will start and provide a local URL (typically `http://localhost:5173/`) that you can open in your browser to view the dashboard.
 
+Run `uv run alembic upgrade head` after pulling changes. Migrations `0004` and `0005` add
+database-backed notification preferences/history and concurrency-safe notification
+deduplication. Profile data, notification state, and preferences persist across logout and
+future login; the session cookie itself is only an authentication credential.
+
 ## Configuration notes
 
 Edit `model_server/config/cameras.yaml` to change sources, model path, confidence, input size, device, sample rate, looping, or stabilization window. The default `track_buffer: 9` in `model_server/config/bytetrack_custom.yaml` is approximately three seconds at the configured 3 FPS sampling rate; it is measured in processed tracker frames, not wall-clock seconds.
