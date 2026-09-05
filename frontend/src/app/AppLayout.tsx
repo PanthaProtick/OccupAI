@@ -1,6 +1,7 @@
-import { LogOut } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/session";
+import { NotificationPanel } from "../components/NotificationPanel";
 
 export function AppLayout() {
   const navigate = useNavigate();
@@ -20,6 +21,8 @@ export function AppLayout() {
         </nav>
         <div className="site-header__actions">
           <p className="site-header__context"><span /> Campus live</p>
+          <NotificationPanel />
+          <Link to="/profile" className="header-icon-btn profile-link" aria-label="Profile"><User size={18} /></Link>
           <button className="logout-button" onClick={async () => { await logout(); navigate("/"); }} aria-label="Log out"><LogOut size={16} /><span>Log out</span></button>
         </div>
       </header>

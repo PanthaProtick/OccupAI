@@ -6,6 +6,7 @@ import { RoomDetailPage } from "../pages/RoomDetailPage";
 import { WelcomePage } from "../pages/WelcomePage";
 import { AuthPage } from "../pages/AuthPage";
 import { ProtectedRoute } from "../auth/ProtectedRoute";
+import { ProfilePage } from "../pages/ProfilePage";
 
 export function App() {
   return (
@@ -16,6 +17,7 @@ export function App() {
         <Route element={<AppLayout />}>
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="rooms/:roomId" element={<RoomDetailPage />} />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
       </Route>
       <Route path="*" element={<NotFound />} />
