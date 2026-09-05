@@ -19,6 +19,7 @@ data/*.db
 data/*.db-journal
 data/*.db-shm
 data/*.db-wal
+mock/generated/
 
 # Large local media inputs are never committed.
 videos/
