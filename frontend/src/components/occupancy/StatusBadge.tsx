@@ -1,3 +1,3 @@
 import type { CameraStatus } from "../../api/types";
 import { formatStatus } from "../../utils/formatters";
-export function StatusBadge({ status }: { status: CameraStatus }) { return <span className={`status status--${status}`}><span aria-hidden="true">●</span> {formatStatus(status)}</span>; }
+export function StatusBadge({ status }: { status: CameraStatus }) { return <span className={`status status--${status}`}><div className="status-dot" aria-hidden="true" /> {formatStatus(status)}</span>; }

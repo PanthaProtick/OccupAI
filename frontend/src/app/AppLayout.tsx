@@ -1,20 +1,31 @@
-import { Link, Outlet } from "react-router-dom";
+import { LogOut } from "lucide-react";
+import { Link, Outlet, useNavigate } from "react-router-dom";
+import { endSession } from "../auth/session";
 
 export function AppLayout() {
+  const navigate = useNavigate();
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">Skip to main content</a>
       <header className="site-header">
-        <Link className="brand" to="/" aria-label="OccupAI dashboard">
-          <span className="brand__mark" aria-hidden="true">O</span>
-          <span>OccupAI</span>
+        <Link className="brand" to="/dashboard" aria-label="OccupAI dashboard">
+          <span className="brand__mark"><img src="/occupai-logo.png" alt="" /></span>
+          <span className="brand__name">Occup<span>AI</span></span>
         </Link>
-        <p className="site-header__context">Campus occupancy</p>
+        <nav className="site-nav" aria-label="Dashboard sections">
+          <a href="#overview">Overview</a>
+          <a href="#floor-map">Floor map</a>
+          <a href="#rooms">Rooms</a>
+        </nav>
+        <div className="site-header__actions">
+          <p className="site-header__context"><span /> Campus live</p>
+          <button className="logout-button" onClick={() => { endSession(); navigate("/"); }} aria-label="Log out"><LogOut size={16} /><span>Log out</span></button>
+        </div>
       </header>
       <main className="page-container" id="main-content">
         <Outlet />
       </main>
-      <footer className="site-footer">Occupancy insights for better spaces</footer>
+      <footer className="site-footer"><strong>OccupAI</strong><span>Smarter space decisions, powered by live campus data.</span></footer>
     </div>
   );
 }

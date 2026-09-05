@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import rooms from "../../../contracts/examples/rooms.json";
@@ -10,18 +10,18 @@ describe("DashboardPage", () => {
   it("joins and renders all four ground-floor rooms", async () => {
     vi.spyOn(api, "getRooms").mockResolvedValue(rooms as never); vi.spyOn(api, "getOccupancy").mockResolvedValue(occupancy as never);
     render(<MemoryRouter><DashboardPage /></MemoryRouter>);
-    expect(await screen.findAllByRole("article")).toHaveLength(4); expect(screen.getByRole("link", { name: "View T.T. Ground" })).toHaveAttribute("href", "/rooms/room_tt_ground");
+    await screen.findByRole("region", { name: "Rooms" }); const roomsRegion = within(screen.getByRole("region", { name: "Rooms" })); expect(roomsRegion.getAllByRole("article")).toHaveLength(4); expect(roomsRegion.getByRole("link", { name: "View T.T. Ground" })).toHaveAttribute("href", "/rooms/room_tt_ground");
   });
   it("retains loaded cards when refresh fails", async () => {
     const getRooms = vi.spyOn(api, "getRooms").mockResolvedValueOnce(rooms as never).mockRejectedValueOnce(new Error("Temporary failure"));
     vi.spyOn(api, "getOccupancy").mockResolvedValue(occupancy as never);
-    render(<MemoryRouter><DashboardPage /></MemoryRouter>); await screen.findAllByRole("article"); fireEvent.click(screen.getByRole("button", { name: "Refresh" }));
-    await screen.findByText(/Showing the last successful update/); expect(screen.getAllByRole("article")).toHaveLength(4); expect(getRooms).toHaveBeenCalledTimes(2);
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>); await screen.findByRole("region", { name: "Rooms" }); fireEvent.click(screen.getByRole("button", { name: "Refresh" }));
+    await screen.findByText(/Showing the last successful update/); expect(within(screen.getByRole("region", { name: "Rooms" })).getAllByRole("article")).toHaveLength(4); expect(getRooms).toHaveBeenCalledTimes(2);
   });
   it("prevents overlapping manual refreshes", async () => {
     let resolve!: (value: typeof rooms) => void; const pending = new Promise<typeof rooms>((done) => { resolve = done; });
     const getRooms = vi.spyOn(api, "getRooms").mockReturnValue(pending as never); vi.spyOn(api, "getOccupancy").mockResolvedValue(occupancy as never);
-    render(<MemoryRouter><DashboardPage /></MemoryRouter>); expect(screen.getByText("Loading room occupancy")).toBeInTheDocument(); expect(getRooms).toHaveBeenCalledTimes(1); resolve(rooms); await waitFor(() => expect(screen.getAllByRole("article")).toHaveLength(4));
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>); expect(screen.getByText("Loading room occupancy")).toBeInTheDocument(); expect(getRooms).toHaveBeenCalledTimes(1); resolve(rooms); await waitFor(() => expect(within(screen.getByRole("region", { name: "Rooms" })).getAllByRole("article")).toHaveLength(4));
   });
   it("filters the schematic map by building and floor", async () => {
     vi.spyOn(api, "getRooms").mockResolvedValue(rooms as never); vi.spyOn(api, "getOccupancy").mockResolvedValue(occupancy as never);
@@ -33,11 +33,11 @@ describe("DashboardPage", () => {
     expect(screen.getByRole("link", { name: "Girls' Common Room, 20% occupied" })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Floor"), { target: { value: "1" } });
     expect(screen.getByRole("link", { name: /Study Room, Occupancy unavailable/ })).toBeInTheDocument();
-    expect(screen.getAllByRole("article")).toHaveLength(7);
+    expect(within(screen.getByRole("region", { name: "Rooms" })).getAllByRole("article")).toHaveLength(7);
     fireEvent.change(screen.getByLabelText("Floor"), { target: { value: "2" } });
     expect(screen.getByRole("link", { name: /2A03, Occupancy unavailable/ })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /2B01, Occupancy unavailable/ })).toBeInTheDocument();
-    expect(screen.getAllByRole("article")).toHaveLength(18);
+    expect(within(screen.getByRole("region", { name: "Rooms" })).getAllByRole("article")).toHaveLength(18);
   });
   it("restores the selected floor from the dashboard URL", async () => {
     vi.spyOn(api, "getRooms").mockResolvedValue(rooms as never); vi.spyOn(api, "getOccupancy").mockResolvedValue(occupancy as never);
@@ -45,6 +45,17 @@ describe("DashboardPage", () => {
     await screen.findByRole("heading", { name: "Floor map" });
     expect(screen.getByLabelText("Floor")).toHaveValue("6");
     expect(screen.getByRole("link", { name: /6A03, Occupancy unavailable/ })).toBeInTheDocument();
-    expect(screen.getAllByRole("article")).toHaveLength(18);
+    expect(within(screen.getByRole("region", { name: "Rooms" })).getAllByRole("article")).toHaveLength(18);
+  });
+  it("shows map details only while a room is being explored", async () => {
+    vi.spyOn(api, "getRooms").mockResolvedValue(rooms as never); vi.spyOn(api, "getOccupancy").mockResolvedValue(occupancy as never);
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>);
+    const room = await screen.findByRole("link", { name: /T.T. Ground, 32% occupied/ });
+    expect(screen.queryByText(/Click the highlighted room for analytics/)).not.toBeInTheDocument();
+    fireEvent.mouseEnter(room);
+    expect(screen.getByText(/Click the highlighted room for analytics/)).toBeInTheDocument();
+    expect(room).toHaveClass("floor-map__room--active");
+    fireEvent.mouseLeave(room);
+    await waitFor(() => expect(screen.queryByText(/Click the highlighted room for analytics/)).not.toBeInTheDocument());
   });
 });
