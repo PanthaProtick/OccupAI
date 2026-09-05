@@ -1,11 +1,13 @@
 import { motion } from "framer-motion";
 import { ArrowRight, BarChart3, Eye, Layers3, LockKeyhole, Route, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import { PreAuthAmbient } from "../components/visual/PreAuthAmbient";
 
-const reveal = { initial: { opacity: 0, y: 54, scale: .97 }, whileInView: { opacity: 1, y: 0, scale: 1 }, viewport: { once: false, amount: .22 }, transition: { duration: .7, ease: [0.2, 0.8, 0.2, 1] as [number, number, number, number] } };
+const reveal = { initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, amount: .22 }, transition: { duration: .6, ease: [0.2, 0.8, 0.2, 1] as [number, number, number, number] } };
 
 export function WelcomePage() {
   return <div className="welcome-page">
+    <PreAuthAmbient />
     <header className="welcome-nav">
       <Link className="welcome-brand" to="/"><img src="/occupai-logo.png" alt=""/><span>Occup<span>AI</span></span></Link>
       <nav aria-label="Welcome navigation"><a href="#vision">Vision</a><a href="#intelligence">Intelligence</a><Link to="/login">Log in</Link><Link className="welcome-nav__cta" to="/login?mode=signup">Get started <ArrowRight size={15}/></Link></nav>
@@ -19,7 +21,7 @@ export function WelcomePage() {
           <motion.div {...reveal} transition={{...reveal.transition, delay:.24}} className="welcome-actions"><Link className="welcome-primary" to="/login?mode=signup">Explore OccupAI <ArrowRight size={18}/></Link><Link className="welcome-secondary" to="/login">View live dashboard</Link></motion.div>
           <motion.div {...reveal} className="welcome-trust"><span><i/>Privacy-first sensing</span><span><i/>Live operational data</span><span><i/>Actionable recommendations</span></motion.div>
         </div>
-        <motion.div initial={{opacity:0,x:70,rotate:2}} whileInView={{opacity:1,x:0,rotate:0}} viewport={{once:false,amount:.2}} transition={{duration:1,ease:[.2,.8,.2,1]}} className="welcome-hero__visual"><img src="/aust-campus.jpg" alt="Ahsanullah University of Science and Technology campus in Tejgaon, Dhaka"/><span className="campus-photo-label">AUST · Tejgaon, Dhaka</span><span className="floating-stat floating-stat--one"><b>42%</b> campus utilization</span><span className="floating-stat floating-stat--two"><i/> 128 rooms live</span></motion.div>
+        <motion.div initial={{opacity:0,x:24}} whileInView={{opacity:1,x:0}} viewport={{once:true,amount:.2}} transition={{duration:.7,ease:[.2,.8,.2,1]}} className="welcome-hero__visual"><img src="/aust-campus.jpg" alt="Ahsanullah University of Science and Technology campus in Tejgaon, Dhaka"/><span className="campus-photo-label">AUST · Tejgaon, Dhaka</span><span className="floating-stat floating-stat--one"><b>42%</b> campus utilization</span><span className="floating-stat floating-stat--two"><i/> 128 rooms live</span></motion.div>
       </section>
 
       <section className="welcome-ideas" id="vision">
