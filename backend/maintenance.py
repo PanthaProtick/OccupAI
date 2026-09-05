@@ -105,6 +105,45 @@ def import_history(session_factory, path: Path) -> int:
     return count
 
 
+def reset_database(session_factory) -> None:
+    """Delete all product data while preserving the migrated schema."""
+    with session_factory.begin() as session:
+        session.execute(delete(IngestionReceiptRow))
+        session.execute(delete(OccupancySampleRow))
+        session.execute(delete(OccupancyBucketRow))
+        session.execute(delete(CameraStateRow))
+        session.execute(delete(CameraRow))
+        session.execute(delete(RoomRow))
+
+
+def import_live_states(session_factory, path: Path) -> int:
+    """Seed current dashboard state from a generated live fixture."""
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    values = payload.get("cameras", [])
+    now = iso(datetime.now(timezone.utc))
+    with session_factory.begin() as session:
+        known = {row.camera_id for row in session.scalars(select(CameraRow)).all()}
+        for item in values:
+            camera_id = item["camera_id"]
+            if camera_id not in known:
+                raise ValueError(f"Live state contains unknown camera: {camera_id}")
+            occupancy = item["occupancy"]
+            state = dict(
+                camera_id=camera_id,
+                raw_occupancy=occupancy,
+                occupancy=occupancy,
+                status=item.get("status", "online"),
+                observed_at=item["updated_at"],
+                updated_at=now,
+                diagnostics_json=json.dumps({"source": "development_seed"}),
+            )
+            statement = insert(CameraStateRow).values(**state)
+            session.execute(statement.on_conflict_do_update(
+                index_elements=[CameraStateRow.camera_id], set_=state
+            ))
+    return len(values)
+
+
 def aggregate_five_minute_buckets(session_factory, expected_sample_count: int = 30, batch_size: int = 100) -> int:
     if expected_sample_count <= 0 or batch_size <= 0:
         raise ValueError("expected_sample_count and batch_size must be positive")

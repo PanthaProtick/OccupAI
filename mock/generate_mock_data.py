@@ -18,7 +18,9 @@ from typing import Any
 SEED = 42
 BUCKET_MINUTES = 5
 HISTORY_DAYS = 7
-DEFAULT_START = datetime(2026, 8, 12, 0, 0, tzinfo=timezone.utc)
+DEFAULT_START = datetime.now(timezone.utc).replace(
+    hour=0, minute=0, second=0, microsecond=0
+) - timedelta(days=HISTORY_DAYS)
 
 
 MODEL_CAMERA_IDS = ("cam_001", "cam_002", "cam_003")
@@ -27,6 +29,19 @@ MODEL_CAMERA_IDS = ("cam_001", "cam_002", "cam_003")
 def load_rooms() -> list[dict[str, Any]]:
     payload = json.loads((Path(__file__).with_name("canonical_rooms.json")).read_text(encoding="utf-8"))
     rooms = [dict(room) for room in payload["rooms"]]
+    # Product capacity policy lives here so every generated consumer (mock API,
+    # database seed, history snapshots, and simulation) receives identical data.
+    for room in rooms:
+        name = room["name"]
+        if name in {"Library", "Canteen"}:
+            room["capacity"] = 150
+        elif name == "T.T. Ground":
+            room["capacity"] = 100
+        elif name == "Teacher's Canteen":
+            room["capacity"] = 50
+        elif room["behavior_profile"] == "classroom":
+            block = name[1].upper() if len(name) > 1 else ""
+            room["capacity"] = 25 if block == "B" else 50
     random.Random(SEED).shuffle(rooms)
     for index, room in enumerate(rooms):
         room["camera_id"] = MODEL_CAMERA_IDS[index] if index < len(MODEL_CAMERA_IDS) else f"cam_{index + 1:03d}"
@@ -107,18 +122,23 @@ def generate_history(rng: random.Random, start: datetime) -> list[dict[str, Any]
 
 
 def make_live(rng: random.Random, now: datetime) -> dict[str, Any]:
-    statuses = {room["camera_id"]: "online" for room in ROOMS}
-    statuses["cam_003"] = "stale"
-    statuses["cam_004"] = "offline"
     results = []
-    for room in ROOMS:
-        status = statuses[room["camera_id"]]
-        percentage = expected_occupancy(room["behavior_profile"], 13.0, now.weekday())
-        occupancy = int(round(clamp(room["capacity"] * percentage + rng.gauss(0, 2), 0, room["capacity"])))
-        updated = now - timedelta(minutes=11) if status == "stale" else now
-        if status == "offline":
-            occupancy = 0
-        results.append({"camera_id": room["camera_id"], "occupancy": occupancy, "updated_at": iso(updated), "status": status})
+    target_fractions = (0.15, 0.42, 0.72, 0.88)
+    for index, room in enumerate(ROOMS):
+        # A co-prime stride prevents adjacent cameras/floors from falling into
+        # the same occupancy band while remaining deterministic for tests.
+        percentage = target_fractions[(index * 7 + 3) % len(target_fractions)]
+        occupancy = int(round(clamp(
+            room["capacity"] * percentage + rng.gauss(0, room["capacity"] * 0.025),
+            0,
+            room["capacity"],
+        )))
+        results.append({
+            "camera_id": room["camera_id"],
+            "occupancy": occupancy,
+            "updated_at": iso(now),
+            "status": "online",
+        })
     return {"cameras": results}
 
 
@@ -164,9 +184,13 @@ def generate(output_dir: Path, start: datetime = DEFAULT_START, seed: int = SEED
     output_dir.mkdir(parents=True, exist_ok=True)
     rng = random.Random(seed)
     history = generate_history(rng, start)
-    now = start + timedelta(days=HISTORY_DAYS, hours=13)
+    # Live state must reflect wall-clock time. Deriving it from the history
+    # window can place observations in the future and block later ingestion.
+    now = datetime.now(timezone.utc)
     live = make_live(rng, now)
     rooms = make_room_views(live, now)
+    capacity_by_id = {room["room_id"]: room["capacity"] for room in ROOMS}
+    camera_by_room = {room["room_id"]: room["camera_id"] for room in ROOMS}
 
     # Explicit fixtures make failure handling testable without corrupting normal history invariants.
     edge_cases = {
@@ -175,8 +199,8 @@ def generate(output_dir: Path, start: datetime = DEFAULT_START, seed: int = SEED
         "zero_occupancy": {"room_id": "room_girls_common", "bucket_start": iso(start + timedelta(days=5, hours=2)), "avg_occupancy": 0, "min_occupancy": 0, "max_occupancy": 0, "capacity_snapshot": 60, "coverage_percentage": 100.0},
         "very_high_occupancy": {"room_id": "room_canteen", "bucket_start": iso(start + timedelta(days=2, hours=13)), "avg_occupancy": 119, "min_occupancy": 112, "max_occupancy": 120, "capacity_snapshot": 120, "coverage_percentage": 100.0},
         "missing_history": {"room_id": "room_girls_common", "from": iso(start + timedelta(days=4, hours=3)), "to": iso(start + timedelta(days=4, hours=4)), "reason": "camera_upload_gap"},
-        "partial_coverage_bucket": {"room_id": "room_teachers_canteen", "bucket_start": iso(start + timedelta(days=3, hours=9, minutes=15)), "avg_occupancy": 18, "min_occupancy": 16, "max_occupancy": 20, "capacity_snapshot": 40, "coverage_percentage": 62.5},
-        "over_capacity_model_server": {"camera_id": "cam_003", "occupancy": 126, "updated_at": iso(now), "status": "online", "configured_capacity": 120, "expected_backend_behavior": "cap display percentage at 100 while retaining raw model value for diagnostics"},
+        "partial_coverage_bucket": {"room_id": "room_teachers_canteen", "bucket_start": iso(start + timedelta(days=3, hours=9, minutes=15)), "avg_occupancy": 22, "min_occupancy": 20, "max_occupancy": 25, "capacity_snapshot": capacity_by_id["room_teachers_canteen"], "coverage_percentage": 62.5},
+        "over_capacity_model_server": {"camera_id": camera_by_room["room_canteen"], "occupancy": 156, "updated_at": iso(now), "status": "online", "configured_capacity": capacity_by_id["room_canteen"], "expected_backend_behavior": "cap display percentage at 100 while retaining raw model value for diagnostics"},
     }
     views = {"range": {"hour": {}, "day": {}, "week": {}}, "metric": {"occupancy": {}, "percentage": {}}}
     for room in ROOMS:

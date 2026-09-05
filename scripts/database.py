@@ -11,13 +11,13 @@ from backend.config import PROJECT_ROOT, Settings
 from backend.database import create_database_engine, make_session_factory
 from backend.maintenance import (
     aggregate_five_minute_buckets, apply_retention, backup_sqlite_database,
-    import_history, seed_canonical,
+    import_history, import_live_states, reset_database, seed_canonical,
 )
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="OccupAI database maintenance")
-    parser.add_argument("command", choices=("migrate", "seed", "import-history", "aggregate", "retention", "backup"))
+    parser.add_argument("command", choices=("migrate", "seed", "reset", "import-history", "aggregate", "retention", "backup"))
     parser.add_argument("--path", type=Path, default=PROJECT_ROOT / "mock" / "generated" / "history_5min_7days.json")
     args = parser.parse_args()
     settings = Settings.from_env()
@@ -35,7 +35,13 @@ def main() -> None:
         return
     engine = create_database_engine(settings.database_url, settings.sqlite_busy_timeout_ms)
     sessions = make_session_factory(engine)
-    if args.command == "seed":
+    if args.command == "reset":
+        reset_database(sessions)
+        seed_canonical(sessions, settings.mock_data_dir)
+        history_count = import_history(sessions, settings.mock_data_dir / "history_5min_7days.json")
+        state_count = import_live_states(sessions, settings.mock_data_dir / "live_occupancy.json")
+        print(f"Reset database: seeded {state_count} rooms/camera states and {history_count} history buckets")
+    elif args.command == "seed":
         seed_canonical(sessions, settings.mock_data_dir)
     elif args.command == "import-history":
         print(f"Imported {import_history(sessions, args.path)} buckets")

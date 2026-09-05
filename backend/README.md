@@ -14,6 +14,7 @@ $env:DATABASE_URL = "sqlite:///./data/occupai.db"
 uv run python -m scripts.database migrate
 uv run python -m scripts.database seed
 uv run python -m scripts.database import-history # optional development history
+uv run python -m scripts.database reset # destructive data reset + metadata/history/live state seed
 .\scripts\start-backend.ps1
 ```
 

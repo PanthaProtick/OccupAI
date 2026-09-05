@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-08-19T13:00:00Z",
+  "generated_at": "2026-09-05T06:21:37.644969Z",
   "cases": {
     "stale_camera": {
       "camera_id": "cam_003",
       "status": "stale",
-      "updated_at": "2026-08-19T12:49:00Z",
+      "updated_at": "2026-09-05T06:10:37.644969Z",
       "stale_after_minutes": 10
     },
     "offline_camera": {
@@ -14,7 +14,7 @@
     },
     "zero_occupancy": {
       "room_id": "room_girls_common",
-      "bucket_start": "2026-08-17T02:00:00Z",
+      "bucket_start": "2026-09-03T02:00:00Z",
       "avg_occupancy": 0,
       "min_occupancy": 0,
       "max_occupancy": 0,
@@ -23,7 +23,7 @@
     },
     "very_high_occupancy": {
       "room_id": "room_canteen",
-      "bucket_start": "2026-08-14T13:00:00Z",
+      "bucket_start": "2026-08-31T13:00:00Z",
       "avg_occupancy": 119,
       "min_occupancy": 112,
       "max_occupancy": 120,
@@ -32,25 +32,25 @@
     },
     "missing_history": {
       "room_id": "room_girls_common",
-      "from": "2026-08-16T03:00:00Z",
-      "to": "2026-08-16T04:00:00Z",
+      "from": "2026-09-02T03:00:00Z",
+      "to": "2026-09-02T04:00:00Z",
       "reason": "camera_upload_gap"
     },
     "partial_coverage_bucket": {
       "room_id": "room_teachers_canteen",
-      "bucket_start": "2026-08-15T09:15:00Z",
-      "avg_occupancy": 18,
-      "min_occupancy": 16,
-      "max_occupancy": 20,
-      "capacity_snapshot": 40,
+      "bucket_start": "2026-09-01T09:15:00Z",
+      "avg_occupancy": 22,
+      "min_occupancy": 20,
+      "max_occupancy": 25,
+      "capacity_snapshot": 50,
       "coverage_percentage": 62.5
     },
     "over_capacity_model_server": {
-      "camera_id": "cam_003",
-      "occupancy": 126,
-      "updated_at": "2026-08-19T13:00:00Z",
+      "camera_id": "cam_024",
+      "occupancy": 156,
+      "updated_at": "2026-09-05T06:21:37.644969Z",
       "status": "online",
-      "configured_capacity": 120,
+      "configured_capacity": 150,
       "expected_backend_behavior": "cap display percentage at 100 while retaining raw model value for diagnostics"
     }
   }
