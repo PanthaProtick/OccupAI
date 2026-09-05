@@ -301,9 +301,10 @@ def create_app(
         validate_auth_origin(request)
         rate_key = f"login:{client_key(request)}:{payload.email.strip().lower()}"
         app.state.auth_rate_limiter.check(rate_key)
-        auth_service().logout(request.cookies.get(active_settings.auth_cookie_name))
+        previous_token = request.cookies.get(active_settings.auth_cookie_name)
         user, token = auth_service().login(payload.email, payload.password,
                                            request.headers.get("User-Agent"))
+        auth_service().logout(previous_token)
         set_session_cookie(response, token)
         app.state.auth_rate_limiter.reset(rate_key)
         return AuthResponse(data=user)
