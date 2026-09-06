@@ -18,9 +18,21 @@ type DisplayMessage = Pick<AssistantMessage,"id"|"role"|"content"|"created_at"> 
 };
 const friendlyError = (error:unknown) => error instanceof Error && error.message
   ? error.message : "The Campus Assistant is unavailable right now. Please try again.";
-const displayTimestamp = (value:string) => new Intl.DateTimeFormat(undefined, {
-  dateStyle:"medium", timeStyle:"short",
-}).format(new Date(value));
+function renderAssistantMarkdown(content:string, enhanceAssistantText = false) {
+  const tokenPattern = /(\*\*[^*]+\*\*|==[^=]+==)/g;
+  const preparedContent = enhanceAssistantText ? content
+    .replace(/^(Here are the \d+ best current room options[^:]*):/m, "**$1**:")
+    .replace(/^(Here is the room's latest reliable occupancy status):/m, "**$1**:")
+    .replace(/^(Go to [^.]+\.)/m, "**$1**")
+    .replace(/^(\d+\.\s+[^—]+) — ((?:\d+(?:\.\d+)?% occupied))/gm, "**$1** — **$2**")
+    .replace(/(latest reliable OccupAI data)/g, "**$1**") : content;
+  const renderInline = (text:string) => text.split(tokenPattern).map((part,index) => {
+    if (part.startsWith("**") && part.endsWith("**")) return <strong key={`${part}-${index}`}>{part.slice(2,-2)}</strong>;
+    if (part.startsWith("==") && part.endsWith("==")) return <mark key={`${part}-${index}`}>{part.slice(2,-2)}</mark>;
+    return part;
+  });
+  return preparedContent.split(/\n\n+/).map((paragraph,index) => <p key={`${paragraph}-${index}`}>{renderInline(paragraph)}</p>);
+}
 
 function restoredMessage(message:AssistantMessage):DisplayMessage {
   const structured = message.structured_results;
@@ -99,10 +111,10 @@ export function AssistantPage() {
           {loadingHistory?<div className="assistant-status" role="status"><LoaderCircle className="spin"/> Restoring your conversation…</div>:
           messages.length===0?<div className="assistant-empty"><span><Bot size={30}/></span><h2>Find your best campus space</h2><p>Ask a question below or choose a suggestion to begin.</p></div>:
           messages.map(message=><article className={`assistant-message assistant-message--${message.role}`} key={message.id}>
-            <span className="assistant-message__icon">{message.role==="user"?<User size={17}/>:<Bot size={18}/>}</span><div><b>{message.role==="user"?"You":"Campus Assistant"}</b><p>{message.content}</p>
+            <span className="assistant-message__icon">{message.role==="user"?<User size={17}/>:<Bot size={18}/>}</span><div><b>{message.role==="user"?"You":"Campus Assistant"}</b><div className="assistant-answer">{renderAssistantMarkdown(message.content, message.role === "assistant")}</div>
               {message.role==="assistant"&&message.results&&<ResultCards results={message.results}/>} 
               {message.warnings?.length?<div className="assistant-warnings" role="note"><AlertTriangle size={16}/><ul>{message.warnings.map(warning=><li key={warning}>{warning}</li>)}</ul></div>:null}
-              {message.dataTimestamp?<time dateTime={message.dataTimestamp}>Data updated {displayTimestamp(message.dataTimestamp)}</time>:null}
+              {message.dataTimestamp?<time className="assistant-freshness" dateTime={message.dataTimestamp}>Live data</time>:null}
             </div></article>)}
           {pending?<div className="assistant-status" role="status"><LoaderCircle className="spin"/> Checking trusted live data…</div>:null}<div ref={endRef}/>
         </div>

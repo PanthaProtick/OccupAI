@@ -63,7 +63,7 @@ describe("Campus Assistant interface",()=>{
     expect(within(results).getAllByRole("heading").map(node=>node.textContent)).toEqual(["1A02","1B03"]);
     expect(within(results).getByRole("link",{name:"View room 1A02"})).toHaveAttribute("href","/rooms/room_1a02");
     expect(screen.getByText("Fewer than three reliable matches were available.")).toBeInTheDocument();
-    expect(screen.getByText(/Data updated/)).toBeInTheDocument();
+    expect(screen.getByText("Live data")).toBeInTheDocument();
   });
 
   it("disables duplicate submission while pending",async()=>{
@@ -110,7 +110,7 @@ describe("Campus Assistant interface",()=>{
     view(); await screen.findByRole("heading",{name:"Find your best campus space"});
     fireEvent.change(screen.getByLabelText("Ask Campus Assistant"),{target:{value:"room for 200 people"}});
     fireEvent.click(screen.getByRole("button",{name:"Send"}));
-    expect(await screen.findByText(/No reliable rooms matched this request/)).toBeInTheDocument();
+    expect(await screen.findByText("No reliable matches.")).toBeInTheDocument();
   });
 
   it("renders user-provided markup as inert text",async()=>{

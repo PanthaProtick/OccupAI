@@ -22,10 +22,6 @@ def _number(value: float) -> str:
     return f"{value:.2f}".rstrip("0").rstrip(".")
 
 
-def _timestamp(value: datetime) -> str:
-    return value.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
-
-
 def _filter_summary(plan: AssistantQueryPlan) -> str:
     parts: list[str] = []
     if plan.buildings:
@@ -46,16 +42,16 @@ def _filter_summary(plan: AssistantQueryPlan) -> str:
 def _intro(plan: AssistantQueryPlan, count: int) -> str:
     scope = _filter_summary(plan)
     if plan.intent is AssistantIntent.IDENTIFY_CROWDED_ROOMS:
-        return f"Based on the latest reliable readings, these are the {count} busiest matches for {scope}:"
+        return f"**Based on the latest reliable readings**, these are the **{count} busiest matches** for {scope}:"
     if plan.intent is AssistantIntent.FIND_ROOM_FOR_GROUP:
-        return f"I found {count} current room option(s) matching {scope}:"
+        return f"I found **{count} current room option(s)** matching {scope}:"
     if plan.intent is AssistantIntent.FIND_NEARBY_ALTERNATIVE:
-        return f"I found {count} lower-occupancy nearby alternative(s) matching {scope}:"
+        return f"I found **{count} lower-occupancy nearby alternative(s)** matching {scope}:"
     if plan.intent is AssistantIntent.COMPARE_ROOMS:
-        return f"Here is the current comparison for {scope}:"
+        return f"Here is the **current comparison** for {scope}:"
     if plan.intent is AssistantIntent.EXPLAIN_ROOM_STATUS:
-        return "Here is the room's latest reliable occupancy status:"
-    return f"Here are the {count} best current room option(s) matching {scope}:"
+        return "Here is the room's **latest reliable occupancy status**:"
+    return f"Here are the **{count} best current room option(s)** matching {scope}:"
 
 
 def compose_assistant_response(
@@ -91,16 +87,16 @@ def compose_assistant_response(
     ):
         recommendation = min(results, key=lambda room: (room.occupancy_percentage, -room.available_capacity, room.name.casefold()))
         lines.append(
-            f"Go to {recommendation.name}. It is the least crowded suitable option right now at "
-            f"{_number(recommendation.occupancy_percentage)}% occupied, with approximately "
-            f"{recommendation.available_capacity} seats available."
+            f"**Go to {recommendation.name}.** It is the least crowded suitable option right now at "
+            f"**{_number(recommendation.occupancy_percentage)}% occupied**, with approximately "
+            f"**{recommendation.available_capacity} seats available.**"
         )
     if plan.intent is AssistantIntent.COMPARE_ROOMS:
         recommendation = min(results, key=lambda room: (room.occupancy_percentage, -room.available_capacity, room.name.casefold()))
         lines.append(
-            f"Recommendation: I suggest going to {recommendation.name} right now. It is the quieter option at "
-            f"{_number(recommendation.occupancy_percentage)}% occupied, with approximately "
-            f"{recommendation.available_capacity} seats available."
+            f"**Recommendation:** I suggest going to **{recommendation.name}** right now. It is the quieter option at "
+            f"**{_number(recommendation.occupancy_percentage)}% occupied**, with approximately "
+            f"**{recommendation.available_capacity} seats available.**"
         )
     if plan.intent is AssistantIntent.EXPLAIN_ROOM_STATUS and plan.crowding_comparison and results:
         lead = min(results, key=lambda room: room.occupancy_percentage)
@@ -114,14 +110,13 @@ def compose_assistant_response(
             if plan.intent is AssistantIntent.EXPLAIN_ROOM_STATUS else ""
         )
         lines.append(
-            f"{index}. {room.name} — {_number(room.occupancy_percentage)}% occupied "
+            f"**{index}. {room.name}** — **{_number(room.occupancy_percentage)}% occupied** "
             f"({_floor_label(room.floor)}, {room.block} Block). "
             f"{capacity_sentence}{room.occupancy} of {room.capacity} seats are currently occupied, leaving approximately "
-            f"{room.available_capacity} available. {room.reason} Latest reading: {_timestamp(room.observed_at)}."
+            f"{room.available_capacity} available. {room.reason}"
         )
     lines.append(
-        f"These suggestions use the latest reliable OccupAI data available at {_timestamp(data_timestamp)}. "
-        "Occupancy can change, so availability is not guaranteed."
+        "These suggestions use the **latest reliable OccupAI data**. Occupancy can change, so availability is not guaranteed."
     )
     warnings = (
         [f"Only {len(results)} reliable matches were available."]

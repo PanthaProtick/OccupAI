@@ -31,7 +31,7 @@ class AssistantResponseTests(unittest.TestCase):
         self.assertIn("1. 1A02 — 15% occupied", content.answer)
         self.assertIn("6 of 40 seats", content.answer)
         self.assertIn("approximately 34 available", content.answer)
-        self.assertIn("Latest reading: 2026-09-05T12:00:00Z", content.answer)
+        self.assertNotIn("2026-09-05T12:00:00Z", content.answer)
         self.assertIn("availability is not guaranteed", content.answer)
         self.assertNotIn("2A99", content.answer)
         self.assertEqual(content.warnings, ["Only 2 reliable matches were available."])
