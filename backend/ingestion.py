@@ -194,7 +194,7 @@ class SerializedDatabaseWriter:
         for user, preference in user_preferences:
             in_app_enabled = preference.in_app_enabled if preference else True
             high_occupancy_enabled = preference.high_occupancy_enabled if preference else True
-            threshold = preference.high_occupancy_threshold if preference else 80
+            threshold = preference.high_occupancy_threshold if preference else 45
             cooldown_minutes = preference.cooldown_minutes if preference else 30
             try:
                 favorite_floors = set(json.loads(preference.favorite_floors)) if preference else set()

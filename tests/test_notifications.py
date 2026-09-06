@@ -9,7 +9,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import create_engine, func, inspect, select
+from sqlalchemy import create_engine, func, inspect, select, text
 from sqlalchemy.orm import Session
 
 from backend.app import create_app
@@ -241,7 +241,7 @@ class NotificationTests(unittest.TestCase):
         self.assertEqual(defaults.json(), {
             "in_app_enabled": True,
             "high_occupancy_enabled": True,
-            "high_occupancy_threshold": 80,
+            "high_occupancy_threshold": 45,
             "cooldown_minutes": 30,
             "favorite_floors": [],
         })
@@ -282,7 +282,7 @@ class NotificationTests(unittest.TestCase):
         self.assertEqual(first.status_code, 200)
         invalid_payloads = (
             {},
-            {"high_occupancy_threshold": 49},
+            {"high_occupancy_threshold": 44},
             {"high_occupancy_threshold": 101},
             {"cooldown_minutes": 0},
             {"cooldown_minutes": 10_081},
@@ -311,12 +311,12 @@ class NotificationTests(unittest.TestCase):
         self.assertNotEqual(first_user, second_user)
         self.assertEqual(
             self.client.get("/api/notification-preferences").json()["high_occupancy_threshold"],
-            80,
+            45,
         )
         engine = create_engine(self.url)
         with Session(engine) as db:
             self.assertEqual(db.get(NotificationPreferenceRow, first_user).high_occupancy_threshold, 75)
-            self.assertEqual(db.get(NotificationPreferenceRow, second_user).high_occupancy_threshold, 80)
+            self.assertEqual(db.get(NotificationPreferenceRow, second_user).high_occupancy_threshold, 45)
         engine.dispose()
 
     def test_preferences_require_authentication(self):
@@ -348,6 +348,37 @@ class NotificationFloorPreferenceMigrationTests(unittest.TestCase):
                 "favorite_floors",
                 {column["name"] for column in inspect(engine).get_columns("notification_preferences")},
             )
+            engine.dispose()
+
+    def test_threshold_migration_sets_old_defaults_to_45_and_preserves_custom_values(self):
+        with tempfile.TemporaryDirectory() as directory:
+            url = f"sqlite:///{(Path(directory) / 'threshold.db').as_posix()}"
+            config = Config(str(PROJECT_ROOT / "alembic.ini"))
+            config.set_main_option("sqlalchemy.url", url)
+            command.upgrade(config, "0007")
+            engine = create_engine(url)
+            with engine.begin() as connection:
+                connection.execute(text(
+                    "INSERT INTO users "
+                    "(id, name, email, normalized_email, password_hash, role, is_active, created_at, updated_at) "
+                    "VALUES ('default-user', 'Default', 'default@aust.edu', 'default@aust.edu', "
+                    "'hash', 'user', 1, 'now', 'now'), "
+                    "('custom-user', 'Custom', 'custom@aust.edu', 'custom@aust.edu', "
+                    "'hash', 'user', 1, 'now', 'now')"
+                ))
+                connection.execute(text(
+                    "INSERT INTO notification_preferences "
+                    "(user_id, in_app_enabled, high_occupancy_enabled, high_occupancy_threshold, "
+                    "cooldown_minutes, favorite_floors, created_at, updated_at) VALUES "
+                    "('default-user', 1, 1, 80, 30, '[]', 'now', 'now'), "
+                    "('custom-user', 1, 1, 75, 30, '[]', 'now', 'now')"
+                ))
+            command.upgrade(config, "head")
+            with engine.connect() as connection:
+                values = dict(connection.execute(text(
+                    "SELECT user_id, high_occupancy_threshold FROM notification_preferences"
+                )).all())
+            self.assertEqual(values, {"default-user": 45, "custom-user": 75})
             engine.dispose()
 
 

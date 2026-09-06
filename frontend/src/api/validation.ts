@@ -72,7 +72,7 @@ export function parseNotification(v: unknown): AppNotification {
 export function parseNotificationPreferences(v: unknown): NotificationPreferences {
   if (!object(v) || typeof v.in_app_enabled !== "boolean" ||
       typeof v.high_occupancy_enabled !== "boolean" || !integer(v.high_occupancy_threshold) ||
-      v.high_occupancy_threshold < 50 || v.high_occupancy_threshold > 100 ||
+      v.high_occupancy_threshold < 45 || v.high_occupancy_threshold > 100 ||
       !integer(v.cooldown_minutes) || v.cooldown_minutes < 1 ||
       !Array.isArray(v.favorite_floors) ||
       v.favorite_floors.some((floor) => !integer(floor) || floor < 2 || floor > 9) ||

@@ -36,7 +36,7 @@ Notification routes are:
 - `POST /api/notifications/{id}/read`, `POST /api/notifications/read-all`, and
   `POST /api/notifications/{id}/dismiss`.
 - `GET` and `PATCH /api/notification-preferences` for per-user in-app/high-occupancy
-  settings, threshold (50–100), cooldown (1–10080 minutes), and favorite upper floors.
+  settings, threshold (45–100), cooldown (1–10080 minutes), and favorite upper floors.
 
 Notifications, read/dismissed state, and preferences belong to the user row and survive
 logout. Logout revokes only the presented session. High-occupancy notifications are created

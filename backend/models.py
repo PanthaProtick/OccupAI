@@ -262,7 +262,7 @@ class NotificationsResponse(ApiModel):
 class NotificationPreferences(ApiModel):
     in_app_enabled: bool
     high_occupancy_enabled: bool
-    high_occupancy_threshold: int = Field(ge=50, le=100)
+    high_occupancy_threshold: int = Field(ge=45, le=100)
     cooldown_minutes: int = Field(gt=0, le=10_080)
     favorite_floors: list[int] = Field(default_factory=list, max_length=8)
 
@@ -281,7 +281,7 @@ class NotificationPreferences(ApiModel):
 class NotificationPreferencesUpdate(ApiModel):
     in_app_enabled: bool | None = Field(default=None, strict=True)
     high_occupancy_enabled: bool | None = Field(default=None, strict=True)
-    high_occupancy_threshold: int | None = Field(default=None, strict=True, ge=50, le=100)
+    high_occupancy_threshold: int | None = Field(default=None, strict=True, ge=45, le=100)
     cooldown_minutes: int | None = Field(default=None, strict=True, gt=0, le=10_080)
     favorite_floors: list[int] | None = Field(default=None, max_length=8)
 
