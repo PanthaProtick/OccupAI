@@ -7,11 +7,13 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, func, select
+from alembic import command
+from alembic.config import Config
+from sqlalchemy import create_engine, func, inspect, select
 from sqlalchemy.orm import Session
 
 from backend.app import create_app
-from backend.config import Settings
+from backend.config import PROJECT_ROOT, Settings
 from backend.database import Base, NotificationPreferenceRow, UserNotificationRow, UserRow
 from backend.repositories import MockOccupancyRepository
 
@@ -241,6 +243,7 @@ class NotificationTests(unittest.TestCase):
             "high_occupancy_enabled": True,
             "high_occupancy_threshold": 80,
             "cooldown_minutes": 30,
+            "favorite_floors": [],
         })
         engine = create_engine(self.url)
         with Session(engine) as db:
@@ -254,6 +257,7 @@ class NotificationTests(unittest.TestCase):
                 "in_app_enabled": False,
                 "high_occupancy_threshold": 75,
                 "cooldown_minutes": 45,
+                "favorite_floors": [7, 3],
             },
         )
         self.assertEqual(updated.status_code, 200)
@@ -262,6 +266,7 @@ class NotificationTests(unittest.TestCase):
             "high_occupancy_enabled": True,
             "high_occupancy_threshold": 75,
             "cooldown_minutes": 45,
+            "favorite_floors": [3, 7],
         })
         self.client.post("/api/auth/logout", headers={"Origin": ORIGIN})
         self.login()
@@ -283,6 +288,11 @@ class NotificationTests(unittest.TestCase):
             {"cooldown_minutes": 10_081},
             {"in_app_enabled": 1},
             {"high_occupancy_enabled": None},
+            {"favorite_floors": [0]},
+            {"favorite_floors": [1]},
+            {"favorite_floors": [10]},
+            {"favorite_floors": [7, 7]},
+            {"favorite_floors": ["7"]},
             {"unknown": True},
         )
         for payload in invalid_payloads:
@@ -319,6 +329,26 @@ class NotificationTests(unittest.TestCase):
             ).status_code,
             401,
         )
+
+
+class NotificationFloorPreferenceMigrationTests(unittest.TestCase):
+    def test_favorite_floor_migration_upgrades_and_downgrades(self):
+        with tempfile.TemporaryDirectory() as directory:
+            url = f"sqlite:///{(Path(directory) / 'floor-preferences.db').as_posix()}"
+            config = Config(str(PROJECT_ROOT / "alembic.ini"))
+            config.set_main_option("sqlalchemy.url", url)
+            command.upgrade(config, "head")
+            engine = create_engine(url)
+            self.assertIn(
+                "favorite_floors",
+                {column["name"] for column in inspect(engine).get_columns("notification_preferences")},
+            )
+            command.downgrade(config, "0006")
+            self.assertNotIn(
+                "favorite_floors",
+                {column["name"] for column in inspect(engine).get_columns("notification_preferences")},
+            )
+            engine.dispose()
 
 
 if __name__ == "__main__":

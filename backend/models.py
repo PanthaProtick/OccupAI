@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 from enum import StrEnum
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator, model_validator
+from uuid import UUID
 
 
 def _require_utc(value: datetime) -> datetime:
@@ -124,6 +125,80 @@ class ErrorResponse(ApiModel):
     error: ErrorBody
 
 
+class AssistantQueryRequest(ApiModel):
+    message: str = Field(min_length=1, max_length=1_000)
+    conversation_id: UUID | None = None
+
+    @field_validator("message", mode="before")
+    @classmethod
+    def normalize_message(cls, value):
+        return value.strip() if isinstance(value, str) else value
+
+
+class AssistantResult(ApiModel):
+    room_id: str = Field(pattern=r"^room_[a-z0-9_]+$")
+    name: str
+    building: str
+    floor: int = Field(ge=0)
+    block: str
+    capacity: int = Field(gt=0)
+    occupancy: int = Field(ge=0)
+    occupancy_percentage: float = Field(ge=0, le=100)
+    available_capacity: int = Field(ge=0)
+    status: CameraStatus
+    observed_at: UtcDateTime
+    reason: str
+
+
+class AssistantAppliedFilters(ApiModel):
+    buildings: list[str] = Field(default_factory=list)
+    floors: list[int] = Field(default_factory=list)
+    blocks: list[str] = Field(default_factory=list)
+    maximum_occupancy_percentage: float | None = Field(default=None, ge=0, le=100)
+    minimum_available_capacity: int | None = Field(default=None, ge=0)
+    limit: int = Field(default=3, ge=1, le=10)
+
+
+class AssistantQueryResponse(ApiModel):
+    conversation_id: UUID
+    answer: str
+    results: list[AssistantResult]
+    applied_filters: AssistantAppliedFilters
+    data_timestamp: UtcDateTime
+    warnings: list[str]
+
+
+class AssistantConversationSummary(ApiModel):
+    id: UUID
+    title: str | None
+    created_at: UtcDateTime
+    updated_at: UtcDateTime
+    message_count: int = Field(ge=0)
+
+
+class AssistantConversationListResponse(ApiModel):
+    items: list[AssistantConversationSummary]
+    page: int = Field(ge=1)
+    limit: int = Field(ge=1, le=50)
+    next_page: int | None = Field(default=None, ge=2)
+
+
+class AssistantMessage(ApiModel):
+    id: UUID
+    role: Literal["user", "assistant"]
+    content: str
+    structured_results: dict[str, Any] | None = None
+    created_at: UtcDateTime
+
+
+class AssistantConversation(ApiModel):
+    id: UUID
+    title: str | None
+    created_at: UtcDateTime
+    updated_at: UtcDateTime
+    messages: list[AssistantMessage]
+
+
 class SignupRequest(ApiModel):
     name: str = Field(min_length=2, max_length=120)
     email: str = Field(min_length=3, max_length=320)
@@ -189,6 +264,18 @@ class NotificationPreferences(ApiModel):
     high_occupancy_enabled: bool
     high_occupancy_threshold: int = Field(ge=50, le=100)
     cooldown_minutes: int = Field(gt=0, le=10_080)
+    favorite_floors: list[int] = Field(default_factory=list, max_length=8)
+
+    @field_validator("favorite_floors", mode="before")
+    @classmethod
+    def validate_favorite_floors(cls, value):
+        if not isinstance(value, list) or any(
+               isinstance(floor, bool) or not isinstance(floor, int) or floor < 2 or floor > 9
+               for floor in value):
+            raise ValueError("Favorite floors must be whole numbers from 2 through 9")
+        if len(set(value)) != len(value):
+            raise ValueError("Favorite floors must not contain duplicates")
+        return sorted(value)
 
 
 class NotificationPreferencesUpdate(ApiModel):
@@ -196,6 +283,20 @@ class NotificationPreferencesUpdate(ApiModel):
     high_occupancy_enabled: bool | None = Field(default=None, strict=True)
     high_occupancy_threshold: int | None = Field(default=None, strict=True, ge=50, le=100)
     cooldown_minutes: int | None = Field(default=None, strict=True, gt=0, le=10_080)
+    favorite_floors: list[int] | None = Field(default=None, max_length=8)
+
+    @field_validator("favorite_floors", mode="before")
+    @classmethod
+    def validate_favorite_floors(cls, value):
+        if value is None:
+            return value
+        if not isinstance(value, list) or any(
+               isinstance(floor, bool) or not isinstance(floor, int) or floor < 2 or floor > 9
+               for floor in value):
+            raise ValueError("Favorite floors must be whole numbers from 2 through 9")
+        if len(set(value)) != len(value):
+            raise ValueError("Favorite floors must not contain duplicates")
+        return sorted(value)
 
     @model_validator(mode="after")
     def require_non_null_update(self):

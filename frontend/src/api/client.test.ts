@@ -47,4 +47,12 @@ describe("API client", () => {
       expect.stringContaining("/notifications/n1/dismiss"),
     ]));
   });
+  it("posts assistant questions to the protected assistant endpoint", async () => {
+    const assistant = {conversation_id:"34d8e859-af14-45f5-a4df-ee71345e213d",answer:"One reliable room.",results:[],applied_filters:{buildings:[],floors:[0],blocks:[],maximum_occupancy_percentage:null,minimum_available_capacity:null,limit:3},data_timestamp:"2026-09-05T10:00:00Z",warnings:[]};
+    const fetchMock = vi.fn().mockResolvedValue(response(assistant));
+    vi.stubGlobal("fetch", fetchMock);
+    await api.queryAssistant({message:"Ground floor rooms"});
+    expect(fetchMock.mock.calls[0][0]).toContain("/api/assistant/query");
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({method:"POST",credentials:"include",body:JSON.stringify({message:"Ground floor rooms"})});
+  });
 });

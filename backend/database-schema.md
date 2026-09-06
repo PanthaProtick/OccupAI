@@ -246,6 +246,8 @@ Both `(camera_id, observed_at)` and `(camera_id, source_event_id)` are unique. R
 ## Account notification tables
 
 `notification_preferences` has one row per user (`user_id` primary key with cascade delete),
+including a JSON-encoded `favorite_floors` list limited by the API to unique floors 2–9. Ground
+Floor and Floor 1 are mandatory notification floors and therefore are not stored as favorites.
 boolean in-app/high-occupancy switches, a constrained 50–100 threshold, a positive cooldown,
 and UTC creation/update timestamps. Missing rows use and persist defaults of enabled, 80%,
 and 30 minutes.

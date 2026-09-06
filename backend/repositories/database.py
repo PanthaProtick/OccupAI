@@ -6,6 +6,7 @@ from sqlalchemy import select
 
 from backend.database import CameraRow, CameraStateRow, OccupancyBucketRow, RoomRow
 from backend.models import CameraStatus, HistoryMetric, HistoryPoint, HistoryRange, Occupancy, Room, RoomView
+from backend.assistant.architecture import AssistantRoomSnapshot
 
 
 def _dt(value: str) -> datetime:
@@ -76,6 +77,35 @@ class DatabaseOccupancyRepository:
         with self.session_factory() as session:
             rows = session.execute(select(RoomRow, CameraRow, CameraStateRow).select_from(RoomRow).join(CameraRow, CameraRow.room_id == RoomRow.room_id).outerjoin(CameraStateRow, CameraStateRow.camera_id == CameraRow.camera_id).order_by(CameraRow.camera_id)).all()
             return [self._occupancy(*row) for row in rows]
+
+    def list_assistant_snapshots(self) -> list[AssistantRoomSnapshot]:
+        """Load every assistant candidate with one joined database query."""
+        now = datetime.now(timezone.utc)
+        with self.session_factory() as session:
+            rows = session.execute(
+                select(RoomRow, CameraRow, CameraStateRow)
+                .select_from(RoomRow)
+                .join(CameraRow, CameraRow.room_id == RoomRow.room_id)
+                .outerjoin(CameraStateRow, CameraStateRow.camera_id == CameraRow.camera_id)
+                .order_by(CameraRow.camera_id)
+            ).all()
+            snapshots: list[AssistantRoomSnapshot] = []
+            for room, camera, state in rows:
+                occupancy = self._occupancy(room, camera, state)
+                observed_at = _dt(state.observed_at) if state and state.observed_at else None
+                age_seconds = (now - observed_at).total_seconds() if observed_at else None
+                is_fresh = bool(
+                    state
+                    and state.status == CameraStatus.ONLINE.value
+                    and observed_at is not None
+                    and age_seconds is not None
+                    and 0 <= age_seconds <= camera.stale_after_seconds
+                )
+                snapshots.append(AssistantRoomSnapshot(
+                    room=self._room(room, camera), occupancy=occupancy,
+                    camera_enabled=camera.enabled, observed_at=observed_at, is_fresh=is_fresh,
+                ))
+            return snapshots
 
     def get_occupancy(self, camera_id: str) -> Occupancy | None:
         with self.session_factory() as session:

@@ -8,7 +8,9 @@ from backend.database import Base
 
 config = context.config
 if config.config_file_name:
-    fileConfig(config.config_file_name)
+    # Migration calls can run inside the API process or test process. Preserve
+    # its existing structured loggers instead of globally disabling them.
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL", config.get_main_option("sqlalchemy.url")))
 target_metadata = Base.metadata
 

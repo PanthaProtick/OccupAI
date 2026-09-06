@@ -16,6 +16,7 @@ from backend.models import (
     Room,
     RoomView,
 )
+from backend.assistant.architecture import AssistantRoomSnapshot
 
 
 def _fixture_datetime(value: Any, location: str) -> datetime:
@@ -168,6 +169,18 @@ class MockOccupancyRepository:
 
     def list_occupancy(self) -> list[Occupancy]:
         return list(self._occupancy.values())
+
+    def list_assistant_snapshots(self) -> list[AssistantRoomSnapshot]:
+        return [
+            AssistantRoomSnapshot(
+                room=room,
+                occupancy=self._occupancy[room.camera_id],
+                camera_enabled=True,
+                observed_at=self._occupancy[room.camera_id].updated_at,
+                is_fresh=self._occupancy[room.camera_id].status is CameraStatus.ONLINE,
+            )
+            for room in self._rooms.values()
+        ]
 
     def get_occupancy(self, camera_id: str) -> Occupancy | None:
         return self._occupancy.get(camera_id)

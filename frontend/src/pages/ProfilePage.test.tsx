@@ -14,6 +14,8 @@ vi.mock("../api/client", async () => {
     getProfile: vi.fn(),
     updateProfile: vi.fn(),
     changePassword: vi.fn(),
+    getNotificationPreferences: vi.fn(),
+    updateNotificationPreferences: vi.fn(),
   }};
 });
 
@@ -30,6 +32,14 @@ beforeEach(() => {
   vi.mocked(api.getProfile).mockReset().mockResolvedValue(profile);
   vi.mocked(api.updateProfile).mockReset();
   vi.mocked(api.changePassword).mockReset();
+  vi.mocked(api.getNotificationPreferences).mockReset().mockResolvedValue({
+    in_app_enabled:true, high_occupancy_enabled:true, high_occupancy_threshold:80,
+    cooldown_minutes:30, favorite_floors:[],
+  });
+  vi.mocked(api.updateNotificationPreferences).mockReset().mockResolvedValue({
+    in_app_enabled:true, high_occupancy_enabled:true, high_occupancy_threshold:80,
+    cooldown_minutes:30, favorite_floors:[7],
+  });
 });
 
 describe("Profile integration", () => {
@@ -59,6 +69,18 @@ describe("Profile integration", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Profile unavailable");
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(await screen.findByText("Real AUST Student")).toBeInTheDocument();
+  });
+
+  it("shows mandatory floors and persists additional used floors", async () => {
+    render(<MemoryRouter><ProfilePage /></MemoryRouter>);
+    await screen.findByText("Real AUST Student");
+    expect(screen.getByText("Ground Floor")).toBeInTheDocument();
+    expect(screen.getByText("Floor 1")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Floor 7" }));
+    await waitFor(() => expect(api.updateNotificationPreferences).toHaveBeenCalledWith({
+      favorite_floors:[7],
+    }));
+    expect(await screen.findByText("Used floors updated successfully.")).toBeInTheDocument();
   });
 });
 
@@ -98,7 +120,7 @@ describe("Dedicated password page", () => {
     resolve();
     expect(await screen.findByText("Password updated successfully.")).toBeInTheDocument();
     expect(api.changePassword).toHaveBeenCalledTimes(1);
-    fireEvent.click(screen.getByRole("link", { name: /Change password/ }));
+    fireEvent.click(await screen.findByRole("link", { name: /Change password/ }));
     expect(screen.getByLabelText("Current Password")).toHaveValue("");
     expect(screen.getByLabelText("New Password")).toHaveValue("");
     expect(screen.getByLabelText("Confirm New Password")).toHaveValue("");

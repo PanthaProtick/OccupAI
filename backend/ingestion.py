@@ -196,6 +196,13 @@ class SerializedDatabaseWriter:
             high_occupancy_enabled = preference.high_occupancy_enabled if preference else True
             threshold = preference.high_occupancy_threshold if preference else 80
             cooldown_minutes = preference.cooldown_minutes if preference else 30
+            try:
+                favorite_floors = set(json.loads(preference.favorite_floors)) if preference else set()
+            except (TypeError, json.JSONDecodeError):
+                favorite_floors = set()
+            notification_floors = {0, 1, *favorite_floors}
+            if camera.room.floor not in notification_floors:
+                continue
             if not in_app_enabled or not high_occupancy_enabled or current_percentage < threshold:
                 continue
             previous_percentage = None

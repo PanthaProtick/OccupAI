@@ -23,6 +23,7 @@ describe("AppLayout dashboard navigation", () => {
     expect(screen.getByRole("link", { name: "Overview" })).toHaveAttribute("href", "/dashboard#overview");
     expect(screen.getByRole("link", { name: "Floor map" })).toHaveAttribute("href", "/dashboard#floor-map");
     expect(screen.getByRole("link", { name: "Rooms" })).toHaveAttribute("href", "/dashboard#rooms");
+    expect(screen.getByRole("link", { name: "AI Assistant" })).toHaveAttribute("href", "/assistant");
     fireEvent.click(screen.getByRole("link", { name: "OccupAI dashboard" }));
     expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "smooth" });
   });

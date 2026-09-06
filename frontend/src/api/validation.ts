@@ -1,4 +1,4 @@
-import type { AppNotification, CameraStatus, HistoryMetric, HistoryRange, HistoryResponse, NotificationPreferences, NotificationsResponse, Occupancy, OccupancyListResponse, OccupancyResponse, Profile, Room, RoomResponse, RoomsResponse } from "./types";
+import type { AppNotification, AssistantConversation, AssistantConversationListResponse, AssistantQueryResponse, AssistantResult, CameraStatus, HistoryMetric, HistoryRange, HistoryResponse, NotificationPreferences, NotificationsResponse, Occupancy, OccupancyListResponse, OccupancyResponse, Profile, Room, RoomResponse, RoomsResponse } from "./types";
 
 type Json = Record<string, unknown>;
 const object = (v: unknown): v is Json => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -10,6 +10,7 @@ const status = (v: unknown): v is CameraStatus => v === "online" || v === "stale
 const range = (v: unknown): v is HistoryRange => v === "hour" || v === "day" || v === "week";
 const metric = (v: unknown): v is HistoryMetric => v === "occupancy" || v === "percentage";
 const timestamp = (v: unknown): v is string => text(v) && !Number.isNaN(Date.parse(v));
+const nullableFinite = (v: unknown): v is number|null => v === null || finite(v);
 
 function room(v: unknown): v is Room {
   return object(v) && text(v.room_id) && text(v.name) && integer(v.capacity) && v.capacity > 0 &&
@@ -72,8 +73,50 @@ export function parseNotificationPreferences(v: unknown): NotificationPreference
   if (!object(v) || typeof v.in_app_enabled !== "boolean" ||
       typeof v.high_occupancy_enabled !== "boolean" || !integer(v.high_occupancy_threshold) ||
       v.high_occupancy_threshold < 50 || v.high_occupancy_threshold > 100 ||
-      !integer(v.cooldown_minutes) || v.cooldown_minutes < 1) {
+      !integer(v.cooldown_minutes) || v.cooldown_minutes < 1 ||
+      !Array.isArray(v.favorite_floors) ||
+      v.favorite_floors.some((floor) => !integer(floor) || floor < 2 || floor > 9) ||
+      new Set(v.favorite_floors).size !== v.favorite_floors.length) {
     throw new Error("Malformed notification preferences response");
   }
   return v as unknown as NotificationPreferences;
+}
+
+function assistantResult(v: unknown): v is AssistantResult {
+  return object(v) && text(v.room_id) && text(v.name) && text(v.building) && integer(v.floor) &&
+    text(v.block) && integer(v.capacity) && v.capacity > 0 && integer(v.occupancy) &&
+    finite(v.occupancy_percentage) && v.occupancy_percentage >= 0 && v.occupancy_percentage <= 100 &&
+    integer(v.available_capacity) && status(v.status) && timestamp(v.observed_at) && text(v.reason);
+}
+const stringArray = (v: unknown): v is string[] => Array.isArray(v) && v.every(text);
+export function parseAssistantQuery(v: unknown): AssistantQueryResponse {
+  if (!object(v) || !text(v.conversation_id) || !text(v.answer) || !Array.isArray(v.results) ||
+      !v.results.every(assistantResult) || !object(v.applied_filters) ||
+      !stringArray(v.applied_filters.buildings) || !Array.isArray(v.applied_filters.floors) ||
+      !v.applied_filters.floors.every(integer) || !stringArray(v.applied_filters.blocks) ||
+      !nullableFinite(v.applied_filters.maximum_occupancy_percentage) ||
+      !nullableFinite(v.applied_filters.minimum_available_capacity) ||
+      !integer(v.applied_filters.limit) || !timestamp(v.data_timestamp) || !stringArray(v.warnings)) {
+    throw new Error("Malformed assistant response");
+  }
+  return v as unknown as AssistantQueryResponse;
+}
+export function parseAssistantConversations(v: unknown): AssistantConversationListResponse {
+  if (!object(v) || !Array.isArray(v.items) || !v.items.every((item) => object(item) &&
+      text(item.id) && (item.title === null || text(item.title)) && timestamp(item.created_at) &&
+      timestamp(item.updated_at) && integer(item.message_count)) || !integer(v.page) ||
+      !integer(v.limit) || !(v.next_page === null || integer(v.next_page))) {
+    throw new Error("Malformed assistant conversations response");
+  }
+  return v as unknown as AssistantConversationListResponse;
+}
+export function parseAssistantConversation(v: unknown): AssistantConversation {
+  if (!object(v) || !text(v.id) || !(v.title === null || text(v.title)) ||
+      !timestamp(v.created_at) || !timestamp(v.updated_at) || !Array.isArray(v.messages) ||
+      !v.messages.every((message) => object(message) && text(message.id) &&
+        (message.role === "user" || message.role === "assistant") && text(message.content) &&
+        (message.structured_results === null || object(message.structured_results)) && timestamp(message.created_at))) {
+    throw new Error("Malformed assistant conversation response");
+  }
+  return v as unknown as AssistantConversation;
 }

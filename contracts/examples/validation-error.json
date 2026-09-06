@@ -10,8 +10,7 @@
             "query",
             "range"
           ],
-          "msg": "Input should be 'hour', 'day' or 'week'",
-          "input": "month"
+          "msg": "Input should be 'hour', 'day' or 'week'"
         }
       ]
     }

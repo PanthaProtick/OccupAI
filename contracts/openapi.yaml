@@ -17,6 +17,105 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
+  /api/assistant/query:
+    post:
+      tags:
+      - assistant
+      summary: Query Assistant
+      description: Authenticated assistant transport; interpretation starts in Module
+        3.
+      operationId: query_assistant_api_assistant_query_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssistantQueryRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssistantQueryResponse'
+        '400': &id001
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/assistant/conversations:
+    get:
+      tags:
+      - assistant
+      summary: List Assistant Conversations
+      operationId: list_assistant_conversations_api_assistant_conversations_get
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 10000
+          minimum: 1
+          default: 1
+          title: Page
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 50
+          minimum: 1
+          default: 20
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssistantConversationListResponse'
+        '400': *id001
+  /api/assistant/conversations/{conversation_id}:
+    get:
+      tags:
+      - assistant
+      summary: Get Assistant Conversation
+      operationId: get_assistant_conversation_api_assistant_conversations__conversation_id__get
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Conversation Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssistantConversation'
+        '400': *id001
+    delete:
+      tags:
+      - assistant
+      summary: Delete Assistant Conversation
+      operationId: delete_assistant_conversation_api_assistant_conversations__conversation_id__delete
+      parameters:
+      - name: conversation_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          title: Conversation Id
+      responses:
+        '204':
+          description: Successful Response
+        '400': *id001
   /api/auth/signup:
     post:
       tags:
@@ -36,12 +135,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
-        '400': &id001
-          description: Invalid request parameters
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+        '400': *id001
   /api/auth/login:
     post:
       tags:
@@ -400,6 +494,286 @@ paths:
         '400': *id001
 components:
   schemas:
+    AssistantAppliedFilters:
+      properties:
+        buildings:
+          items:
+            type: string
+          type: array
+          title: Buildings
+        floors:
+          items:
+            type: integer
+          type: array
+          title: Floors
+        blocks:
+          items:
+            type: string
+          type: array
+          title: Blocks
+        maximum_occupancy_percentage:
+          anyOf:
+          - type: number
+            maximum: 100.0
+            minimum: 0.0
+          - type: 'null'
+          title: Maximum Occupancy Percentage
+        minimum_available_capacity:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Minimum Available Capacity
+        limit:
+          type: integer
+          maximum: 10.0
+          minimum: 1.0
+          title: Limit
+          default: 3
+      additionalProperties: false
+      type: object
+      title: AssistantAppliedFilters
+    AssistantConversation:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+        messages:
+          items:
+            $ref: '#/components/schemas/AssistantMessage'
+          type: array
+          title: Messages
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - title
+      - created_at
+      - updated_at
+      - messages
+      title: AssistantConversation
+    AssistantConversationListResponse:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/AssistantConversationSummary'
+          type: array
+          title: Items
+        page:
+          type: integer
+          minimum: 1.0
+          title: Page
+        limit:
+          type: integer
+          maximum: 50.0
+          minimum: 1.0
+          title: Limit
+        next_page:
+          anyOf:
+          - type: integer
+            minimum: 2.0
+          - type: 'null'
+          title: Next Page
+      additionalProperties: false
+      type: object
+      required:
+      - items
+      - page
+      - limit
+      title: AssistantConversationListResponse
+    AssistantConversationSummary:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Title
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+        message_count:
+          type: integer
+          minimum: 0.0
+          title: Message Count
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - title
+      - created_at
+      - updated_at
+      - message_count
+      title: AssistantConversationSummary
+    AssistantMessage:
+      properties:
+        id:
+          type: string
+          format: uuid
+          title: Id
+        role:
+          type: string
+          enum:
+          - user
+          - assistant
+          title: Role
+        content:
+          type: string
+          title: Content
+        structured_results:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Structured Results
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+      additionalProperties: false
+      type: object
+      required:
+      - id
+      - role
+      - content
+      - created_at
+      title: AssistantMessage
+    AssistantQueryRequest:
+      properties:
+        message:
+          type: string
+          maxLength: 1000
+          minLength: 1
+          title: Message
+        conversation_id:
+          anyOf:
+          - type: string
+            format: uuid
+          - type: 'null'
+          title: Conversation Id
+      additionalProperties: false
+      type: object
+      required:
+      - message
+      title: AssistantQueryRequest
+    AssistantQueryResponse:
+      properties:
+        conversation_id:
+          type: string
+          format: uuid
+          title: Conversation Id
+        answer:
+          type: string
+          title: Answer
+        results:
+          items:
+            $ref: '#/components/schemas/AssistantResult'
+          type: array
+          title: Results
+        applied_filters:
+          $ref: '#/components/schemas/AssistantAppliedFilters'
+        data_timestamp:
+          type: string
+          format: date-time
+          title: Data Timestamp
+        warnings:
+          items:
+            type: string
+          type: array
+          title: Warnings
+      additionalProperties: false
+      type: object
+      required:
+      - conversation_id
+      - answer
+      - results
+      - applied_filters
+      - data_timestamp
+      - warnings
+      title: AssistantQueryResponse
+    AssistantResult:
+      properties:
+        room_id:
+          type: string
+          pattern: ^room_[a-z0-9_]+$
+          title: Room Id
+        name:
+          type: string
+          title: Name
+        building:
+          type: string
+          title: Building
+        floor:
+          type: integer
+          minimum: 0.0
+          title: Floor
+        block:
+          type: string
+          title: Block
+        capacity:
+          type: integer
+          exclusiveMinimum: 0.0
+          title: Capacity
+        occupancy:
+          type: integer
+          minimum: 0.0
+          title: Occupancy
+        occupancy_percentage:
+          type: number
+          maximum: 100.0
+          minimum: 0.0
+          title: Occupancy Percentage
+        available_capacity:
+          type: integer
+          minimum: 0.0
+          title: Available Capacity
+        status:
+          $ref: '#/components/schemas/CameraStatus'
+        observed_at:
+          type: string
+          format: date-time
+          title: Observed At
+        reason:
+          type: string
+          title: Reason
+      additionalProperties: false
+      type: object
+      required:
+      - room_id
+      - name
+      - building
+      - floor
+      - block
+      - capacity
+      - occupancy
+      - occupancy_percentage
+      - available_capacity
+      - status
+      - observed_at
+      - reason
+      title: AssistantResult
     AuthResponse:
       properties:
         data:

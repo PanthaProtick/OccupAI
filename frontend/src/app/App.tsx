@@ -8,6 +8,7 @@ import { AuthPage } from "../pages/AuthPage";
 import { ProtectedRoute } from "../auth/ProtectedRoute";
 import { ProfilePage } from "../pages/ProfilePage";
 import { ChangePasswordPage } from "../pages/ChangePasswordPage";
+import { AssistantPage } from "../pages/AssistantPage";
 
 export function App() {
   return (
@@ -20,6 +21,7 @@ export function App() {
           <Route path="rooms/:roomId" element={<RoomDetailPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="profile/change-password" element={<ChangePasswordPage />} />
+          <Route path="assistant" element={<AssistantPage />} />
         </Route>
       </Route>
       <Route path="*" element={<NotFound />} />
