@@ -12,6 +12,7 @@ export function HistoryChart({ points, metric, range = "hour" }: { points: Histo
   const peak = Math.max(...points.map(p => p.value));
   const coverage = Math.round(points.reduce((sum, p) => sum + p.coverage_percentage, 0) / points.length);
   const display = (value: number) => metric === "percentage" ? formatPercentage(value) : formatOccupancy(value);
+  const exactDisplay = (value: number) => metric === "percentage" ? `${value}%` : `${value}`;
   const area = coords.length > 1 ? `${segments[0] ?? ""} L${coords.at(-1)!.x},${height - bottom} L${coords[0].x},${height - bottom} Z` : "";
   const ticks = [0, .25, .5, .75, 1];
   const labelIndexes = [...new Set([0, Math.floor((points.length - 1) / 2), points.length - 1])];
@@ -21,7 +22,7 @@ export function HistoryChart({ points, metric, range = "hour" }: { points: Histo
       <defs><linearGradient id="chartArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#65e6c4" stopOpacity=".38"/><stop offset="1" stopColor="#65e6c4" stopOpacity="0"/></linearGradient></defs>
       {ticks.map(t => <g key={t}><line className="chart-gridline" x1={left} x2={width-right} y1={top + (1-t)*(height-top-bottom)} y2={top + (1-t)*(height-top-bottom)} /><text className="chart-axis-label" x={left-10} y={top + (1-t)*(height-top-bottom)+4} textAnchor="end">{display(max*t)}</text></g>)}
       {area && <path className="chart-area" d={area} />}{segments.map((d, i) => <path className="chart-line" key={i} d={d} />)}
-      {coords.map(({ x, y, p }) => <g key={p.bucket_start}><circle cx={x} cy={y} r="5" className={p.coverage_percentage < 100 ? "partial" : ""}><title>{formatTimestamp(p.bucket_start)} · {display(p.value)} · {p.coverage_percentage}% coverage</title></circle></g>)}
+      {coords.map(({ x, y, p }) => <g key={p.bucket_start}><circle cx={x} cy={y} r="5" className={p.coverage_percentage < 100 ? "partial" : ""}><title>{formatTimestamp(p.bucket_start)} · Exact value: {exactDisplay(p.value)} · {p.coverage_percentage}% coverage</title></circle></g>)}
       {labelIndexes.map(i => <text key={i} className="chart-axis-label" x={coords[i].x} y={height-13} textAnchor={i === 0 ? "start" : i === points.length-1 ? "end" : "middle"}>{new Date(points[i].bucket_start).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</text>)}
     </svg></div>
     <details className="chart-table"><summary>View all {points.length} readings</summary><ul className="chart-details">{points.map((p) => <li key={p.bucket_start}><time dateTime={p.bucket_start}>{formatTimestamp(p.bucket_start)}</time><strong>{display(p.value)}</strong><span>{p.coverage_percentage}% coverage{p.coverage_percentage < 100 ? " — incomplete" : ""}</span></li>)}</ul></details>

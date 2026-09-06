@@ -8,6 +8,7 @@ import stale from "../../../contracts/examples/stale-room.json";
 import zero from "../../../contracts/examples/zero-occupancy.json";
 import emptyHistory from "../../../contracts/examples/empty-history.json";
 import partialHistory from "../../../contracts/examples/partial-coverage-history.json";
+import history from "../../../contracts/examples/history.json";
 import notFound from "../../../contracts/examples/not-found-error.json";
 import validationError from "../../../contracts/examples/validation-error.json";
 import rooms from "../../../contracts/examples/rooms.json";
@@ -25,5 +26,9 @@ describe("provided UI edge cases", () => {
   it("caps display and retains over-capacity raw count", () => { render(<OccupancyReading data={overCapacity.data as Occupancy} />); expect(screen.getByText("100% · capacity 120")).toBeInTheDocument(); expect(screen.getByText(/Raw count: 126/)).toBeInTheDocument(); });
   it("renders empty history without artificial points", () => { render(<HistoryChart points={emptyHistory.data} metric="occupancy" />); expect(screen.getByText("No history available")).toBeInTheDocument(); expect(screen.queryByRole("img")).not.toBeInTheDocument(); });
   it("communicates partial coverage", () => { render(<HistoryChart points={partialHistory.data} metric="occupancy" />); expect(screen.getByText(/62.5% coverage — incomplete/)).toBeInTheDocument(); });
+  it("shows the exact raw value when hovering a history point", () => {
+    render(<HistoryChart points={history.data} metric="percentage" range="week" />);
+    expect(screen.getByText(/Exact value: 20\.6528%/, { selector: "title" })).toBeInTheDocument();
+  });
   it.each([notFound, validationError])("renders supplied API errors", (payload) => { const retry = vi.fn(); render(<ErrorState message={payload.error.message} onRetry={retry} />); expect(screen.getByText(payload.error.message)).toBeInTheDocument(); fireEvent.click(screen.getByRole("button", { name: "Try again" })); expect(retry).toHaveBeenCalled(); });
 });
