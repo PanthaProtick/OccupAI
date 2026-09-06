@@ -116,13 +116,16 @@ class SimulatedIngestionService:
 
     def run_once(self) -> dict[str, bool]:
         """Generate one round of simulated readings for all cameras."""
-        now = datetime.now(timezone.utc)
-        hour = now.hour + now.minute / 60.0
-        weekday = now.weekday()
         results: dict[str, bool] = {}
 
         for camera in self.cameras:
             try:
+                # Timestamp each reading when this camera is processed. A large
+                # all-room simulation cycle must not make later/earlier cameras
+                # appear stale merely because the cycle itself takes time.
+                now = datetime.now(timezone.utc)
+                hour = now.hour + now.minute / 60.0
+                weekday = now.weekday()
                 fraction = expected_occupancy(camera.behavior_profile, hour, weekday)
                 
                 # Random walk drift for organic movement (people entering/leaving)

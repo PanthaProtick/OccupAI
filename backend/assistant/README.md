@@ -33,7 +33,8 @@ when fewer reliable matches exist.
 
 Supported room queries are also scoped to the authenticated user's persisted "My used floors":
 Ground Floor and Floor 1 plus selected Floors 2–9. A query without an explicit floor searches that
-scope. Explicit unselected floors are excluded with a warning directing the user to Profile.
+scope. When the user explicitly mentions one or more floors, those requested floors take priority
+over the saved scope so the assistant can help when the user is elsewhere in the building.
 
 ## API and persistence
 

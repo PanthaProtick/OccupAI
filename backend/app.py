@@ -179,6 +179,13 @@ def create_app(
             if room["camera_id"] not in live_ids
         ]
         if sim_cameras:
+            freshness_overrides = getattr(active_repository, "freshness_overrides", None)
+            if freshness_overrides is not None:
+                # A full 155-room SQLite simulation cycle is intentionally
+                # serialized through the real ingestion pipeline and can take
+                # longer than physical-camera stale thresholds. This in-memory
+                # override applies only to simulated feeds for this process.
+                freshness_overrides.update({camera.camera_id: 300 for camera in sim_cameras})
             simulation_service = SimulatedIngestionService(
                 sim_cameras, sim_writer, active_settings.simulation_tick_interval_seconds,
             )
@@ -405,23 +412,15 @@ def create_app(
             app.state.assistant_ip_rate_limiter.check(f"assistant:ip:{client_key(request)}")
             plan = parse_assistant_query(payload.message)
             intent = plan.intent.value
-            excluded_floors: list[int] = []
-            no_allowed_requested_floor = False
             if not plan.clarification_question and plan.intent.value != "unsupported":
-                preferences = notification_service().get_preferences(user.id)
-                used_floors = sorted({0, 1, *preferences.favorite_floors})
-                requested_floors = set(plan.floors)
-                excluded_floors = sorted(requested_floors - set(used_floors))
-                no_allowed_requested_floor = bool(
-                    requested_floors and not requested_floors.intersection(used_floors)
-                )
-                if requested_floors and not no_allowed_requested_floor:
-                    plan = plan.model_copy(update={
-                        "floors": sorted(requested_floors.intersection(used_floors))
-                    })
-                elif not requested_floors:
+                # An explicitly requested floor represents the user's current context and
+                # takes priority over their saved preferences. Saved floors scope only
+                # general queries that do not mention a floor.
+                if not plan.floors:
+                    preferences = notification_service().get_preferences(user.id)
+                    used_floors = sorted({0, 1, *preferences.favorite_floors})
                     plan = plan.model_copy(update={"floors": used_floors})
-            if plan.clarification_question or plan.intent.value == "unsupported" or no_allowed_requested_floor:
+            if plan.clarification_question or plan.intent.value == "unsupported":
                 results = []
             else:
                 candidates = execute_query_plan(active_repository, plan)
@@ -429,14 +428,6 @@ def create_app(
             result_count = len(results)
             data_timestamp = active_repository.generated_at
             content = compose_assistant_response(plan, results, data_timestamp)
-            if excluded_floors:
-                labels = ", ".join("Ground Floor" if floor == 0 else f"Floor {floor}" for floor in excluded_floors)
-                content = AssistantResponseContent(
-                    content.answer,
-                    content.warnings + [
-                        f"{labels} {'is' if len(excluded_floors) == 1 else 'are'} not included in your used floors. Update My used floors in Profile to include {'it' if len(excluded_floors) == 1 else 'them'}."
-                    ],
-                )
             if not plan.safety_refusal and plan.intent.value != "unsupported" and not plan.clarification_question:
                 provider_outcome = provider_coordinator.rewrite(content.answer, results)
                 provider_used = provider_outcome.provider_used

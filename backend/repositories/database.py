@@ -25,6 +25,10 @@ def _intensity(percentage: float | None) -> str | None:
 class DatabaseOccupancyRepository:
     def __init__(self, session_factory) -> None:
         self.session_factory = session_factory
+        self.freshness_overrides: dict[str, int] = {}
+
+    def freshness_seconds(self, camera: CameraRow) -> int:
+        return self.freshness_overrides.get(camera.camera_id, camera.stale_after_seconds)
 
     @property
     def generated_at(self) -> datetime:
@@ -43,13 +47,12 @@ class DatabaseOccupancyRepository:
         return Room(room_id=row.room_id, name=row.name, capacity=row.capacity, building=row.building,
                     floor=row.floor, camera_id=camera.camera_id, behavior_profile=row.behavior_profile)
 
-    @staticmethod
-    def _occupancy(room: RoomRow, camera: CameraRow, state: CameraStateRow | None) -> Occupancy:
+    def _occupancy(self, room: RoomRow, camera: CameraRow, state: CameraStateRow | None) -> Occupancy:
         updated = _dt(state.updated_at) if state else _dt(camera.updated_at)
         status = CameraStatus(state.status) if state else CameraStatus.OFFLINE
         if state and status is CameraStatus.ONLINE and state.observed_at:
             age = datetime.now(timezone.utc) - _dt(state.observed_at)
-            if age.total_seconds() > camera.stale_after_seconds:
+            if age.total_seconds() > self.freshness_seconds(camera):
                 status = CameraStatus.STALE
         value = state.occupancy if state and status is not CameraStatus.OFFLINE else None
         percentage = round(min(value / room.capacity * 100, 100), 2) if value is not None else None
@@ -99,7 +102,7 @@ class DatabaseOccupancyRepository:
                     and state.status == CameraStatus.ONLINE.value
                     and observed_at is not None
                     and age_seconds is not None
-                    and 0 <= age_seconds <= camera.stale_after_seconds
+                    and 0 <= age_seconds <= self.freshness_seconds(camera)
                 )
                 snapshots.append(AssistantRoomSnapshot(
                     room=self._room(room, camera), occupancy=occupancy,

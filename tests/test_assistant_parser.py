@@ -43,6 +43,12 @@ class AssistantParserTests(unittest.TestCase):
         self.assertEqual(plan.minimum_occupancy_percentage, 80)
         self.assertEqual(plan.sort, AssistantSort.HIGHEST_OCCUPANCY)
 
+    def test_maximum_occupancy_alone_is_a_low_occupancy_room_query(self):
+        plan = parse_assistant_query("Show rooms below 40% occupancy.")
+        self.assertEqual(plan.intent, AssistantIntent.FIND_LEAST_OCCUPIED_ROOMS)
+        self.assertEqual(plan.maximum_occupancy_percentage, 40)
+        self.assertEqual(plan.sort, AssistantSort.LOWEST_OCCUPANCY)
+
     def test_comparison_requires_two_room_references(self):
         clear = parse_assistant_query("Compare 2A03 vs 2B04")
         self.assertEqual(clear.intent, AssistantIntent.COMPARE_ROOMS)
