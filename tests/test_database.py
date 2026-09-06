@@ -62,7 +62,7 @@ class DatabaseTests(unittest.TestCase):
             self.assertEqual(connection.scalar(text("PRAGMA foreign_keys")), 1)
             self.assertGreaterEqual(connection.scalar(text("PRAGMA busy_timeout")), 5000)
             self.assertEqual(connection.scalar(text("PRAGMA journal_mode")), "wal")
-            self.assertEqual(connection.scalar(text("SELECT version_num FROM alembic_version")), "0007")
+            self.assertEqual(connection.scalar(text("SELECT version_num FROM alembic_version")), "0008")
         self.assertIn(
             "favorite_floors",
             {column["name"] for column in inspect(self.engine).get_columns("notification_preferences")},
@@ -108,7 +108,7 @@ class DatabaseTests(unittest.TestCase):
         self.assertIn("notification_preferences", tables)
         self.assertIn("user_notifications", tables)
         with self.engine.connect() as connection:
-            self.assertEqual(connection.scalar(text("SELECT version_num FROM alembic_version")), "0007")
+            self.assertEqual(connection.scalar(text("SELECT version_num FROM alembic_version")), "0008")
 
     def test_seed_is_idempotent_and_all_rooms_stay_visible(self):
         fixtures = PROJECT_ROOT / "mock" / "generated"

@@ -172,11 +172,11 @@ class NotificationGenerationTests(unittest.TestCase):
         self.assertEqual(len(self._notifications(self.default_user)), 1)
         self.assertEqual(len(self._notifications(threshold_user)), 1)
 
-        self.assertTrue(self._ingest(3, 70))
+        self.assertTrue(self._ingest(3, 40))
         self.assertTrue(self._ingest(4, 85))
         self.assertEqual(len(self._notifications(self.default_user)), 1)
 
-        self.assertTrue(self._ingest(32, 70))
+        self.assertTrue(self._ingest(32, 40))
         self.assertTrue(self._ingest(33, 85))
         self.assertEqual(len(self._notifications(self.default_user)), 2)
 

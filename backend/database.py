@@ -104,7 +104,7 @@ class NotificationPreferenceRow(Base):
     __tablename__ = "notification_preferences"
     __table_args__ = (
         CheckConstraint(
-            "high_occupancy_threshold BETWEEN 50 AND 100",
+            "high_occupancy_threshold BETWEEN 45 AND 100",
             name="ck_notification_preferences_threshold",
         ),
         CheckConstraint(
@@ -117,7 +117,7 @@ class NotificationPreferenceRow(Base):
     )
     in_app_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
     high_occupancy_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
-    high_occupancy_threshold: Mapped[int] = mapped_column(Integer, default=80)
+    high_occupancy_threshold: Mapped[int] = mapped_column(Integer, default=45)
     cooldown_minutes: Mapped[int] = mapped_column(Integer, default=30)
     favorite_floors: Mapped[str] = mapped_column(Text, default="[]")
     created_at: Mapped[str] = mapped_column(String)
