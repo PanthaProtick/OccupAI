@@ -125,6 +125,21 @@ class AssistantApiTests(unittest.TestCase):
         )
         self.assertEqual(response.json()["warnings"], ["Only 2 reliable matches were available."])
 
+    def test_percentage_only_query_executes_with_the_users_saved_floor_scope(self):
+        self.signup()
+        response = self.client.post(
+            "/api/assistant/query", headers={"Origin": ORIGIN},
+            json={"message": "Show rooms below 40% occupancy."},
+        )
+        self.assertEqual(response.status_code, 200, response.text)
+        payload = response.json()
+        self.assertEqual(payload["applied_filters"]["floors"], [0, 1])
+        self.assertEqual(payload["applied_filters"]["maximum_occupancy_percentage"], 40)
+        self.assertTrue(payload["results"])
+        self.assertTrue(all(item["floor"] in {0, 1} for item in payload["results"]))
+        self.assertTrue(all(item["occupancy_percentage"] < 40 for item in payload["results"]))
+        self.assertNotIn("No room query was executed.", payload["warnings"])
+
     def test_queries_are_scoped_to_the_authenticated_users_used_floors(self):
         self.signup()
         defaults = self.client.post(
@@ -148,17 +163,17 @@ class AssistantApiTests(unittest.TestCase):
         self.assertEqual(selected.json()["applied_filters"]["floors"], [0, 1, 7])
         self.assertTrue(all(item["floor"] in {0, 1, 7} for item in selected.json()["results"]))
 
-    def test_explicit_unselected_floor_is_not_searched(self):
+    def test_explicit_unselected_floor_overrides_saved_floor_scope(self):
         self.signup()
         response = self.client.post(
             "/api/assistant/query", headers={"Origin": ORIGIN},
             json={"message": "Show available rooms on Floor 7"},
         )
         self.assertEqual(response.status_code, 200, response.text)
-        self.assertEqual(response.json()["results"], [])
         self.assertEqual(response.json()["applied_filters"]["floors"], [7])
-        self.assertTrue(any("not included in your used floors" in warning
-                            for warning in response.json()["warnings"]))
+        self.assertTrue(all(item["floor"] == 7 for item in response.json()["results"]))
+        self.assertFalse(any("not included in your used floors" in warning
+                             for warning in response.json()["warnings"]))
 
     def test_query_rejects_empty_oversized_malformed_and_extra_input(self):
         self.signup()

@@ -136,7 +136,11 @@ class Settings:
         file_values = dotenv_values(PROJECT_ROOT / "backend" / ".env")
 
         def setting(name: str, default: str) -> str:
-            return os.getenv(name, file_values.get(name) or default)
+            environment_value = os.getenv(name)
+            if environment_value is not None:
+                return environment_value
+            file_value = file_values.get(name)
+            return str(file_value) if file_value is not None else default
 
         data_source = setting("DATA_SOURCE", "mock").strip().lower()
         configured_dir = setting("MOCK_DATA_DIR", "")

@@ -173,6 +173,10 @@ def parse_assistant_query(message: str) -> AssistantQueryPlan:
         sort = AssistantSort.HIGHEST_AVAILABLE_CAPACITY
     elif least:
         intent = AssistantIntent.FIND_LEAST_OCCUPIED_ROOMS
+    elif maximum is not None:
+        # A bounded occupancy request is itself a complete room-search intent,
+        # even when the user does not also say "available" or "quiet".
+        intent = AssistantIntent.FIND_LEAST_OCCUPIED_ROOMS
     elif available:
         intent = AssistantIntent.FIND_AVAILABLE_ROOMS
     elif normalized_blocks:
