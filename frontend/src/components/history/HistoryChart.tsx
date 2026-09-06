@@ -1,6 +1,8 @@
+import { useState } from "react";
 import type { HistoryMetric, HistoryPoint, HistoryRange } from "../../api/types";
 import { formatOccupancy, formatPercentage, formatTimestamp } from "../../utils/formatters";
 export function HistoryChart({ points, metric, range = "hour" }: { points: HistoryPoint[]; metric: HistoryMetric; range?: HistoryRange }) {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   if (!points.length) return <EmptyState />;
   const max = Math.max(...points.map((p) => p.value), metric === "percentage" ? 100 : 1);
   const width = 760, height = 300, left = 52, right = 20, top = 24, bottom = 42;
@@ -22,7 +24,17 @@ export function HistoryChart({ points, metric, range = "hour" }: { points: Histo
       <defs><linearGradient id="chartArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#65e6c4" stopOpacity=".38"/><stop offset="1" stopColor="#65e6c4" stopOpacity="0"/></linearGradient></defs>
       {ticks.map(t => <g key={t}><line className="chart-gridline" x1={left} x2={width-right} y1={top + (1-t)*(height-top-bottom)} y2={top + (1-t)*(height-top-bottom)} /><text className="chart-axis-label" x={left-10} y={top + (1-t)*(height-top-bottom)+4} textAnchor="end">{display(max*t)}</text></g>)}
       {area && <path className="chart-area" d={area} />}{segments.map((d, i) => <path className="chart-line" key={i} d={d} />)}
-      {coords.map(({ x, y, p }) => <g key={p.bucket_start}><circle cx={x} cy={y} r="5" className={p.coverage_percentage < 100 ? "partial" : ""}><title>{formatTimestamp(p.bucket_start)} · Exact value: {exactDisplay(p.value)} · {p.coverage_percentage}% coverage</title></circle></g>)}
+      {coords.map(({ x, y, p }, index) => <g key={p.bucket_start} className={`chart-point ${activeIndex === index ? "is-active" : ""}`}>
+        <circle cx={x} cy={y} r={activeIndex === index ? 7 : 5} className={p.coverage_percentage < 100 ? "partial" : ""} tabIndex={0} role="button" aria-label={`${formatTimestamp(p.bucket_start)}: ${exactDisplay(p.value)}, ${p.coverage_percentage}% coverage`} onMouseEnter={() => setActiveIndex(index)} onMouseLeave={() => setActiveIndex(null)} onFocus={() => setActiveIndex(index)} onBlur={() => setActiveIndex(null)} />
+        {activeIndex === index && <foreignObject className="chart-tooltip" x={Math.min(Math.max(x - 92, left), width - right - 184)} y={Math.max(y - 106, 8)} width="184" height="98" pointerEvents="none">
+          <div className="chart-tooltip__card">
+            <span className="chart-tooltip__eyebrow">{metric === "percentage" ? "Utilization" : "Occupancy"}</span>
+            <strong>{display(p.value)}</strong>
+            <time>{formatTimestamp(p.bucket_start)}</time>
+            <span className="chart-tooltip__coverage"><i className={p.coverage_percentage < 100 ? "is-partial" : ""} />{p.coverage_percentage}% data coverage</span>
+          </div>
+        </foreignObject>}
+      </g>)}
       {labelIndexes.map(i => <text key={i} className="chart-axis-label" x={coords[i].x} y={height-13} textAnchor={i === 0 ? "start" : i === points.length-1 ? "end" : "middle"}>{new Date(points[i].bucket_start).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</text>)}
     </svg></div>
     <details className="chart-table"><summary>View all {points.length} readings</summary><ul className="chart-details">{points.map((p) => <li key={p.bucket_start}><time dateTime={p.bucket_start}>{formatTimestamp(p.bucket_start)}</time><strong>{display(p.value)}</strong><span>{p.coverage_percentage}% coverage{p.coverage_percentage < 100 ? " — incomplete" : ""}</span></li>)}</ul></details>

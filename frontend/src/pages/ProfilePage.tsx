@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { ArrowLeft, Building2, KeyRound, Mail, Save, Shield, User } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { api, ApiError } from "../api/client";
 import type { NotificationPreferences, Profile } from "../api/types";
 
 export function ProfilePage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
@@ -33,6 +34,10 @@ export function ProfilePage() {
       setPreferences(savedPreferences);
     } catch (error) {
       if (!(error instanceof ApiError && error.code === "cancelled")) {
+        if (error instanceof ApiError && error.status === 401) {
+          navigate("/login", { replace: true, state: { from: `${location.pathname}${location.search}`, sessionExpired: true } });
+          return;
+        }
         setLoadError(error instanceof ApiError ? error.message : "Unable to load your profile.");
       }
     } finally {

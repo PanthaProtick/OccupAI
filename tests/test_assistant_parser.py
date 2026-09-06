@@ -97,6 +97,51 @@ class AssistantParserTests(unittest.TestCase):
             with self.subTest(message=message):
                 self.assertEqual(parse_assistant_query(message).intent, intent)
 
+    def test_named_room_condition_questions_explain_current_status(self):
+        plan = parse_assistant_query("What is the condition of the canteen?")
+        self.assertEqual(plan.intent, AssistantIntent.EXPLAIN_ROOM_STATUS)
+        self.assertEqual(plan.room_references, ["Canteen"])
+
+        shorthand = parse_assistant_query("what is the condition of tt")
+        self.assertEqual(shorthand.intent, AssistantIntent.EXPLAIN_ROOM_STATUS)
+        self.assertEqual(shorthand.room_references, ["T.T. Ground"])
+
+    def test_natural_or_question_compares_named_rooms(self):
+        plan = parse_assistant_query("Should I go to the library or study room now?")
+        self.assertEqual(plan.intent, AssistantIntent.COMPARE_ROOMS)
+        self.assertEqual(plan.room_references, ["Library", "Study Room"])
+
+    def test_named_room_capacity_question_is_a_status_lookup(self):
+        plan = parse_assistant_query("I want to know the capacity of library now")
+        self.assertEqual(plan.intent, AssistantIntent.EXPLAIN_ROOM_STATUS)
+        self.assertEqual(plan.room_references, ["Library"])
+
+    def test_recommendation_without_a_named_room_searches_live_spaces(self):
+        self.assertEqual(parse_assistant_query("Where should I go now?").intent, AssistantIntent.FIND_AVAILABLE_ROOMS)
+
+    def test_location_question_for_named_room_is_supported(self):
+        plan = parse_assistant_query("Where is the library?")
+        self.assertEqual(plan.intent, AssistantIntent.EXPLAIN_ROOM_STATUS)
+        self.assertEqual(plan.room_references, ["Library"])
+
+    def test_unsupported_website_fact_gets_a_calm_explanation(self):
+        plan = parse_assistant_query("What are the library opening hours?")
+        self.assertEqual(plan.intent, AssistantIntent.WEBSITE_HELP)
+
+    def test_less_people_wording_checks_named_space(self):
+        plan = parse_assistant_query("Are there less people in the library?")
+        self.assertEqual(plan.intent, AssistantIntent.EXPLAIN_ROOM_STATUS)
+        self.assertEqual(plan.room_references, ["Library"])
+
+    def test_ambiguous_space_reference_asks_for_a_room(self):
+        plan = parse_assistant_query("Is there less person in that space?")
+        self.assertIsNotNone(plan.clarification_question)
+
+    def test_most_less_crowded_request_is_a_recommendation(self):
+        plan = parse_assistant_query("I want the most less crowded place to go to")
+        self.assertEqual(plan.intent, AssistantIntent.FIND_LEAST_OCCUPIED_ROOMS)
+        self.assertTrue(plan.is_recommendation)
+
     def test_most_free_capacity_uses_capacity_sort(self):
         plan = parse_assistant_query("Which room on the first floor has the most free capacity?")
         self.assertEqual(plan.floors, [1])

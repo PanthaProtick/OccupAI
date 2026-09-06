@@ -10,6 +10,7 @@ const suggestions = [
   "Which rooms can fit 20 people?",
   "Suggest an alternative to the busiest room.",
   "Show rooms below 40% occupancy.",
+  "Should I go to the Library or Study Room now?",
 ];
 
 type DisplayMessage = Pick<AssistantMessage,"id"|"role"|"content"|"created_at"> & {
@@ -28,7 +29,7 @@ function restoredMessage(message:AssistantMessage):DisplayMessage {
 }
 
 function ResultCards({results}:{results:AssistantResult[]}) {
-  if (!results.length) return <p className="assistant-no-results">No reliable rooms matched this request. Try changing the floor, block, or capacity.</p>;
+  if (!results.length) return <p className="assistant-no-results">I couldn’t find a fresh reading for that request. Try another room name, floor, or block and I’ll check again.</p>;
   return <div className="assistant-results" role="region" aria-label="Recommended rooms">{results.map((room,index)=><article className="assistant-result" key={room.room_id}>
     <span className="assistant-result__rank">{index+1}</span>
     <div><p>{room.building} · {room.floor === 0 ? "Ground Floor" : `Floor ${room.floor}`} · {room.block} Block</p>
@@ -86,7 +87,7 @@ export function AssistantPage() {
   return <section className="assistant-page" aria-labelledby="assistant-title">
     <header className="assistant-hero"><div><p className="assistant-kicker"><Sparkles size={15}/> Live campus intelligence</p>
       <h1 id="assistant-title">Campus Assistant</h1>
-      <p>Ask about reliable room availability, occupancy, capacity, floors, and nearby alternatives.</p></div>
+      <p>Ask for live room details, compare spaces, or get a calm recommendation for where to go next.</p></div>
       <aside><Clock3 size={18}/><span><strong>Privacy-first and current</strong>Answers use the latest trusted OccupAI readings. Availability can change.</span></aside>
     </header>
     <div className="assistant-layout">

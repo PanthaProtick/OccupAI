@@ -5,12 +5,12 @@ import { RoomCard } from "../components/rooms/RoomCard";
 import { FloorMap } from "../components/map/FloorMap";
 import { useDashboard } from "../hooks/useDashboard";
 import { formatTimestamp } from "../utils/formatters";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { motion, type Variants } from "framer-motion";
 import { Activity, Building2, DoorOpen, Gauge, RefreshCw, Sparkles, TrendingUp, Users } from "lucide-react";
 import { SmartRecommendations } from "../components/recommendations/SmartRecommendations";
-import { groupRoomsByBlock } from "../components/rooms/roomBlocks";
+import { BUILDING_BLOCKS, groupRoomsByBlock, roomBlock, type BuildingBlock } from "../components/rooms/roomBlocks";
 
 const textVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
@@ -28,12 +28,13 @@ export function DashboardPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedBuilding = searchParams.get("building") ?? "";
   const selectedFloor = searchParams.get("floor") ?? "";
+  const [selectedBlock, setSelectedBlock] = useState<BuildingBlock | "all">("all");
   const allData = data ?? [];
   const buildings = useMemo(() => [...new Set(allData.map(({ room }) => room.building))].sort(), [data]);
   const building = selectedBuilding || buildings[0];
   const floors = useMemo(() => [...new Set((data ?? []).filter(({ room }) => room.building === building).map(({ room }) => room.floor))].sort((a, b) => a - b), [data, building]);
   const floor = selectedFloor === "" || !floors.includes(Number(selectedFloor)) ? floors[0] : Number(selectedFloor);
-  const mapData = allData.filter(({ room }) => room.building === building && room.floor === floor);
+  const mapData = allData.filter(snapshot => snapshot.room.building === building && snapshot.room.floor === floor && (selectedBlock === "all" || roomBlock(snapshot) === selectedBlock));
   const roomBlocks = useMemo(() => groupRoomsByBlock(mapData), [mapData]);
   const liveRooms = mapData.filter(({ occupancy }) => occupancy.status === "online" && occupancy.occupancy !== null);
   const allLiveRooms = allData.filter(({ occupancy }) => occupancy.status === "online" && occupancy.occupancy !== null);
@@ -138,13 +139,10 @@ export function DashboardPage() {
           </div>
           <div className="map-filters">
             <label>
-              Building
-              <select value={building} onChange={(event) => setSearchParams({ building: event.target.value, floor: "0" })}>
-                {buildings.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
+              Block
+              <select value={selectedBlock} onChange={(event) => setSelectedBlock(event.target.value as BuildingBlock | "all")}>
+                <option value="all">All blocks</option>
+                {BUILDING_BLOCKS.map((block) => <option key={block} value={block}>{block} Block</option>)}
               </select>
             </label>
             <label>

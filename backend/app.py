@@ -412,7 +412,7 @@ def create_app(
             app.state.assistant_ip_rate_limiter.check(f"assistant:ip:{client_key(request)}")
             plan = parse_assistant_query(payload.message)
             intent = plan.intent.value
-            if not plan.clarification_question and plan.intent.value != "unsupported":
+            if not plan.clarification_question and plan.intent.value not in {"unsupported", "website_help"}:
                 # An explicitly requested floor represents the user's current context and
                 # takes priority over their saved preferences. Saved floors scope only
                 # general queries that do not mention a floor.
@@ -420,7 +420,7 @@ def create_app(
                     preferences = notification_service().get_preferences(user.id)
                     used_floors = sorted({0, 1, *preferences.favorite_floors})
                     plan = plan.model_copy(update={"floors": used_floors})
-            if plan.clarification_question or plan.intent.value == "unsupported":
+            if plan.clarification_question or plan.intent.value in {"unsupported", "website_help"}:
                 results = []
             else:
                 candidates = execute_query_plan(active_repository, plan)
@@ -428,7 +428,7 @@ def create_app(
             result_count = len(results)
             data_timestamp = active_repository.generated_at
             content = compose_assistant_response(plan, results, data_timestamp)
-            if not plan.safety_refusal and plan.intent.value != "unsupported" and not plan.clarification_question:
+            if not plan.safety_refusal and plan.intent.value not in {"unsupported", "website_help"} and not plan.clarification_question:
                 provider_outcome = provider_coordinator.rewrite(content.answer, results)
                 provider_used = provider_outcome.provider_used
                 fallback_used = provider_outcome.used_fallback
