@@ -1038,6 +1038,93 @@ h2 {
   vector-effect: non-scaling-stroke
 }
 
+.chart-point circle {
+  cursor: crosshair;
+  transition: r .18s ease, filter .18s ease;
+  outline: none
+}
+
+.chart-point circle:focus-visible,
+.chart-point.is-active circle {
+  filter: drop-shadow(0 0 8px rgba(101, 230, 196, .78));
+}
+
+.chart-tooltip {
+  overflow: visible
+}
+
+.chart-tooltip__card {
+  position: relative;
+  display: grid;
+  gap: .18rem;
+  min-height: 74px;
+  padding: .62rem .72rem;
+  color: #f3fffc;
+  border: 1px solid rgba(190, 255, 237, .34);
+  border-radius: .9rem;
+  background: linear-gradient(145deg, rgba(32, 73, 79, .68), rgba(10, 28, 37, .52));
+  box-shadow: 0 12px 26px rgba(0, 0, 0, .18), inset 0 1px 0 rgba(255, 255, 255, .24);
+  backdrop-filter: blur(10px) saturate(135%);
+  font-family: inherit;
+  filter: drop-shadow(0 5px 8px rgba(0, 0, 0, .16));
+}
+
+.chart-tooltip__card:after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 9px;
+  height: 9px;
+  border-right: 1px solid rgba(190, 255, 237, .34);
+  border-bottom: 1px solid rgba(190, 255, 237, .34);
+  background: rgba(20, 52, 59, .62);
+  transform: translateX(-50%) rotate(45deg)
+}
+
+.chart-tooltip__eyebrow {
+  color: #a9f6e4;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase
+}
+
+.chart-tooltip__card strong {
+  margin: .02rem 0 .08rem;
+  color: #fff;
+  font-size: 1.2rem;
+  line-height: 1;
+  letter-spacing: -.03em
+}
+
+.chart-tooltip__card time {
+  color: rgba(235, 250, 247, .8);
+  font-size: .68rem
+}
+
+.chart-tooltip__coverage {
+  display: flex;
+  align-items: center;
+  gap: .32rem;
+  margin-top: .12rem;
+  color: rgba(235, 250, 247, .72);
+  font-size: .62rem
+}
+
+.chart-tooltip__coverage i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #65e6c4;
+  box-shadow: 0 0 7px rgba(101, 230, 196, .8)
+}
+
+.chart-tooltip__coverage i.is-partial {
+  background: #f6be60;
+  box-shadow: 0 0 7px rgba(246, 190, 96, .8)
+}
+
 .chart circle.partial {
   stroke: #f6be60
 }
@@ -1316,6 +1403,20 @@ body:after { opacity: .18; background-image: radial-gradient(rgba(124,77,255,.13
 .site-nav a:nth-child(2) { border-radius: .6rem 1rem .6rem 1rem; transform: translateY(4px); }
 .site-nav a:nth-child(3) { border-radius: 1rem 1rem 1rem .45rem; }
 .site-nav a:hover,.site-nav a:focus-visible { color: #fff; background: linear-gradient(135deg,#7657f5,#c842ed); box-shadow: 0 10px 26px rgba(132,68,220,.24); transform: translateY(-2px); }
+
+/* Refined analytics surface: airy, translucent, and intentionally quiet behind the data. */
+.chart {
+  border-color: rgba(255, 255, 255, .72);
+  background: linear-gradient(135deg, rgba(255, 255, 255, .48), rgba(247, 241, 255, .26) 52%, rgba(227, 244, 255, .3));
+  box-shadow: 0 24px 58px rgba(104, 78, 157, .12), inset 0 1px 0 rgba(255, 255, 255, .78);
+  backdrop-filter: blur(24px) saturate(125%);
+}
+.chart-summary div { background: rgba(255, 255, 255, .27); box-shadow: inset 0 1px 0 rgba(255,255,255,.5); }
+.chart-tooltip__card { background: linear-gradient(135deg, rgba(255,255,255,.64), rgba(242,236,255,.48)); border-color: rgba(255,255,255,.78); box-shadow: 0 14px 30px rgba(88,70,145,.13), inset 0 1px 0 rgba(255,255,255,.78); backdrop-filter: blur(14px) saturate(135%); color: #252143; }
+.chart-tooltip__card:after { background: rgba(244,239,255,.62); border-color: rgba(255,255,255,.78); }
+.chart-tooltip__eyebrow { color: #7054d8; }
+.chart-tooltip__card strong { color: #2b2055; }
+.chart-tooltip__card time,.chart-tooltip__coverage { color: #68708a; }
 .site-nav a:nth-child(2):hover,.site-nav a:nth-child(2):focus-visible { transform: translateY(2px); }
 .site-header__context { padding: .7rem 1rem; border: 1px solid rgba(255,255,255,.7); border-radius: 999px; background: rgba(255,255,255,.32); box-shadow: 0 8px 24px rgba(93,69,145,.06); backdrop-filter: blur(14px); }
 

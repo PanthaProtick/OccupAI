@@ -28,7 +28,7 @@ describe("DashboardPage", () => {
     render(<MemoryRouter><DashboardPage /></MemoryRouter>);
     await screen.findByRole("heading", { name: "Floor map" });
     expect(screen.getByRole("link", { name: /T.T. Ground, 32% occupied/ })).toBeInTheDocument();
-    expect(screen.getByLabelText("Building")).toHaveValue("University Building");
+    expect(screen.queryByLabelText("Building")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Floor")).toHaveValue("0");
     expect(screen.getByRole("link", { name: "Girls' Common Room, 20% occupied" })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Floor"), { target: { value: "1" } });

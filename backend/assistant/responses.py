@@ -71,6 +71,8 @@ def compose_assistant_response(
         )
     if plan.clarification_question:
         return AssistantResponseContent(plan.clarification_question, ["No room query was executed."])
+    if plan.intent is AssistantIntent.WEBSITE_HELP:
+        return AssistantResponseContent(plan.help_answer or "I can explain the OccupAI website and its live campus features.", [])
     if plan.intent is AssistantIntent.UNSUPPORTED:
         return AssistantResponseContent(
             SAFE_SCOPE_RESPONSE,
@@ -84,11 +86,37 @@ def compose_assistant_response(
         )
 
     lines = [_intro(plan, len(results))]
+    if plan.intent is AssistantIntent.FIND_LEAST_OCCUPIED_ROOMS or (
+        plan.is_recommendation and plan.intent is AssistantIntent.FIND_AVAILABLE_ROOMS
+    ):
+        recommendation = min(results, key=lambda room: (room.occupancy_percentage, -room.available_capacity, room.name.casefold()))
+        lines.append(
+            f"Go to {recommendation.name}. It is the least crowded suitable option right now at "
+            f"{_number(recommendation.occupancy_percentage)}% occupied, with approximately "
+            f"{recommendation.available_capacity} seats available."
+        )
+    if plan.intent is AssistantIntent.COMPARE_ROOMS:
+        recommendation = min(results, key=lambda room: (room.occupancy_percentage, -room.available_capacity, room.name.casefold()))
+        lines.append(
+            f"Recommendation: I suggest going to {recommendation.name} right now. It is the quieter option at "
+            f"{_number(recommendation.occupancy_percentage)}% occupied, with approximately "
+            f"{recommendation.available_capacity} seats available."
+        )
+    if plan.intent is AssistantIntent.EXPLAIN_ROOM_STATUS and plan.crowding_comparison and results:
+        lead = min(results, key=lambda room: room.occupancy_percentage)
+        if plan.crowding_comparison == "less":
+            lines.append(f"Yes — {lead.name} currently has relatively few people ({_number(lead.occupancy_percentage)}% occupied).")
+        else:
+            lines.append(f"It is currently fairly busy ({lead.name} is {_number(lead.occupancy_percentage)}% occupied).")
     for index, room in enumerate(results, start=1):
+        capacity_sentence = (
+            f"Capacity is {room.capacity} seats. "
+            if plan.intent is AssistantIntent.EXPLAIN_ROOM_STATUS else ""
+        )
         lines.append(
             f"{index}. {room.name} — {_number(room.occupancy_percentage)}% occupied "
             f"({_floor_label(room.floor)}, {room.block} Block). "
-            f"{room.occupancy} of {room.capacity} seats are currently occupied, leaving approximately "
+            f"{capacity_sentence}{room.occupancy} of {room.capacity} seats are currently occupied, leaving approximately "
             f"{room.available_capacity} available. {room.reason} Latest reading: {_timestamp(room.observed_at)}."
         )
     lines.append(
