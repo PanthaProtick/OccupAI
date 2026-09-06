@@ -1,0 +1,72 @@
+OccupAI Assistant: Supported Query Types
+
+The assistant answers grounded campus-room questions using fresh, reliable
+OccupAI occupancy data.
+
+1. Available or free rooms
+   - Which rooms are available right now?
+   - Find free rooms.
+   - Suggest me a room.
+   - Recommend a quiet space.
+
+2. Quietest or least-occupied rooms
+   - What are the three quietest rooms?
+   - Show the least occupied rooms.
+   - Find rooms below 40% occupancy.
+
+3. Rooms for a group
+   - Which rooms can fit 20 people?
+   - Find a room for 25 people.
+   - Show rooms with at least 30 available seats.
+
+4. Rooms on a specific floor
+   - Show rooms on the Ground Floor.
+   - Find rooms on Floor 2.
+   - Which rooms are on the 5th floor?
+
+5. Rooms in a specific block
+   - Show rooms in A Block.
+   - Find available rooms in C Block.
+
+6. Rooms in a specific building
+   - Find rooms in the University Building.
+
+7. Nearby alternatives
+   - Suggest an alternative to room 2A03.
+   - Find a nearby quiet room instead of 2A03.
+   - Avoid crowded rooms near 2A03.
+
+8. Crowded or busiest rooms
+   - Which rooms are crowded?
+   - What are the busiest rooms?
+   - Which rooms are above 80% occupied?
+
+9. Occupancy thresholds
+   - Show rooms below 40% occupancy.
+   - Which rooms are over 70% occupied?
+   - Find rooms with at most 30% occupancy.
+
+10. Room status and availability
+    - Is room 2A03 available?
+    - What is the occupancy of room 2A03?
+    - How full is room 2A03?
+
+11. Room comparisons
+    - Compare 2A03 and 2B04.
+    - What is the difference between room 2A03 and room 2B04?
+
+12. Ranking and result limits
+    - Show the top 3 quiet rooms.
+    - Find the best 5 available rooms.
+    - Which room has the most free capacity?
+
+Queries can combine filters such as floor, block, building, capacity,
+occupancy percentage, and result count.
+
+Scope limitations
+
+- Results use only fresh, reliable, online occupancy readings.
+- Offline, stale, disabled, missing, or inconsistent readings are excluded.
+- The assistant does not answer unrelated requests or invent room information.
+- The optional Gemini provider only improves wording; it cannot select rooms
+  or override the verified results.

@@ -144,6 +144,14 @@ def parse_assistant_query(message: str) -> AssistantQueryPlan:
     capacity = _minimum_capacity(text)
 
     available = any(word in text for word in ("free", "quiet", "available", "availability"))
+    # A bare recommendation is still a room-discovery request. Keep this
+    # scoped to room/space nouns so unrelated prompts such as "suggest a poem"
+    # remain unsupported rather than accidentally executing a room query.
+    recommendation = bool(re.search(
+        r"\b(?:suggest|recommend|recommendation)\b.*\b(?:room|rooms|space|spaces)\b"
+        r"|\b(?:room|rooms|space|spaces)\b.*\b(?:suggest|recommend|recommendation)\b",
+        text,
+    ))
     least = bool(re.search(r"\b(?:least\s+occupied|lowest\s+occupancy|quietest)\b", text))
     alternative = any(word in text for word in ("alternative", "nearby", "avoid crowded"))
     crowded = bool(re.search(r"\b(?:crowded|busiest|busy|high(?:est)?\s+occupancy)\b", text)) or minimum is not None
@@ -177,7 +185,7 @@ def parse_assistant_query(message: str) -> AssistantQueryPlan:
         # A bounded occupancy request is itself a complete room-search intent,
         # even when the user does not also say "available" or "quiet".
         intent = AssistantIntent.FIND_LEAST_OCCUPIED_ROOMS
-    elif available:
+    elif available or recommendation:
         intent = AssistantIntent.FIND_AVAILABLE_ROOMS
     elif normalized_blocks:
         intent = AssistantIntent.FIND_ROOMS_BY_BLOCK

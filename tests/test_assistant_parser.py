@@ -67,6 +67,19 @@ class AssistantParserTests(unittest.TestCase):
         self.assertEqual(plan.intent, AssistantIntent.UNSUPPORTED)
         self.assertEqual(plan.floors, [])
 
+    def test_room_recommendation_is_a_bounded_availability_query(self):
+        for message in ("Suggest me a room", "Recommend a quiet space"):
+            with self.subTest(message=message):
+                plan = parse_assistant_query(message)
+                self.assertEqual(plan.intent, AssistantIntent.FIND_AVAILABLE_ROOMS)
+                self.assertIsNone(plan.clarification_question)
+
+    def test_unscoped_suggestion_does_not_execute_a_room_query(self):
+        self.assertEqual(
+            parse_assistant_query("Suggest a poem").intent,
+            AssistantIntent.UNSUPPORTED,
+        )
+
     def test_every_declared_intent_has_a_deterministic_route(self):
         cases = {
             "Which rooms are available right now?": AssistantIntent.FIND_AVAILABLE_ROOMS,
