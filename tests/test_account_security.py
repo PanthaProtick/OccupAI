@@ -104,7 +104,7 @@ class AccountSecurityTests(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 200)
         methods = set(response.headers["access-control-allow-methods"].split(", "))
-        self.assertEqual(methods, {"GET", "POST", "PATCH"})
+        self.assertEqual(methods, {"GET", "POST", "PATCH", "DELETE"})
         self.assertEqual(response.headers["access-control-allow-origin"], ORIGIN)
         rejected = self.client.options("/api/profile", headers={
             "Origin": "https://evil.example",

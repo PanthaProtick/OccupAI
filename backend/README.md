@@ -36,7 +36,7 @@ Notification routes are:
 - `POST /api/notifications/{id}/read`, `POST /api/notifications/read-all`, and
   `POST /api/notifications/{id}/dismiss`.
 - `GET` and `PATCH /api/notification-preferences` for per-user in-app/high-occupancy
-  settings, threshold (50–100), and cooldown (1–10080 minutes).
+  settings, threshold (50–100), cooldown (1–10080 minutes), and favorite upper floors.
 
 Notifications, read/dismissed state, and preferences belong to the user row and survive
 logout. Logout revokes only the presented session. High-occupancy notifications are created
@@ -44,6 +44,16 @@ inside the accepted ingestion transaction on a below-to-at/above-threshold trans
 Online lower-occupancy recommendations prefer the same building, then floor, then rooms
 below 40%. Remaining above the threshold, stale/offline input, disabled preferences, and
 events inside the cooldown do not create another alert.
+Ground Floor and Floor 1 are always included in each user's "My used floors" scope. Users may
+add any combination of Floors 2–9 from Profile. High-occupancy alerts and supported Campus
+Assistant room queries both use that persisted scope; unselected upper floors are excluded.
+
+## Campus Assistant
+
+The authenticated Campus Assistant provides deterministic, database-grounded room discovery and
+persistent, user-owned conversation history. Its routes, supported intents, ranking/freshness rules,
+provider fallback, privacy boundary, local setup, and verification commands are documented in
+[`backend/assistant/README.md`](assistant/README.md).
 
 Set `APP_ENVIRONMENT=production` in production. Startup then refuses the development
 pepper and insecure cookies. `AUTH_RATE_LIMIT_ATTEMPTS` and
@@ -99,6 +109,12 @@ Run all tests with `.\scripts\test.ps1`. API documentation is at `/docs`. `/heal
 - `FRONTEND_ORIGINS`: comma-separated CORS allowlist.
 - `AUTH_RATE_LIMIT_ATTEMPTS` / `AUTH_RATE_LIMIT_WINDOW_SECONDS`: process-local limits for
   login, signup, and password-change attempts (use a shared limiter for multi-instance deployments).
+- `ASSISTANT_ENABLED`: enables the authenticated Campus Assistant; defaults to `true`.
+- `ASSISTANT_PROVIDER`: `deterministic` by default. Other provider identifiers require an injected
+  backend adapter and always retain the deterministic fallback.
+- `ASSISTANT_MODEL` / `ASSISTANT_API_KEY`: external-provider deployment settings. Never commit a
+  real key; production rejects incomplete external-provider configuration.
+- `ASSISTANT_TIMEOUT_SECONDS`: strict optional-provider response deadline; defaults to 3 seconds.
 
 Every SQLite connection enables foreign keys, WAL, and the busy timeout. Writes use short transactions and the ingestion writer is serialized. API reads continue serving the last durable state during model-server downtime. A successful stale result preserves its last occupancy and observation time; offline remains unavailable and distinct from a measured zero. One malformed camera result is isolated from other cameras.
 

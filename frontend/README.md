@@ -36,6 +36,9 @@ npm run preview
 - Authentication uses the backend HttpOnly session cookie. `/api/auth/me` restores login
   after reload, and no token or authentication proof is stored in browser storage. Sign-up
   requires an exact `@aust.edu` address, with the backend as the authoritative validator.
+- `/assistant` is protected and uses only the typed API client. It supports suggested questions,
+  persisted conversation history, deterministic room results, and direct navigation to a
+  recommended room. No assistant or authentication secret is stored in browser storage.
 
 ## Testing
 

@@ -38,6 +38,13 @@ class Settings:
     auth_session_pepper: str = "occupai-local-development-only-change-me"
     auth_rate_limit_attempts: int = 10
     auth_rate_limit_window_seconds: int = 300
+    assistant_rate_limit_attempts: int = 30
+    assistant_rate_limit_window_seconds: int = 60
+    assistant_enabled: bool = True
+    assistant_provider: str = "deterministic"
+    assistant_model: str = ""
+    assistant_api_key: str = ""
+    assistant_timeout_seconds: float = 3.0
 
     def __post_init__(self) -> None:
         if self.data_source not in {"mock", "database"}:
@@ -55,6 +62,9 @@ class Settings:
             "AUTH_SESSION_TTL_SECONDS": self.auth_session_ttl_seconds,
             "AUTH_RATE_LIMIT_ATTEMPTS": self.auth_rate_limit_attempts,
             "AUTH_RATE_LIMIT_WINDOW_SECONDS": self.auth_rate_limit_window_seconds,
+            "ASSISTANT_RATE_LIMIT_ATTEMPTS": self.assistant_rate_limit_attempts,
+            "ASSISTANT_RATE_LIMIT_WINDOW_SECONDS": self.assistant_rate_limit_window_seconds,
+            "ASSISTANT_TIMEOUT_SECONDS": self.assistant_timeout_seconds,
         }
         invalid = [name for name, value in positive.items() if value <= 0]
         if invalid:
@@ -76,6 +86,13 @@ class Settings:
                 raise ValueError("Production requires AUTH_COOKIE_SECURE=true")
             if self.auth_session_pepper == "occupai-local-development-only-change-me":
                 raise ValueError("Production requires a unique AUTH_SESSION_PEPPER")
+            if self.assistant_enabled and self.assistant_provider != "deterministic":
+                if not self.assistant_model.strip():
+                    raise ValueError("Production external assistant providers require ASSISTANT_MODEL")
+                if not self.assistant_api_key.strip():
+                    raise ValueError("Production external assistant providers require ASSISTANT_API_KEY")
+        if not re.fullmatch(r"[a-z0-9_-]{1,64}", self.assistant_provider):
+            raise ValueError("ASSISTANT_PROVIDER must be a lowercase provider identifier")
         if self.raw_sample_interval_seconds < 5 or self.raw_sample_interval_seconds > 10:
             raise ValueError("RAW_SAMPLE_INTERVAL_SECONDS must be between 5 and 10")
         if self.ingestion_enabled and self.data_source != "database":
@@ -103,6 +120,11 @@ class Settings:
             "maintenance_enabled": self.maintenance_enabled,
             "simulation_enabled": self.simulation_enabled,
             "auth_cookie_secure": self.auth_cookie_secure,
+            "assistant_rate_limit_attempts": self.assistant_rate_limit_attempts,
+            "assistant_rate_limit_window_seconds": self.assistant_rate_limit_window_seconds,
+            "assistant_enabled": self.assistant_enabled,
+            "assistant_provider": self.assistant_provider,
+            "assistant_timeout_seconds": self.assistant_timeout_seconds,
             "app_environment": self.app_environment,
         }
 
@@ -158,5 +180,12 @@ class Settings:
             ),
             auth_rate_limit_attempts=int(setting("AUTH_RATE_LIMIT_ATTEMPTS", "10")),
             auth_rate_limit_window_seconds=int(setting("AUTH_RATE_LIMIT_WINDOW_SECONDS", "300")),
+            assistant_rate_limit_attempts=int(setting("ASSISTANT_RATE_LIMIT_ATTEMPTS", "30")),
+            assistant_rate_limit_window_seconds=int(setting("ASSISTANT_RATE_LIMIT_WINDOW_SECONDS", "60")),
+            assistant_enabled=setting("ASSISTANT_ENABLED", "true").strip().lower() in {"1", "true", "yes"},
+            assistant_provider=setting("ASSISTANT_PROVIDER", "deterministic").strip().lower(),
+            assistant_model=setting("ASSISTANT_MODEL", "").strip(),
+            assistant_api_key=setting("ASSISTANT_API_KEY", ""),
+            assistant_timeout_seconds=float(setting("ASSISTANT_TIMEOUT_SECONDS", "3")),
         )
 

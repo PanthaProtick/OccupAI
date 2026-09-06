@@ -56,12 +56,17 @@ class DatabaseTests(unittest.TestCase):
         self.assertEqual(set(inspect(self.engine).get_table_names()), {
             "alembic_version", "rooms", "cameras", "camera_states", "ingestion_receipts",
             "occupancy_samples", "occupancy_buckets_5m", "users", "authentication_sessions",
-            "notification_preferences", "user_notifications"})
+            "notification_preferences", "user_notifications", "assistant_conversations",
+            "assistant_messages"})
         with self.engine.connect() as connection:
             self.assertEqual(connection.scalar(text("PRAGMA foreign_keys")), 1)
             self.assertGreaterEqual(connection.scalar(text("PRAGMA busy_timeout")), 5000)
             self.assertEqual(connection.scalar(text("PRAGMA journal_mode")), "wal")
-            self.assertEqual(connection.scalar(text("SELECT version_num FROM alembic_version")), "0005")
+            self.assertEqual(connection.scalar(text("SELECT version_num FROM alembic_version")), "0007")
+        self.assertIn(
+            "favorite_floors",
+            {column["name"] for column in inspect(self.engine).get_columns("notification_preferences")},
+        )
         inspector = inspect(self.engine)
         self.assertEqual({fk["referred_table"] for fk in inspector.get_foreign_keys("cameras")}, {"rooms"})
         self.assertEqual({fk["referred_table"] for fk in inspector.get_foreign_keys("camera_states")}, {"cameras"})
@@ -103,7 +108,7 @@ class DatabaseTests(unittest.TestCase):
         self.assertIn("notification_preferences", tables)
         self.assertIn("user_notifications", tables)
         with self.engine.connect() as connection:
-            self.assertEqual(connection.scalar(text("SELECT version_num FROM alembic_version")), "0005")
+            self.assertEqual(connection.scalar(text("SELECT version_num FROM alembic_version")), "0007")
 
     def test_seed_is_idempotent_and_all_rooms_stay_visible(self):
         fixtures = PROJECT_ROOT / "mock" / "generated"

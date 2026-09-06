@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Protocol
 
 from backend.models import HistoryMetric, HistoryPoint, HistoryRange, Occupancy, Room, RoomView
+from backend.assistant.architecture import AssistantRoomSnapshot
 
 
 class OccupancyRepository(Protocol):
@@ -14,6 +15,8 @@ class OccupancyRepository(Protocol):
     def get_room(self, room_id: str) -> RoomView | None: ...
 
     def list_occupancy(self) -> list[Occupancy]: ...
+
+    def list_assistant_snapshots(self) -> list[AssistantRoomSnapshot]: ...
 
     def get_occupancy(self, camera_id: str) -> Occupancy | None: ...
 

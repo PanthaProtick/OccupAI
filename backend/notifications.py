@@ -148,11 +148,16 @@ class NotificationService:
 
     @staticmethod
     def _preferences(row: NotificationPreferenceRow) -> NotificationPreferences:
+        try:
+            favorite_floors = json.loads(row.favorite_floors)
+        except (TypeError, json.JSONDecodeError):
+            favorite_floors = []
         return NotificationPreferences(
             in_app_enabled=row.in_app_enabled,
             high_occupancy_enabled=row.high_occupancy_enabled,
             high_occupancy_threshold=row.high_occupancy_threshold,
             cooldown_minutes=row.cooldown_minutes,
+            favorite_floors=favorite_floors,
         )
 
     def get_preferences(self, user_id: str) -> NotificationPreferences:
@@ -166,6 +171,7 @@ class NotificationService:
                     high_occupancy_enabled=True,
                     high_occupancy_threshold=80,
                     cooldown_minutes=30,
+                    favorite_floors="[]",
                     created_at=now,
                     updated_at=now,
                 )
@@ -188,12 +194,13 @@ class NotificationService:
                     high_occupancy_enabled=True,
                     high_occupancy_threshold=80,
                     cooldown_minutes=30,
+                    favorite_floors="[]",
                     created_at=now,
                     updated_at=now,
                 )
                 db.add(row)
             for field, value in payload.model_dump(exclude_unset=True).items():
-                setattr(row, field, value)
+                setattr(row, field, json.dumps(value) if field == "favorite_floors" else value)
             row.updated_at = now
             db.commit()
             return self._preferences(row)

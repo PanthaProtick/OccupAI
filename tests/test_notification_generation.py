@@ -3,6 +3,7 @@ from __future__ import annotations
 import tempfile
 import unittest
 import uuid
+import json
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -37,10 +38,11 @@ class NotificationGenerationTests(unittest.TestCase):
         self.writer = SerializedDatabaseWriter(self.sessions, sample_interval_seconds=5)
         self.start = datetime(2026, 9, 5, 10, 0, tzinfo=timezone.utc)
         with self.sessions.begin() as db:
-            self._add_room(db, "room_target", "Target 201", "Building One", 2, "cam_001", 100, 0, "offline")
-            self._add_room(db, "room_same_floor", "Nearby 202", "Building One", 2, "cam_002", 100, 30)
+            self._add_room(db, "room_target", "Target Ground", "Building One", 0, "cam_001", 100, 0, "offline")
+            self._add_room(db, "room_same_floor", "Nearby Ground", "Building One", 0, "cam_002", 100, 30)
             self._add_room(db, "room_other_floor", "Nearby 301", "Building One", 3, "cam_003", 100, 10)
             self._add_room(db, "room_other_building", "Remote 201", "Building Two", 2, "cam_004", 100, 5)
+            self._add_room(db, "room_floor_7", "Room 7A01", "Building One", 7, "cam_005", 100, 0, "offline")
         self.default_user = self._add_user("default-user")
 
     def tearDown(self):
@@ -93,6 +95,7 @@ class NotificationGenerationTests(unittest.TestCase):
         enabled: bool | None = None,
         threshold: int = 80,
         cooldown: int = 30,
+        favorite_floors: list[int] | None = None,
     ) -> str:
         user_id = str(uuid.uuid4())
         stamp = self.start.isoformat()
@@ -115,20 +118,34 @@ class NotificationGenerationTests(unittest.TestCase):
                     high_occupancy_enabled=enabled,
                     high_occupancy_threshold=threshold,
                     cooldown_minutes=cooldown,
+                    favorite_floors=json.dumps(favorite_floors or []),
                     created_at=stamp,
                     updated_at=stamp,
                 ))
         return user_id
 
-    def _ingest(self, minute: int, occupancy: int, status: str = "online", event: str | None = None) -> bool:
+    def _ingest(self, minute: int, occupancy: int, status: str = "online", event: str | None = None,
+                camera_id: str = "cam_001") -> bool:
         return self.writer.ingest(IngestionRecord(
-            camera_id="cam_001",
+            camera_id=camera_id,
             observed_at=self.start + timedelta(minutes=minute),
             raw_occupancy=occupancy,
             occupancy=occupancy,
             status=status,
             source_event_id=event or f"event-{minute}-{occupancy}-{status}",
         ))
+
+    def test_upper_floor_alerts_only_reach_users_who_selected_that_floor(self):
+        favorite_user = self._add_user("floor-seven-user", enabled=True, favorite_floors=[7])
+        other_user = self._add_user("floor-six-user", enabled=True, favorite_floors=[6])
+
+        self.assertTrue(self._ingest(1, 85, camera_id="cam_005"))
+
+        self.assertEqual(self._notifications(self.default_user), [])
+        self.assertEqual(self._notifications(other_user), [])
+        favorite_notifications = self._notifications(favorite_user)
+        self.assertEqual(len(favorite_notifications), 1)
+        self.assertEqual(favorite_notifications[0].room_id, "room_floor_7")
 
     def _notifications(self, user_id: str) -> list[UserNotificationRow]:
         with self.sessions() as db:

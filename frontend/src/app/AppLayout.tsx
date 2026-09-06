@@ -1,4 +1,4 @@
-import { LogOut, User } from "lucide-react";
+import { Bot, LogOut, User } from "lucide-react";
 import { useRef } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/session";
@@ -30,6 +30,7 @@ export function AppLayout() {
         </nav>
         <div className="site-header__actions">
           <p className="site-header__context"><span /> Campus live</p>
+          <Link to="/assistant" className="assistant-nav-link"><Bot size={17} aria-hidden="true" /><span>AI Assistant</span></Link>
           <NotificationPanel />
           <Link to="/profile" className="header-icon-btn profile-link" aria-label="Profile"><User size={18} /></Link>
           <button className="logout-button" onClick={async () => { await logout(); navigate("/"); }} aria-label="Log out"><LogOut size={16} /><span>Log out</span></button>

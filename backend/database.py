@@ -42,6 +42,9 @@ class UserRow(Base):
     notifications: Mapped[list["UserNotificationRow"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    assistant_conversations: Mapped[list["AssistantConversationRow"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class AuthenticationSessionRow(Base):
@@ -55,6 +58,46 @@ class AuthenticationSessionRow(Base):
     revoked_at: Mapped[str | None] = mapped_column(String, nullable=True)
     user_agent: Mapped[str | None] = mapped_column(String(512), nullable=True)
     user: Mapped[UserRow] = relationship(back_populates="sessions")
+
+
+class AssistantConversationRow(Base):
+    __tablename__ = "assistant_conversations"
+    __table_args__ = (
+        CheckConstraint(
+            "title IS NULL OR length(trim(title)) > 0",
+            name="ck_assistant_conversations_title",
+        ),
+        Index("ix_assistant_conversations_user_updated", "user_id", "updated_at"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    title: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    created_at: Mapped[str] = mapped_column(String)
+    updated_at: Mapped[str] = mapped_column(String, index=True)
+    user: Mapped[UserRow] = relationship(back_populates="assistant_conversations")
+    messages: Mapped[list["AssistantMessageRow"]] = relationship(
+        back_populates="conversation", cascade="all, delete-orphan"
+    )
+
+
+class AssistantMessageRow(Base):
+    __tablename__ = "assistant_messages"
+    __table_args__ = (
+        CheckConstraint("role IN ('user','assistant')", name="ck_assistant_messages_role"),
+        CheckConstraint("length(trim(content)) > 0", name="ck_assistant_messages_content"),
+        Index("ix_assistant_messages_conversation_created", "conversation_id", "created_at"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    conversation_id: Mapped[str] = mapped_column(
+        ForeignKey("assistant_conversations.id", ondelete="CASCADE"), index=True
+    )
+    role: Mapped[str] = mapped_column(String(16))
+    content: Mapped[str] = mapped_column(Text)
+    structured_results: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[str] = mapped_column(String, index=True)
+    conversation: Mapped[AssistantConversationRow] = relationship(back_populates="messages")
 
 
 class NotificationPreferenceRow(Base):
@@ -76,6 +119,7 @@ class NotificationPreferenceRow(Base):
     high_occupancy_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
     high_occupancy_threshold: Mapped[int] = mapped_column(Integer, default=80)
     cooldown_minutes: Mapped[int] = mapped_column(Integer, default=30)
+    favorite_floors: Mapped[str] = mapped_column(Text, default="[]")
     created_at: Mapped[str] = mapped_column(String)
     updated_at: Mapped[str] = mapped_column(String)
     user: Mapped[UserRow] = relationship(back_populates="notification_preferences")

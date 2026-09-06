@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import logging
+import hashlib
+import hmac
 import json
 import time
 import uuid
@@ -18,6 +20,11 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from backend.config import Settings
 from backend.models import (
     AuthResponse,
+    AssistantAppliedFilters,
+    AssistantConversation,
+    AssistantConversationListResponse,
+    AssistantQueryRequest,
+    AssistantQueryResponse,
     ChangePasswordRequest,
     CollectionMeta,
     ErrorBody,
@@ -41,6 +48,18 @@ from backend.models import (
     SignupRequest,
 )
 from backend.auth import AuthError, AuthService, get_current_user
+from backend.assistant import (
+    AssistantConversationService,
+    AssistantLanguageProvider,
+    AssistantProviderCoordinator,
+    AssistantResponseContent,
+    GeminiAssistantProvider,
+    compose_assistant_response,
+    execute_query_plan,
+    parse_assistant_query,
+    rank_query_results,
+    sanitize_assistant_message_for_storage,
+)
 from backend.database import create_database_engine, make_session_factory
 from backend.ingestion import ModelServerIngestionAdapter, ModelServerIngestionService, SerializedDatabaseWriter
 from backend.maintenance import DatabaseMaintenanceService
@@ -55,6 +74,11 @@ logger = logging.getLogger(__name__)
 
 def _log(event: str, level: int = logging.INFO, **fields: Any) -> None:
     logger.log(level, json.dumps({"event": event, **fields}, sort_keys=True, default=str))
+
+
+def _assistant_user_reference(user_id: str, pepper: str) -> str:
+    """Return a stable one-way identifier suitable for operational correlation."""
+    return hmac.new(pepper.encode(), user_id.encode(), hashlib.sha256).hexdigest()[:20]
 
 
 def _error(status_code: int, code: str, message: str, details: dict[str, Any] | None = None) -> JSONResponse:
@@ -92,10 +116,23 @@ def _build_repository(settings: Settings) -> OccupancyRepository:
 def create_app(
     settings: Settings | None = None,
     repository: OccupancyRepository | None = None,
+    assistant_provider: AssistantLanguageProvider | None = None,
 ) -> FastAPI:
     active_settings = settings or Settings.from_env()
     repository_was_injected = repository is not None
     active_repository = repository or _build_repository(active_settings)
+    selected_provider = assistant_provider
+    if active_settings.assistant_provider == "deterministic":
+        selected_provider = None
+    elif active_settings.assistant_provider == "gemini" and selected_provider is None:
+        selected_provider = GeminiAssistantProvider(
+            active_settings.assistant_api_key,
+            active_settings.assistant_model,
+            active_settings.assistant_timeout_seconds,
+        )
+    provider_coordinator = AssistantProviderCoordinator(
+        selected_provider, active_settings.assistant_timeout_seconds
+    )
     ingestion_service: ModelServerIngestionService | None = None
     maintenance_service: DatabaseMaintenanceService | None = None
     simulation_service: SimulatedIngestionService | None = None
@@ -172,6 +209,7 @@ def create_app(
             engine.dispose()
         if app.state.auth_engine is not None and app.state.auth_engine is not engine:
             app.state.auth_engine.dispose()
+        provider_coordinator.close()
 
     app = FastAPI(
         title="OccupAI Product API",
@@ -190,18 +228,29 @@ def create_app(
         active_settings.auth_rate_limit_attempts,
         active_settings.auth_rate_limit_window_seconds,
     )
+    app.state.assistant_user_rate_limiter = AuthenticationRateLimiter(
+        active_settings.assistant_rate_limit_attempts,
+        active_settings.assistant_rate_limit_window_seconds,
+    )
+    app.state.assistant_ip_rate_limiter = AuthenticationRateLimiter(
+        active_settings.assistant_rate_limit_attempts,
+        active_settings.assistant_rate_limit_window_seconds,
+    )
     app.state.notification_service = None
+    app.state.assistant_conversation_service = None
+    app.state.assistant_provider_coordinator = provider_coordinator
     app.add_middleware(
         CORSMiddleware,
         allow_origins=list(active_settings.frontend_origins),
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PATCH"],
+        allow_methods=["GET", "POST", "PATCH", "DELETE"],
         allow_headers=["Accept", "Content-Type", "X-Request-ID"],
     )
 
     @app.middleware("http")
     async def request_context(request: Request, call_next):
         request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+        request.state.request_id = request_id
         started = time.perf_counter()
         try:
             response = await call_next(request)
@@ -227,7 +276,8 @@ def create_app(
         elif (request.url.path.startswith("/api/occupancy")
               or request.url.path.startswith("/api/profile")
               or request.url.path.startswith("/api/notifications")
-              or request.url.path.startswith("/api/notification-preferences")):
+              or request.url.path.startswith("/api/notification-preferences")
+              or request.url.path.startswith("/api/assistant")):
             response.headers["Cache-Control"] = "no-store"
         _log("request", request_id=request_id, method=request.method, path=request.url.path,
              status=response.status_code, duration_ms=round((time.perf_counter() - started) * 1000, 2))
@@ -237,7 +287,7 @@ def create_app(
     async def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
         status = 422 if request.url.path == "/api/notification-preferences" else 400
         errors = [
-            {key: value for key, value in error.items() if key != "ctx"}
+            {key: value for key, value in error.items() if key not in {"ctx", "input"}}
             for error in exc.errors()
         ]
         return _error(status, "invalid_request", "Request validation failed", {"errors": errors})
@@ -275,7 +325,7 @@ def create_app(
             try:
                 missing = {
                     "users", "authentication_sessions", "notification_preferences",
-                    "user_notifications",
+                    "user_notifications", "assistant_conversations", "assistant_messages",
                 } - set(inspect(engine).get_table_names())
             except Exception as exc:
                 engine.dispose()
@@ -297,6 +347,13 @@ def create_app(
             app.state.notification_service = NotificationService(auth_service().session_factory)
         return app.state.notification_service
 
+    def assistant_conversation_service() -> AssistantConversationService:
+        if app.state.assistant_conversation_service is None:
+            app.state.assistant_conversation_service = AssistantConversationService(
+                auth_service().session_factory
+            )
+        return app.state.assistant_conversation_service
+
     def validate_auth_origin(request: Request) -> None:
         if request.headers.get("Origin") not in active_settings.frontend_origins:
             raise AuthError(403, "invalid_origin", "The request origin is not allowed.")
@@ -311,6 +368,160 @@ def create_app(
             httponly=True, secure=active_settings.auth_cookie_secure,
             samesite=active_settings.auth_cookie_samesite, path="/",
         )
+
+    @app.post(
+        "/api/assistant/query",
+        response_model=AssistantQueryResponse,
+        tags=["assistant"],
+    )
+    def query_assistant(
+        payload: AssistantQueryRequest,
+        request: Request,
+        user=Depends(get_current_user),
+    ) -> AssistantQueryResponse:
+        """Authenticated assistant transport; interpretation starts in Module 3."""
+        started = time.perf_counter()
+        user_reference = _assistant_user_reference(user.id, active_settings.auth_session_pepper)
+        intent = "not_parsed"
+        result_count = 0
+        provider_used = "deterministic"
+        fallback_used = False
+        error_category = None
+        validate_auth_origin(request)
+        if not active_settings.assistant_enabled:
+            _log(
+                "assistant_query", request_id=request.state.request_id,
+                user_reference=user_reference, intent=intent, result_count=0,
+                duration_ms=round((time.perf_counter() - started) * 1000, 2),
+                provider_used=provider_used, fallback_used=False,
+                error_category="assistant_disabled",
+            )
+            raise HTTPException(503, detail={
+                "code": "assistant_disabled",
+                "message": "The Campus Assistant is currently unavailable.",
+            })
+        try:
+            app.state.assistant_user_rate_limiter.check(f"assistant:user:{user.id}")
+            app.state.assistant_ip_rate_limiter.check(f"assistant:ip:{client_key(request)}")
+            plan = parse_assistant_query(payload.message)
+            intent = plan.intent.value
+            excluded_floors: list[int] = []
+            no_allowed_requested_floor = False
+            if not plan.clarification_question and plan.intent.value != "unsupported":
+                preferences = notification_service().get_preferences(user.id)
+                used_floors = sorted({0, 1, *preferences.favorite_floors})
+                requested_floors = set(plan.floors)
+                excluded_floors = sorted(requested_floors - set(used_floors))
+                no_allowed_requested_floor = bool(
+                    requested_floors and not requested_floors.intersection(used_floors)
+                )
+                if requested_floors and not no_allowed_requested_floor:
+                    plan = plan.model_copy(update={
+                        "floors": sorted(requested_floors.intersection(used_floors))
+                    })
+                elif not requested_floors:
+                    plan = plan.model_copy(update={"floors": used_floors})
+            if plan.clarification_question or plan.intent.value == "unsupported" or no_allowed_requested_floor:
+                results = []
+            else:
+                candidates = execute_query_plan(active_repository, plan)
+                results = rank_query_results(candidates, plan)
+            result_count = len(results)
+            data_timestamp = active_repository.generated_at
+            content = compose_assistant_response(plan, results, data_timestamp)
+            if excluded_floors:
+                labels = ", ".join("Ground Floor" if floor == 0 else f"Floor {floor}" for floor in excluded_floors)
+                content = AssistantResponseContent(
+                    content.answer,
+                    content.warnings + [
+                        f"{labels} {'is' if len(excluded_floors) == 1 else 'are'} not included in your used floors. Update My used floors in Profile to include {'it' if len(excluded_floors) == 1 else 'them'}."
+                    ],
+                )
+            if not plan.safety_refusal and plan.intent.value != "unsupported" and not plan.clarification_question:
+                provider_outcome = provider_coordinator.rewrite(content.answer, results)
+                provider_used = provider_outcome.provider_used
+                fallback_used = provider_outcome.used_fallback
+                error_category = provider_outcome.error_category
+                content = AssistantResponseContent(
+                    provider_outcome.answer,
+                    content.warnings + ([provider_outcome.warning] if provider_outcome.warning else []),
+                )
+            applied_filters = AssistantAppliedFilters(
+                buildings=plan.buildings, floors=plan.floors, blocks=plan.blocks,
+                maximum_occupancy_percentage=plan.maximum_occupancy_percentage,
+                minimum_available_capacity=plan.minimum_available_capacity, limit=plan.limit,
+            )
+            conversation_id = assistant_conversation_service().record_exchange(
+                user.id, payload.conversation_id,
+                sanitize_assistant_message_for_storage(payload.message), content.answer,
+                {"results": [result.model_dump(mode="json") for result in results],
+                 "applied_filters": applied_filters.model_dump(mode="json"),
+                 "data_timestamp": data_timestamp.isoformat(), "warnings": content.warnings},
+            )
+            response = AssistantQueryResponse(
+                conversation_id=conversation_id, answer=content.answer, results=results,
+                applied_filters=applied_filters, data_timestamp=data_timestamp,
+                warnings=content.warnings,
+            )
+        except Exception as exc:
+            if error_category is None:
+                error_category = (
+                    exc.code if isinstance(exc, AuthError) else "assistant_internal_error"
+                )
+            _log(
+                "assistant_query", request_id=request.state.request_id,
+                user_reference=user_reference, intent=intent, result_count=result_count,
+                duration_ms=round((time.perf_counter() - started) * 1000, 2),
+                provider_used=provider_used, fallback_used=fallback_used,
+                error_category=error_category,
+            )
+            raise
+        _log(
+            "assistant_query", request_id=request.state.request_id,
+            user_reference=user_reference, intent=intent, result_count=result_count,
+            duration_ms=round((time.perf_counter() - started) * 1000, 2),
+            provider_used=provider_used, fallback_used=fallback_used,
+            error_category=error_category,
+        )
+        return response
+
+    @app.get(
+        "/api/assistant/conversations",
+        response_model=AssistantConversationListResponse,
+        tags=["assistant"],
+    )
+    def list_assistant_conversations(
+        page: int = Query(default=1, ge=1, le=10_000),
+        limit: int = Query(default=20, ge=1, le=50),
+        user=Depends(get_current_user),
+    ) -> AssistantConversationListResponse:
+        return assistant_conversation_service().list_conversations(
+            user.id, page=page, limit=limit
+        )
+
+    @app.get(
+        "/api/assistant/conversations/{conversation_id}",
+        response_model=AssistantConversation,
+        tags=["assistant"],
+    )
+    def get_assistant_conversation(
+        conversation_id: uuid.UUID,
+        user=Depends(get_current_user),
+    ) -> AssistantConversation:
+        return assistant_conversation_service().get_conversation(user.id, conversation_id)
+
+    @app.delete(
+        "/api/assistant/conversations/{conversation_id}",
+        status_code=204,
+        tags=["assistant"],
+    )
+    def delete_assistant_conversation(
+        conversation_id: uuid.UUID,
+        request: Request,
+        user=Depends(get_current_user),
+    ) -> None:
+        validate_auth_origin(request)
+        assistant_conversation_service().delete_conversation(user.id, conversation_id)
 
     @app.post("/api/auth/signup", response_model=AuthResponse, status_code=201, tags=["authentication"])
     def signup(payload: SignupRequest, request: Request, response: Response) -> AuthResponse:

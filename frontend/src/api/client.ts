@@ -1,6 +1,6 @@
 import { env } from "../config/env";
 import type { ApiErrorResponse, HistoryMetric, HistoryRange, NotificationPreferences } from "./types";
-import { parseHistory, parseNotification, parseNotificationPreferences, parseNotifications, parseOccupancy, parseOccupancyList, parseProfile, parseRoom, parseRooms } from "./validation";
+import { parseAssistantConversation, parseAssistantConversations, parseAssistantQuery, parseHistory, parseNotification, parseNotificationPreferences, parseNotifications, parseOccupancy, parseOccupancyList, parseProfile, parseRoom, parseRooms } from "./validation";
 
 export class ApiError extends Error {
   constructor(message: string, public readonly status: number | null, public readonly code: string, public readonly details?: Record<string, unknown>) { super(message); this.name = "ApiError"; }
@@ -47,6 +47,9 @@ export const api = {
   dismissNotification: (id:string) => request(`/notifications/${segment(id)}/dismiss`, {method:"POST"}),
   getNotificationPreferences: (options?: RequestOptions) => request("/notification-preferences", options).then(parseNotificationPreferences),
   updateNotificationPreferences: (value: Partial<NotificationPreferences>) => request("/notification-preferences", {method:"PATCH",body:value}).then(parseNotificationPreferences),
+  queryAssistant: (value:{message:string;conversation_id?:string}) => request("/assistant/query", {method:"POST",body:value,timeoutMs:15_000}).then(parseAssistantQuery),
+  getAssistantConversations: (options?:RequestOptions) => request("/assistant/conversations?limit=20", options).then(parseAssistantConversations),
+  getAssistantConversation: (id:string, options?:RequestOptions) => request(`/assistant/conversations/${segment(id)}`, options).then(parseAssistantConversation),
   getRooms: (options?: RequestOptions) => request("/rooms", options).then(parseRooms),
   getRoom: (roomId: string, options?: RequestOptions) => request(`/rooms/${segment(roomId)}`, options).then(parseRoom),
   getOccupancy: (options?: RequestOptions) => request("/occupancy", options).then(parseOccupancyList),

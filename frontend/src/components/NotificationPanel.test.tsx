@@ -105,4 +105,5 @@ describe("NotificationPanel integration", () => {
     rendered.rerender(view(auth));
     await waitFor(() => expect(api.getNotifications).toHaveBeenCalledTimes(2));
   });
+
 });

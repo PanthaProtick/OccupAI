@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, KeyRound, Mail, Save, Shield, User } from "lucide-react";
+import { ArrowLeft, Building2, KeyRound, Mail, Save, Shield, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { api, ApiError } from "../api/client";
-import type { Profile } from "../api/types";
+import type { NotificationPreferences, Profile } from "../api/types";
 
 export function ProfilePage() {
   const location = useLocation();
@@ -12,6 +12,8 @@ export function ProfilePage() {
   const [loadError, setLoadError] = useState("");
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [preferences, setPreferences] = useState<NotificationPreferences | null>(null);
+  const [savingFloor, setSavingFloor] = useState<number | null>(null);
   const [message, setMessage] = useState(
     (location.state as { passwordChanged?: boolean } | null)?.passwordChanged
       ? "Password updated successfully."
@@ -22,15 +24,37 @@ export function ProfilePage() {
     setLoading(true);
     setLoadError("");
     try {
-      const value = await api.getProfile({ signal });
+      const [value, savedPreferences] = await Promise.all([
+        api.getProfile({ signal }),
+        api.getNotificationPreferences({ signal }),
+      ]);
       setProfile(value);
       setName(value.name);
+      setPreferences(savedPreferences);
     } catch (error) {
       if (!(error instanceof ApiError && error.code === "cancelled")) {
         setLoadError(error instanceof ApiError ? error.message : "Unable to load your profile.");
       }
     } finally {
       if (!signal?.aborted) setLoading(false);
+    }
+  };
+
+  const toggleUsedFloor = async (floor: number) => {
+    if (!preferences || savingFloor !== null) return;
+    const favoriteFloors = preferences.favorite_floors.includes(floor)
+      ? preferences.favorite_floors.filter((value) => value !== floor)
+      : [...preferences.favorite_floors, floor].sort((a, b) => a - b);
+    setSavingFloor(floor);
+    setMessage("");
+    try {
+      const updated = await api.updateNotificationPreferences({ favorite_floors: favoriteFloors });
+      setPreferences(updated);
+      setMessage("Used floors updated successfully.");
+    } catch (error) {
+      setMessage(error instanceof ApiError ? error.message : "Unable to update your used floors.");
+    } finally {
+      setSavingFloor(null);
     }
   };
 
@@ -105,6 +129,21 @@ export function ProfilePage() {
           <KeyRound size={16}/> Change password
         </Link>
       </div>
+      {preferences && <div className="profile-card profile-floors">
+        <h2><Building2 size={18}/> My used floors</h2>
+        <p className="info-help">Your notifications and Campus Assistant recommendations use these floors.</p>
+        <div className="profile-fixed-floors" aria-label="Always included floors">
+          <span>Ground Floor</span><span>Floor 1</span>
+        </div>
+        <fieldset disabled={savingFloor !== null}>
+          <legend>Select any additional floors you regularly use</legend>
+          <div>{Array.from({length:8},(_,index)=>index+2).map((floor)=><label key={floor}>
+            <input type="checkbox" checked={preferences.favorite_floors.includes(floor)}
+              onChange={() => void toggleUsedFloor(floor)}/>
+            <span>Floor {floor}</span>{savingFloor===floor?<small>Saving…</small>:null}
+          </label>)}</div>
+        </fieldset>
+      </div>}
     </div>}
   </div>;
 }
