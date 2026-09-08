@@ -1,146 +1,295 @@
-# Multi-camera occupancy checkpoint
+# OccupAI
 
-This project runs a multi-camera people-occupancy pipeline. Each camera has a capture thread and an independent ByteTrack tracker; one shared YOLO11 detector performs inference, and a scheduler samples the latest frame from each camera at about 3 FPS. A two-second per-camera history produces the stabilized occupancy value.
+Campus occupancy monitoring with multi-camera person detection, a persistent API, and a React dashboard.
 
-The repository also includes mock- and SQLite-backed product API modes for parallel frontend/backend development. See [`backend/README.md`](backend/README.md) for migration, ingestion, retention, recovery, and configuration operations; see [`docs/parallel-development.md`](docs/parallel-development.md) and [`contracts/openapi.yaml`](contracts/openapi.yaml) for the shared API boundary.
+OccupAI represents **155 spaces across floors 0–9**. The local demonstration combines three video-backed rooms with synthetic occupancy for the other 152 spaces. It includes room discovery, occupancy history, account profiles, in-app notifications, and a database-grounded Campus Assistant.
+
+## Architecture
+
+```text
+Video sources → YOLO11 + per-camera ByteTrack → Model API :8001
+                                                     ↓ polling
+Synthetic room schedules ───────────────→ Backend ingestion writer
+                                                     ↓
+                                              SQLite database
+                                                     ↓
+                                             Product API :8000
+                                                     ↓
+                                            React / Vite :5173
+```
+
+- **Model server:** one shared detector, independent capture threads and trackers, and per-camera occupancy stabilization. API requests read the latest state without triggering inference.
+- **Backend:** FastAPI, SQLAlchemy, Alembic, and SQLite. Validated model readings and synthetic readings pass through the backend ingestion writer.
+- **Frontend:** React, TypeScript, and Vite. The dashboard consumes the product API; it does not connect directly to the model server.
+- **Campus Assistant:** deterministic room filtering and ranking, with optional provider-assisted wording. The default mode needs no external API key.
 
 ## Requirements
 
-- Python 3.12 (the required version is recorded in `.python-version` and `pyproject.toml`).
-- [`uv`](https://docs.astral.sh/uv/).
-- A Windows, Linux, or macOS environment that can open the configured video files. Display mode additionally requires a graphical desktop.
-- By default, PyTorch is resolved from the CUDA 12.4 index and the configuration uses `device: 0`. For a CPU-only machine, change `device` to `cpu` in `model_server/config/cameras.yaml` before starting the application.
+The commands below use **PowerShell**, run from the repository root unless stated otherwise.
 
-The YOLO11 model weights are included under `model_server/models/`. The demo videos are intentionally not included: create `model_server/videos/` and provide the three files referenced by `model_server/config/cameras.yaml`, or edit that configuration to use your own local files. Video files, logs, caches, and virtual environments are ignored by Git.
+| Requirement | Notes |
+| --- | --- |
+| Python 3.12 | Version selected by `.python-version`. |
+| `uv` | Python environment and dependency management; use the committed `uv.lock`. |
+| Node.js 22.12 or newer and npm | Meets the Node requirement of the locked Vite version. |
+| NVIDIA GPU and compatible driver | The committed PyTorch source is CUDA 12.4; inference uses `device: 0`. |
+| Graphical desktop | Required only for OpenCV video windows. |
+| Local video files | Three inputs are required for the video-backed demonstration; they are not committed. |
 
-## Reproduce the environment
+The documented inference setup targets Windows with NVIDIA CUDA. On a CPU-only Windows/Linux machine, set `device: cpu` in `model_server/config/cameras.yaml`; inference throughput will depend on the machine. Other platforms may require a different PyTorch installation: the committed CUDA environment is not a universal platform setup.
 
-From the repository root:
+Model weights (`yolo11m.pt`, `yolo11s.pt`, and `yolo11n.pt`) are tracked under `model_server/models/`. The default uses `yolo11m.pt`. Generated fixtures, databases, video inputs, logs, secrets, and virtual environments are excluded from version control.
+
+## Setup
+
+### 1. Install dependencies
+
+Clone or download this repository, open its root directory, and run:
 
 ```powershell
-uv sync
+uv sync --locked
+npm --prefix frontend ci
 ```
 
-If `uv` cannot create its default cache in a locked-down environment, point it at a writable directory inside the project:
+If the default Python cache is not writable:
 
 ```powershell
 $env:UV_CACHE_DIR = ".uv-cache"
-uv sync --link-mode copy
+uv sync --locked --link-mode copy
 ```
 
-Run the unit tests before starting the inference pipeline:
+Use the committed Python and npm lockfiles for reproduction rather than resolving new dependency versions.
+
+### 2. Create local configuration
+
+These commands preserve configuration files that already exist:
 
 ```powershell
-uv run python -m unittest discover -s tests -p "test_*.py"
+if (-not (Test-Path backend/.env)) {
+    Copy-Item backend/.env.example backend/.env
+}
+if (-not (Test-Path frontend/.env.local)) {
+    Copy-Item frontend/.env.example frontend/.env.local
+}
 ```
 
-## Run the local video demo
+For the full demonstration, set these values in `backend/.env`:
 
-After the three configured video files are present:
+```dotenv
+DATA_SOURCE=database
+DATABASE_URL=sqlite:///./data/occupai.db
+MOCK_DATA_DIR=mock/generated
+INGESTION_ENABLED=true
+SIMULATION_ENABLED=true
+LIVE_CAMERA_IDS=cam_093,cam_047,cam_010
+MODEL_SERVER_URL=http://127.0.0.1:8001
+SIMULATION_TICK_INTERVAL_SECONDS=5
+MAINTENANCE_ENABLED=true
+ASSISTANT_PROVIDER=deterministic
+```
+
+Keep the remaining example settings for local development. In `frontend/.env.local`, use:
+
+```dotenv
+VITE_API_BASE_URL=http://localhost:8000/api
+```
+
+Backend process environment variables override `backend/.env`. Restart the relevant service after changing configuration. Use `localhost` consistently for the browser and product API so cookie-based authentication works as expected.
+
+### 3. Generate fixtures and initialize the database
 
 ```powershell
-uv run python -m model_server.main
+uv run python mock/generate_mock_data.py --seed 42
+uv run python -m scripts.database migrate
+uv run python -m scripts.database seed
 ```
 
-For annotated OpenCV windows:
+This creates six fixture files in `mock/generated/`, applies the database schema, and seeds the 155 room/camera mappings. Seeding is idempotent and refuses to silently change existing camera assignments. Authentication also requires the database schema, including when occupancy reads use mock mode.
+
+To populate the history charts with seven days of **synthetic demonstration history**, optionally run:
 
 ```powershell
-uv run python -m model_server.main --display
+uv run python -m scripts.database import-history
 ```
 
-Press `q` to stop display mode. Results are appended to `model_server/logs/occupancy.jsonl`. Each JSONL record includes the camera ID, local ISO-8601 timestamp, raw and stabilized occupancy, inference/processing latency, source and sampled FPS, and dropped-frame count.
+Without this import, historical charts fill as readings are collected and aggregated. Newly seeded current states begin offline and update when ingestion starts. Re-running fixture generation does not replace existing database history.
 
-The configured videos loop at EOF. At each loop boundary, that camera's tracker and stabilizer reset so track IDs do not leak from the end of a clip into its beginning.
+### 4. Supply the video inputs
 
-## Run the REST API
+Place your clips at the following paths, or edit their `source` entries in `model_server/config/cameras.yaml`:
 
-Start the background CV worker and API:
+| Room displayed | Camera ID | Default video path |
+| --- | --- | --- |
+| 7A03 | `cam_093` | `model_server/videos/test3.mp4` |
+| 7B03 | `cam_047` | `model_server/videos/test4.mp4` |
+| 7C07 | `cam_010` | `model_server/videos/test5.mp4` |
 
-```powershell
-uv run uvicorn model_server.model_server:app --host 127.0.0.1 --port 8001
-```
+The room labels identify the rooms represented by the demo feeds; they do not establish where a supplied clip was recorded. Exact visual reproduction requires the same source clips, which are not distributed with this repository.
 
-For annotated windows in PowerShell, set the display flag before starting the server:
+## Run the full application
+
+Use three terminals. Start only one model-server instance and one backend instance.
+
+### Terminal 1 — Model server with video windows
+
+From the repository root:
 
 ```powershell
 $env:OCCUPANCY_DISPLAY = "1"
 uv run uvicorn model_server.model_server:app --host 127.0.0.1 --port 8001
 ```
 
-The API reads the latest in-memory state; requests never trigger inference:
+Each window shows a large room-number header and occupancy counts above the footage. To run without windows, set `OCCUPANCY_DISPLAY` to `"0"` before launching.
 
-```text
-GET /health
-GET /occupancy
-GET /occupancy/cam_001
-```
+### Terminal 2 — Product API
 
-For example:
+From the repository root, after completing the database setup:
 
 ```powershell
-Invoke-RestMethod http://127.0.0.1:8000/health
-Invoke-RestMethod http://127.0.0.1:8000/occupancy
+uv run uvicorn backend.app:app --host 127.0.0.1 --port 8000
 ```
 
-Camera results become `stale` after 10 seconds without an update. Failed sources are marked `offline`, while the last known occupancy values are preserved when available. Override the timeout with `OCCUPANCY_STALE_AFTER_SECONDS`; override the config and log paths with `OCCUPANCY_CONFIG` and `OCCUPANCY_LOG`.
+For development with automatic Python reload, `./scripts/start-backend.ps1` is also available. It applies migrations and reads `backend/.env`; the explicit fixture-generation and database-seeding steps above are still required for a fresh database-mode setup.
 
-## Run the full application stack
-
-To run the complete system with the model server, product API backend, and the React frontend, you will need three separate terminal windows.
-
-**1. Model Server:**
-From the repository root, start the computer vision worker on port 8001:
-
-```powershell
-uv run uvicorn model_server.model_server:app --host 127.0.0.1 --port 8001
-```
-
-**2. Backend (Product API):**
-From a new terminal at the repository root, start the backend. Enable ingestion and simulation to connect to the model server:
-
-```powershell
-$env:DATA_SOURCE = "database"
-$env:INGESTION_ENABLED = "true"
-$env:SIMULATION_ENABLED = "true"
-$env:MODEL_SERVER_URL = "http://127.0.0.1:8001"
-$env:LIVE_CAMERA_IDS = "cam_093,cam_047,cam_010"
-.\scripts\start-backend.ps1
-```
-
-**3. Frontend:**
-From a third terminal, navigate to the `frontend` directory, set up the environment, and start the development server:
+### Terminal 3 — Frontend
 
 ```powershell
 cd frontend
-Copy-Item .env.example .env.local
-npm install
-npm run dev
+npm run dev -- --host localhost --port 5173 --strictPort
 ```
 
-The frontend will start and provide a local URL (typically `http://localhost:5173/`) that you can open in your browser to view the dashboard.
+Open [http://localhost:5173](http://localhost:5173). Create a local account using an `@aust.edu` address to access authenticated features. No preconfigured user account is supplied.
 
-Run `uv run alembic upgrade head` after pulling changes. Migrations `0004` and `0005` add
-database-backed notification preferences/history and concurrency-safe notification
-deduplication. Profile data, notification state, and preferences persist across logout and
-future login; the session cookie itself is only an authentication credential.
+Stop each service with **Ctrl+C in its terminal**. In video display mode, `q` stops the video worker; use Ctrl+C to stop the API process as well.
 
-## Configuration notes
+## Verify the running system
 
-The three model feeds are assigned to **7A03** (`cam_093`, `test3.mp4`),
-**7B03** (`cam_047`, `test4.mp4`), and **7C07** (`cam_010`, `test5.mp4`).
-Keep `LIVE_CAMERA_IDS` synchronized with `model_server/config/cameras.yaml`;
-these cameras are excluded from synthetic ingestion. Restart both services after
-changing the assignments. Room IDs and existing camera history are preserved.
+From a fourth terminal:
 
-Artificial rooms use a shared busy-campus demonstration schedule in
-`mock/occupancy_patterns.py`, interpreted in Dhaka time. Most classrooms are
-medium-to-high occupied, with staggered breaks; common rooms have shorter,
-less frequent quiet periods. Modest daily/weekend variation keeps the demo busy
-at any viewing hour; it does not model campus closures or claim measured usage.
-Live simulation and generated mock snapshots/history use the same patterns.
-Regenerate fixtures with `python mock/generate_mock_data.py` when needed;
-existing database history is preserved and new simulation ticks update current state.
+```powershell
+Invoke-RestMethod http://127.0.0.1:8001/health
+Invoke-RestMethod http://127.0.0.1:8001/occupancy
+Invoke-RestMethod http://localhost:8000/health
+Invoke-RestMethod http://localhost:8000/ready
+./scripts/smoke-backend.ps1 -BaseUrl http://localhost:8000
+```
 
-Edit `model_server/config/cameras.yaml` to change sources, model path, confidence, input size, device, sample rate, looping, or stabilization window. The default `track_buffer: 9` in `model_server/config/bytetrack_custom.yaml` is approximately three seconds at the configured 3 FPS sampling rate; it is measured in processed tracker frames, not wall-clock seconds.
+Expected results:
 
-The pipeline is designed for local-file reproducibility. Live RTSP/HTTP sources may require additional OpenCV/FFmpeg support and their availability, latency, and credentials are outside this repository's reproducible setup.
+- Model occupancy contains `cam_093`, `cam_047`, and `cam_010`, with fresh online readings when the clips are processing successfully.
+- Product health reports `data_source: database`; readiness succeeds.
+- The smoke check finds **155 rooms and 155 camera states**, and validates history metadata and API documentation.
+- The dashboard shows the three model-backed rooms alongside the simulated rooms after the first ingestion cycle.
+
+A model-server health response confirms HTTP availability; inspect `/occupancy` to verify that inference is actually producing fresh readings.
+
+| Service | Address / documentation |
+| --- | --- |
+| Frontend | [localhost:5173](http://localhost:5173) |
+| Product API documentation | [localhost:8000/docs](http://localhost:8000/docs) |
+| Product room list | [localhost:8000/api/rooms](http://localhost:8000/api/rooms) |
+| Model API documentation | [127.0.0.1:8001/docs](http://127.0.0.1:8001/docs) |
+| Individual model reading | [127.0.0.1:8001/occupancy/cam_093](http://127.0.0.1:8001/occupancy/cam_093) |
+
+## Alternative run modes
+
+### Standalone annotated video demo
+
+After installing Python dependencies and supplying the clips, run from the repository root:
+
+```powershell
+uv run python -m model_server.main --display
+```
+
+This mode needs neither the backend nor the frontend and does not serve HTTP. Press `q` or Ctrl+C to stop. Omit `--display` for processing and JSONL logging without windows. Do not run it alongside the model API worker unless you intentionally want a second inference pipeline.
+
+### Dashboard without video inference
+
+Complete dependency installation, configuration, fixture generation, and database migration first. In the backend terminal, override the full-stack settings:
+
+```powershell
+$env:DATA_SOURCE = "mock"
+$env:INGESTION_ENABLED = "false"
+$env:SIMULATION_ENABLED = "false"
+$env:MAINTENANCE_ENABLED = "false"
+uv run uvicorn backend.app:app --host 127.0.0.1 --port 8000
+```
+
+Start the frontend normally. This mode reads generated fixtures; occupancy does not advance through live simulation. Regenerate fixtures to refresh their timestamps. Restore the database settings or use a new terminal before returning to the full stack.
+
+## Occupancy behavior and reproducibility
+
+### Video-backed rooms
+
+The default configuration samples at **2 FPS per camera**, uses a **two-second stabilization window**, a **1280-pixel inference size**, and **0.15 confidence**. These are configured targets, not guaranteed throughput. Videos loop at EOF, resetting the corresponding tracker and stabilizer at each boundary.
+
+Processing logs are appended to `model_server/logs/occupancy.jsonl`. They include raw and stabilized counts, timestamps, latency, frame-rate statistics, and dropped-frame counts. Wall-clock scheduling, hardware, and dropped frames can affect results even with identical clips and weights.
+
+### Artificial rooms
+
+`mock/occupancy_patterns.py` supplies the shared schedules used by live simulation and generated mock history:
+
+- Most classrooms remain medium-to-high occupied, with staggered quiet periods.
+- Common-use rooms have shorter and less frequent quiet periods.
+- Schedules use Dhaka time, stable camera-specific phases, and modest daily/weekend variation.
+- Live readings include bounded drift and noise and remain within room capacity.
+
+These are busy-campus demonstration patterns, not measured usage or an opening-hours model. They intentionally remain active at any viewing hour. Seed 42 makes controlled variation repeatable for the same time inputs; default generation dates and live timestamps follow the clock, so successive runs are not byte-identical.
+
+`LIVE_CAMERA_IDS` must match the model-server camera IDs: simulation excludes those cameras to prevent synthetic readings from overwriting model observations. The `room_label` fields control video titles only. Preserve existing room/camera mappings when changing input clips.
+
+## Tests and build
+
+Generate fixtures before running Python tests. These commands do not require running application servers:
+
+```powershell
+uv run python -m unittest discover -s tests -p "test_*.py"
+npm --prefix frontend test
+npm --prefix frontend run build
+```
+
+For focused checks of synthetic occupancy behavior and feed assignments:
+
+```powershell
+uv run python -m unittest discover -s tests -p test_simulation_patterns.py
+```
+
+The frontend build produces `frontend/dist/`. `npm --prefix frontend run preview` serves that build locally; it does not start the backend or model server.
+
+## Troubleshooting
+
+| Symptom | Action |
+| --- | --- |
+| Video windows do not appear | Set `OCCUPANCY_DISPLAY=1` in the same terminal before starting the model API, and use a graphical desktop. |
+| Model cameras remain offline | Check video paths, decoding support, GPU availability, and worker terminal output. Verify `/occupancy`, not only `/health`. |
+| CUDA device error | Check the installed driver and PyTorch environment, or select `device: cpu` for CPU inference. |
+| Missing rooms or database tables | Run fixture generation, `scripts.database migrate`, and `scripts.database seed` in order. Confirm `DATABASE_URL` and `MOCK_DATA_DIR`. |
+| Login fails or cookies are missing | Use an `@aust.edu` account, keep browser/API hostnames consistent, and check `FRONTEND_ORIGINS`. |
+| Frontend cannot reach the API | Verify `VITE_API_BASE_URL`, port 8000, and backend readiness; restart Vite after configuration changes. |
+| A port is already occupied | Stop the existing service in its terminal. Changing ports also requires updating API URLs and allowed frontend origins. |
+| History is empty | Import optional synthetic history or allow time for aggregation with `MAINTENANCE_ENABLED=true`. |
+| Seed refuses a camera remap | Check the fixture/database mappings. Do not reset an existing database as a routine fix. |
+
+## Project layout
+
+```text
+backend/          Product API, authentication, ingestion, simulation, assistant
+frontend/         React application and frontend tests
+model_server/     Video capture, detector, tracking, visualization, model API
+mock/             Room catalog, synthetic schedules, fixture generator
+migrations/       Alembic database migrations
+contracts/        OpenAPI contract and compact API examples
+scripts/          Startup, database operations, smoke checks
+tests/            Python tests
+docs/             Architecture and historical design notes
+```
+
+## Further documentation
+
+- [Backend operations](backend/README.md): authentication, configuration, retention, backup, and recovery.
+- [Campus Assistant](backend/assistant/README.md): supported queries, ranking, provider behavior, and privacy boundaries.
+- [Frontend guide](frontend/README.md): API client, refresh behavior, routes, and tests.
+- [API contract](contracts/openapi.yaml) and [contract guide](contracts/README.md).
+- [Development architecture](docs/parallel-development.md).
+
+This README describes local reproduction. Production deployment needs environment-specific configuration; see the backend operations guide before exposing the services beyond localhost.

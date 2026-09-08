@@ -101,7 +101,7 @@ Run all tests with `.\scripts\test.ps1`. API documentation is at `/docs`. `/heal
 - `MODEL_SERVER_URL` / `MODEL_SERVER_TIMEOUT_SECONDS`: model-server polling settings.
 - `MODEL_SERVER_POLL_INTERVAL_SECONDS`: delay between latest-state polls, default 2 seconds.
 - `INGESTION_ENABLED`: starts the backend-owned polling worker in database mode; default `false`.
-- `LIVE_CAMERA_IDS`: canonical cameras expected from the model server. The current configuration is `cam_001,cam_002,cam_003`.
+- `LIVE_CAMERA_IDS`: canonical cameras expected from the model server. The current configuration is `cam_093,cam_047,cam_010` (7A03, 7B03, and 7C07).
 - `MAINTENANCE_ENABLED`: starts recurring incremental aggregation and bounded retention in database mode.
 - `MAINTENANCE_INTERVAL_SECONDS`: maintenance cadence, default 60 seconds.
 - `SIMULATION_ENABLED`: starts synthetic ingestion for every canonical camera not listed in `LIVE_CAMERA_IDS`; requires database mode.
@@ -118,7 +118,7 @@ Run all tests with `.\scripts\test.ps1`. API documentation is at `/docs`. `/heal
 
 Every SQLite connection enables foreign keys, WAL, and the busy timeout. Writes use short transactions and the ingestion writer is serialized. API reads continue serving the last durable state during model-server downtime. A successful stale result preserves its last occupancy and observation time; offline remains unavailable and distinct from a measured zero. One malformed camera result is isolated from other cameras.
 
-The checked-in `model_server/config/cameras.yaml` has exactly three sources. With `SIMULATION_ENABLED=true`, `cam_004`–`cam_155` receive synthetic readings through the same database writer, so they remain visibly fresh in the frontend. IDs are always normalized to `cam_NNN`; aliases never cross the product API boundary.
+The checked-in `model_server/config/cameras.yaml` has exactly three sources. With `SIMULATION_ENABLED=true`, the other 152 cameras receive synthetic readings through the same database writer, so they remain visibly fresh in the frontend. IDs are always normalized to `cam_NNN`; aliases never cross the product API boundary.
 
 To run ingestion, start the model server on port 8001, then the product API on port 8000:
 
