@@ -51,7 +51,10 @@ class ModelServerWorker:
             for item in self.config["cameras"]
         ]
         sink: JsonlSink | None = None
-        visualizer = OccupancyVisualizer() if self.display else None
+        visualizer = OccupancyVisualizer(room_labels={
+            item["camera_id"]: item.get("room_label", item["camera_id"])
+            for item in self.config["cameras"]
+        }) if self.display else None
         try:
             detector = SharedPersonDetector(
                 self.config["model"],

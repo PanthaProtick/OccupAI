@@ -8,13 +8,13 @@ through the standard SerializedDatabaseWriter pipeline.
 from __future__ import annotations
 
 import json
-import math
 import random
 import threading
 import logging
 import uuid
 from datetime import datetime, timezone
-from typing import Any
+
+from mock.occupancy_patterns import occupancy_at
 
 from backend.ingestion import IngestionRecord, SerializedDatabaseWriter
 
@@ -24,36 +24,6 @@ logger = logging.getLogger(__name__)
 
 def _clamp(value: float, low: float, high: float) -> float:
     return max(low, min(high, value))
-
-
-def _gaussian_peak(hour: float, center: float, width: float) -> float:
-    return math.exp(-((hour - center) ** 2) / (2 * width**2))
-
-
-def _weekday_factor(day: int) -> float:
-    return 0.30 if day >= 5 else 1.0
-
-
-def expected_occupancy(profile: str, hour: float, day: int) -> float:
-    """Return a smooth occupancy fraction for the given behavior profile.
-
-    Identical to the curves in ``mock/generate_mock_data.py`` so simulated
-    cameras produce statistically indistinguishable patterns from mock history.
-    """
-    day_factor = _weekday_factor(day)
-    if profile == "classroom":
-        value = 0.04 + 0.78 * _gaussian_peak(hour, 10.0, 1.15) + 0.62 * _gaussian_peak(hour, 14.5, 1.25)
-        return _clamp(value * day_factor, 0.0, 0.95)
-    if profile == "library":
-        opening = _clamp((hour - 7.0) / 2.5, 0.0, 1.0)
-        closing = _clamp((19.0 - hour) / 3.0, 0.0, 1.0)
-        return _clamp((0.10 + 0.52 * opening * closing) * day_factor, 0.0, 0.85)
-    if profile == "study_room":
-        return _clamp((0.05 + 0.42 * _gaussian_peak(hour, 16.0, 4.0) + 0.18 * _gaussian_peak(hour, 21.0, 2.0)) * day_factor, 0.0, 0.75)
-    if profile == "canteen":
-        value = 0.04 + 0.35 * _gaussian_peak(hour, 8.0, 1.0) + 0.92 * _gaussian_peak(hour, 13.0, 1.35) + 0.42 * _gaussian_peak(hour, 19.0, 1.7)
-        return _clamp(value * day_factor, 0.0, 0.98)
-    raise ValueError(f"Unknown behavior profile: {profile}")
 
 
 class SimulatedCamera:
@@ -124,15 +94,13 @@ class SimulatedIngestionService:
                 # all-room simulation cycle must not make later/earlier cameras
                 # appear stale merely because the cycle itself takes time.
                 now = datetime.now(timezone.utc)
-                hour = now.hour + now.minute / 60.0
-                weekday = now.weekday()
-                fraction = expected_occupancy(camera.behavior_profile, hour, weekday)
+                fraction = occupancy_at(camera.behavior_profile, now, camera.camera_id)
                 
                 # Random walk drift for organic movement (people entering/leaving)
                 drift_change = self._rng.choice([-2.0, -1.0, 0.0, 1.0, 2.0])
-                new_drift = self._drift_offsets[camera.camera_id] + drift_change
-                # Clamp drift to +/- 15% of capacity so it doesn't wander infinitely
-                max_drift = camera.capacity * 0.15
+                new_drift = self._drift_offsets[camera.camera_id] * 0.85 + drift_change
+                # Clamp drift to +/- 5% of capacity so it doesn't wander infinitely
+                max_drift = camera.capacity * 0.05
                 self._drift_offsets[camera.camera_id] = _clamp(new_drift, -max_drift, max_drift)
                 
                 base_val = camera.capacity * fraction + self._drift_offsets[camera.camera_id]

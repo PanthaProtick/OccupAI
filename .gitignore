@@ -12,6 +12,7 @@ wheels/
 logs/
 runs/
 outputs/
+.report-work/
 .env
 .env.local
 .env.*.local

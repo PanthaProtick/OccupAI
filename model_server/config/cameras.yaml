@@ -9,9 +9,12 @@ loop_videos: true
 stabilization_window_seconds: 2.0
 tracker_config: model_server/config/bytetrack_custom.yaml
 cameras:
-  - camera_id: cam_001
+  - camera_id: cam_093  # 7A03
+    room_label: 7A03
     source: model_server/videos/test3.mp4
-  - camera_id: cam_002
+  - camera_id: cam_047  # 7B03
+    room_label: 7B03
     source: model_server/videos/test4.mp4
-  - camera_id: cam_003
+  - camera_id: cam_010  # 7C07
+    room_label: 7C07
     source: model_server/videos/test5.mp4

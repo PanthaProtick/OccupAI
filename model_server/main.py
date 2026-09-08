@@ -42,7 +42,10 @@ def main() -> None:
         [camera.camera_id for camera in cameras], config["tracker_config"], config["sample_fps"]
     )
     sink = JsonlSink(args.log)
-    visualizer = OccupancyVisualizer() if args.display else None
+    visualizer = OccupancyVisualizer(room_labels={
+        item["camera_id"]: item.get("room_label", item["camera_id"])
+        for item in camera_configs
+    }) if args.display else None
     for camera in cameras:
         camera.start()
     started = time.monotonic()

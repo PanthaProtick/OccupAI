@@ -103,6 +103,7 @@ $env:DATA_SOURCE = "database"
 $env:INGESTION_ENABLED = "true"
 $env:SIMULATION_ENABLED = "true"
 $env:MODEL_SERVER_URL = "http://127.0.0.1:8001"
+$env:LIVE_CAMERA_IDS = "cam_093,cam_047,cam_010"
 .\scripts\start-backend.ps1
 ```
 
@@ -124,6 +125,21 @@ deduplication. Profile data, notification state, and preferences persist across 
 future login; the session cookie itself is only an authentication credential.
 
 ## Configuration notes
+
+The three model feeds are assigned to **7A03** (`cam_093`, `test3.mp4`),
+**7B03** (`cam_047`, `test4.mp4`), and **7C07** (`cam_010`, `test5.mp4`).
+Keep `LIVE_CAMERA_IDS` synchronized with `model_server/config/cameras.yaml`;
+these cameras are excluded from synthetic ingestion. Restart both services after
+changing the assignments. Room IDs and existing camera history are preserved.
+
+Artificial rooms use a shared busy-campus demonstration schedule in
+`mock/occupancy_patterns.py`, interpreted in Dhaka time. Most classrooms are
+medium-to-high occupied, with staggered breaks; common rooms have shorter,
+less frequent quiet periods. Modest daily/weekend variation keeps the demo busy
+at any viewing hour; it does not model campus closures or claim measured usage.
+Live simulation and generated mock snapshots/history use the same patterns.
+Regenerate fixtures with `python mock/generate_mock_data.py` when needed;
+existing database history is preserved and new simulation ticks update current state.
 
 Edit `model_server/config/cameras.yaml` to change sources, model path, confidence, input size, device, sample rate, looping, or stabilization window. The default `track_buffer: 9` in `model_server/config/bytetrack_custom.yaml` is approximately three seconds at the configured 3 FPS sampling rate; it is measured in processed tracker frames, not wall-clock seconds.
 

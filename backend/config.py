@@ -26,7 +26,7 @@ class Settings:
     model_server_url: str = "http://127.0.0.1:8001"
     model_server_timeout_seconds: float = 2.0
     model_server_poll_interval_seconds: float = 2.0
-    live_camera_ids: tuple[str, ...] = ("cam_001", "cam_002", "cam_003")
+    live_camera_ids: tuple[str, ...] = ("cam_093", "cam_047", "cam_010")
     maintenance_enabled: bool = False
     maintenance_interval_seconds: float = 60.0
     simulation_enabled: bool = False
@@ -169,7 +169,7 @@ class Settings:
             model_server_timeout_seconds=float(setting("MODEL_SERVER_TIMEOUT_SECONDS", "2")),
             model_server_poll_interval_seconds=float(setting("MODEL_SERVER_POLL_INTERVAL_SECONDS", "2")),
             live_camera_ids=tuple(value.strip() for value in setting(
-                "LIVE_CAMERA_IDS", "cam_001,cam_002,cam_003"
+                "LIVE_CAMERA_IDS", "cam_093,cam_047,cam_010"
             ).split(",") if value.strip()),
             maintenance_enabled=setting("MAINTENANCE_ENABLED", "false").strip().lower() in {"1", "true", "yes"},
             maintenance_interval_seconds=float(setting("MAINTENANCE_INTERVAL_SECONDS", "60")),

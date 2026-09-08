@@ -8,11 +8,15 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import random
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
+
+if __package__:
+    from .occupancy_patterns import occupancy_at
+else:  # Support direct execution by start-backend.ps1.
+    from occupancy_patterns import occupancy_at
 
 
 SEED = 42
@@ -21,9 +25,6 @@ HISTORY_DAYS = 7
 DEFAULT_START = datetime.now(timezone.utc).replace(
     hour=0, minute=0, second=0, microsecond=0
 ) - timedelta(days=HISTORY_DAYS)
-
-
-MODEL_CAMERA_IDS = ("cam_001", "cam_002", "cam_003")
 
 
 def load_rooms() -> list[dict[str, Any]]:
@@ -44,7 +45,7 @@ def load_rooms() -> list[dict[str, Any]]:
             room["capacity"] = 25 if block == "B" else 50
     random.Random(SEED).shuffle(rooms)
     for index, room in enumerate(rooms):
-        room["camera_id"] = MODEL_CAMERA_IDS[index] if index < len(MODEL_CAMERA_IDS) else f"cam_{index + 1:03d}"
+        room["camera_id"] = f"cam_{index + 1:03d}"
     return rooms
 
 
@@ -57,34 +58,6 @@ def iso(value: datetime) -> str:
 
 def clamp(value: float, low: float, high: float) -> float:
     return max(low, min(high, value))
-
-
-def gaussian_peak(hour: float, center: float, width: float) -> float:
-    return math.exp(-((hour - center) ** 2) / (2 * width**2))
-
-
-def weekday_factor(day: int) -> float:
-    return 0.30 if day >= 5 else 1.0
-
-
-def expected_occupancy(profile: str, hour: float, day: int) -> float:
-    """Return a smooth occupancy fraction before controlled random variation."""
-    day_factor = weekday_factor(day)
-    if profile == "classroom":
-        # Sharp class-time peaks, with a lunch dip and near-empty nights.
-        value = 0.04 + 0.78 * gaussian_peak(hour, 10.0, 1.15) + 0.62 * gaussian_peak(hour, 14.5, 1.25)
-        return clamp(value * day_factor, 0.0, 0.95)
-    if profile == "library":
-        # Gradual opening/ramp-up and sustained daytime occupancy.
-        opening = clamp((hour - 7.0) / 2.5, 0.0, 1.0)
-        closing = clamp((19.0 - hour) / 3.0, 0.0, 1.0)
-        return clamp((0.10 + 0.52 * opening * closing) * day_factor, 0.0, 0.85)
-    if profile == "study_room":
-        return clamp((0.05 + 0.42 * gaussian_peak(hour, 16.0, 4.0) + 0.18 * gaussian_peak(hour, 21.0, 2.0)) * day_factor, 0.0, 0.75)
-    if profile == "canteen":
-        value = 0.04 + 0.35 * gaussian_peak(hour, 8.0, 1.0) + 0.92 * gaussian_peak(hour, 13.0, 1.35) + 0.42 * gaussian_peak(hour, 19.0, 1.7)
-        return clamp(value * day_factor, 0.0, 0.98)
-    raise ValueError(f"Unknown behavior profile: {profile}")
 
 
 def intensity(percentage: float) -> str:
@@ -103,7 +76,7 @@ def generate_history(rng: random.Random, start: datetime) -> list[dict[str, Any]
     for room in ROOMS:
         for index in range(buckets):
             timestamp = start + timedelta(minutes=index * BUCKET_MINUTES)
-            fraction = expected_occupancy(room["behavior_profile"], timestamp.hour + timestamp.minute / 60, timestamp.weekday())
+            fraction = occupancy_at(room["behavior_profile"], timestamp, room["camera_id"])
             average = int(round(clamp(room["capacity"] * fraction + rng.gauss(0, room["capacity"] * 0.035), 0, room["capacity"])))
             minimum = max(0, min(average, average - rng.randint(0, max(1, round(room["capacity"] * 0.08)))))
             maximum = min(room["capacity"], max(average, average + rng.randint(0, max(1, round(room["capacity"] * 0.08)))))
@@ -123,11 +96,8 @@ def generate_history(rng: random.Random, start: datetime) -> list[dict[str, Any]
 
 def make_live(rng: random.Random, now: datetime) -> dict[str, Any]:
     results = []
-    target_fractions = (0.15, 0.42, 0.72, 0.88)
-    for index, room in enumerate(ROOMS):
-        # A co-prime stride prevents adjacent cameras/floors from falling into
-        # the same occupancy band while remaining deterministic for tests.
-        percentage = target_fractions[(index * 7 + 3) % len(target_fractions)]
+    for room in ROOMS:
+        percentage = occupancy_at(room["behavior_profile"], now, room["camera_id"])
         occupancy = int(round(clamp(
             room["capacity"] * percentage + rng.gauss(0, room["capacity"] * 0.025),
             0,
