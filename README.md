@@ -4,6 +4,33 @@ Campus occupancy monitoring with multi-camera person detection, a persistent API
 
 OccupAI represents **155 spaces across floors 0–9**. The local demonstration combines three video-backed rooms with synthetic occupancy for the other 152 spaces. It includes room discovery, occupancy history, account profiles, in-app notifications, and a database-grounded Campus Assistant.
 
+## Sustainable Development Goals and environmental impact
+
+OccupAI helps students discover campus spaces for study and collaboration and provides occupancy evidence that can inform campus resource decisions. The following SDG connections describe contribution pathways, not proof that the prototype achieves an SDG or its official indicators.
+
+| SDG and target | How OccupAI can contribute | Current evidence and limits |
+| --- | --- | --- |
+| [SDG 4: Quality Education, Target 4.a](https://sdgs.un.org/goals/goal4) — effective learning environments | Room discovery and the Campus Assistant can help students find spaces for study and collaboration. | This is the strongest connection to current features. Reduced search time and improved access still need user evaluation. An empty room may be reserved, locked, or restricted; occupancy alone does not establish permission to use it. |
+| [SDG 12: Responsible Consumption and Production, Target 12.2](https://sdgs.un.org/goals/goal12) — efficient use of natural resources | Occupancy history can inform better use of existing facilities and their associated resources. | Resource savings depend on administrators acting on real occupancy evidence. Synthetic demonstration history cannot establish actual campus utilization or savings. |
+| [SDG 7: Affordable and Clean Energy, Target 7.3](https://sdgs.un.org/goals/goal7) — energy efficiency | Occupancy information could guide reductions in unnecessary lighting, fan, or cooling use in unused rooms. | This is a potential future operational benefit. The current prototype does not control building equipment or demonstrate metered electricity savings. |
+
+### Environmental benefits and costs
+
+The main environmental opportunity is **occupancy evidence → better room and equipment decisions → less wasted electricity**. Monitoring alone does not save energy: staff actions or a future building-control integration must change equipment use. Better long-term space planning might also reduce demand for additional facilities, but that benefit remains speculative.
+
+OccupAI has its own footprint from video decoding, inference, networking, storage, and any additional cameras or computers. Local processing still consumes electricity; the broader relationship between AI computation and electricity demand is discussed in the [IEA's Energy and AI report](https://www.iea.org/reports/energy-and-ai/energy-demand-from-ai).
+
+The implementation limits unnecessary computation by sharing one detector, targeting inference at 2 FPS per camera, serving cached occupancy state to API requests, and using a deterministic Campus Assistant by default. These are design choices, not measured energy savings. Video capture still decodes frames continuously, so lower inference frequency does not imply the same proportional reduction in total electricity use.
+
+**Net electricity saved = avoided building electricity use − additional electricity used by OccupAI**, measured over the same period and against a defined baseline. Carbon estimates additionally require appropriate electricity emission factors; a broader environmental assessment must account for hardware manufacture and disposal. No net energy or carbon savings have been measured for this prototype.
+
+### How to validate the impact
+
+- Evaluate student room-finding time and successful access to suitable spaces with and without OccupAI.
+- Run a small pilot using real occupancy observations and record the equipment decisions made from them. The current three video-backed rooms and 152 synthetic spaces do not establish campus-wide operational impact.
+- Compare metered room electricity before and after those decisions under comparable schedules, occupancy, and weather, while separately measuring the system's additional electricity consumption.
+- Report the measurement period, baseline, coverage, and uncertainty alongside any claimed savings. Any future equipment automation must treat stale or missing readings as unknown rather than empty and preserve safety, ventilation, and manual overrides.
+
 ## Architecture
 
 ```text

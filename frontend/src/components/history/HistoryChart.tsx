@@ -1,21 +1,20 @@
 import { useState } from "react";
 import type { HistoryMetric, HistoryPoint, HistoryRange } from "../../api/types";
 import { formatOccupancy, formatPercentage, formatTimestamp } from "../../utils/formatters";
-export function HistoryChart({ points, metric, range = "hour" }: { points: HistoryPoint[]; metric: HistoryMetric; range?: HistoryRange }) {
+export function HistoryChart({ points, metric }: { points: HistoryPoint[]; metric: HistoryMetric; range?: HistoryRange }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   if (!points.length) return <EmptyState />;
   const max = Math.max(...points.map((p) => p.value), metric === "percentage" ? 100 : 1);
   const width = 760, height = 300, left = 52, right = 20, top = 24, bottom = 42;
   const coords = points.map((p, i) => ({ x: points.length === 1 ? width / 2 : left + i * (width - left - right) / (points.length - 1), y: height - bottom - p.value / max * (height - top - bottom), p }));
-  const segments: string[] = []; let segment = "";
-  const interval = { hour: 3_600_000, day: 86_400_000, week: 604_800_000 }[range];
-  coords.forEach(({ x, y, p }, index) => { const previous = points[index - 1]; const gap = previous && Date.parse(p.bucket_start) - Date.parse(previous.bucket_start) > interval * 1.5; if (p.coverage_percentage < 100 || gap) { if (segment) segments.push(segment); segment = ""; } if (p.coverage_percentage === 100) segment += `${segment ? " L" : "M"}${x},${y}`; }); if (segment) segments.push(segment);
+  // Connect the returned readings, including across unreported buckets.
+  const line = coords.length > 1 ? coords.map(({ x, y }, index) => `${index ? "L" : "M"}${x},${y}`).join(" ") : "";
+  const area = line ? `${line} L${coords[coords.length - 1].x},${height - bottom} L${coords[0].x},${height - bottom} Z` : "";
   const average = points.reduce((sum, p) => sum + p.value, 0) / points.length;
   const peak = Math.max(...points.map(p => p.value));
   const coverage = Math.round(points.reduce((sum, p) => sum + p.coverage_percentage, 0) / points.length);
   const display = (value: number) => metric === "percentage" ? formatPercentage(value) : formatOccupancy(value);
   const exactDisplay = (value: number) => metric === "percentage" ? `${value}%` : `${value}`;
-  const area = coords.length > 1 ? `${segments[0] ?? ""} L${coords.at(-1)!.x},${height - bottom} L${coords[0].x},${height - bottom} Z` : "";
   const ticks = [0, .25, .5, .75, 1];
   const labelIndexes = [...new Set([0, Math.floor((points.length - 1) / 2), points.length - 1])];
   return <div className="chart">
@@ -23,7 +22,7 @@ export function HistoryChart({ points, metric, range = "hour" }: { points: Histo
     <div className="chart-plot"><svg role="img" aria-label={`${metric} history chart`} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet">
       <defs><linearGradient id="chartArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#65e6c4" stopOpacity=".38"/><stop offset="1" stopColor="#65e6c4" stopOpacity="0"/></linearGradient></defs>
       {ticks.map(t => <g key={t}><line className="chart-gridline" x1={left} x2={width-right} y1={top + (1-t)*(height-top-bottom)} y2={top + (1-t)*(height-top-bottom)} /><text className="chart-axis-label" x={left-10} y={top + (1-t)*(height-top-bottom)+4} textAnchor="end">{display(max*t)}</text></g>)}
-      {area && <path className="chart-area" d={area} />}{segments.map((d, i) => <path className="chart-line" key={i} d={d} />)}
+      {area && <path className="chart-area" d={area} />}{line && <path className="chart-line" d={line} />}
       {coords.map(({ x, y, p }, index) => <g key={p.bucket_start} className={`chart-point ${activeIndex === index ? "is-active" : ""}`}>
         <circle cx={x} cy={y} r={activeIndex === index ? 7 : 5} className={p.coverage_percentage < 100 ? "partial" : ""} tabIndex={0} role="button" aria-label={`${formatTimestamp(p.bucket_start)}: ${exactDisplay(p.value)}, ${p.coverage_percentage}% coverage`} onMouseEnter={() => setActiveIndex(index)} onMouseLeave={() => setActiveIndex(null)} onFocus={() => setActiveIndex(index)} onBlur={() => setActiveIndex(null)} />
         {activeIndex === index && <foreignObject className="chart-tooltip" x={Math.min(Math.max(x - 92, left), width - right - 184)} y={Math.max(y - 106, 8)} width="184" height="98" pointerEvents="none">
